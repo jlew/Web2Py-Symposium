@@ -229,7 +229,7 @@ crud.settings.update_onvalidation.paper.append(paper_update)
 #TODO ADD ON CREATE RUN EMAIL/UPDATE PAPER ROUTINE
 db.define_table('paper_comment',
     Field('paper', db.paper, writable=False),
-    Field('author', db.auth_user, default=auth.user.id, writable=False),
+    Field('author', db.auth_user, default=auth.user.id if auth.user else None, writable=False),
     Field('status', 'string', requires=IS_IN_SET(PAPER_STATUS)),
     Field('created', 'datetime', default=request.now, writable=False),
     Field('comment', 'text')
