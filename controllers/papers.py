@@ -2,7 +2,10 @@
 # try something like
 def index():
     symposium = db(db.symposium.sid==request.args(0)).select().first()
-    paper_request = db(db.paper.symposium==symposium).select()
+    if symposium:
+        paper_request = db(db.paper.symposium==symposium).select()
+    else:
+        paper_request = db(db.paper.id>0).select()
     papers=[]
     pending = 0
     for paper in paper_request:
