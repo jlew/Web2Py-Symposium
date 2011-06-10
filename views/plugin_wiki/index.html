@@ -21,12 +21,22 @@
   {{pass}}
 </table>
 
+<h3>Custom Wiki Pages</h3>
+<ul>
+<li><a href="{{=URL(r=request,f='page',args='home')}}">home</a> is the home page.</li>
+<li><a href="{{=URL(r=request,f='page',args='submit_paper')}}">submit_paper</a> is the seciton above the paper submission form.
+<li><a href="{{=URL(r=request,f='page',args='manage_papers')}}">manage_papers</a> is the seciton above the manage papers page.
+<li><a href="{{=URL(r=request,f='page',args='review_paper')}}">review_paper</a> is the seciton above the paper review page.
+<li><a href="{{=URL(r=request,f='page',args='review_paper_list')}}">review_paper_list</a> is the seciton above the list of papers to review.
+
+</ul>
+
 <h3>Info</h3>
 
 Pages started with undescore are considered system pages. In particular:
 <ul>
   <li><a href="{{=URL(r=request,f='page',args='meta-code')}}">meta-code</a> must contain code and it will be executed for every page.</li>
-  <li><a href="{{=URL(r=request,f='page',args='meta-menu')}}">meta-menu</a> must contain a description of the menu.</li>
+  <li><a href="{{=URL(r=request,f='page',args='meta-menu')}}">meta-menu</a> must contain a description of the menu. WARNING: this will REPLACE the existing menu.</li>
   <li><a href="{{=URL(r=request,f='page',args='meta-header')}}">meta-header</a> conatins the content of the header.</li>
   <li><a href="{{=URL(r=request,f='page',args='meta-sidebar')}}">meta-sidebar</a> conatins the content of the sidebar.</li>
   <li><a href="{{=URL(r=request,f='page',args='meta-footer')}}">meta-footer</a> conatins the content of the footer.</li>

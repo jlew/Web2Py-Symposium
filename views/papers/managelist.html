@@ -2,7 +2,7 @@
 {{include 'blocks/paper_block.html'}}
 <h1>Manage My Papers</h1>
 
-
+{{=plugin_wiki.embed_page('manage_papers') or ""}}
 
 {{for paper in papers:}}
    {{paper_block()}}
