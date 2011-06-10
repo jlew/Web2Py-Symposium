@@ -1,14 +1,17 @@
 # -*- coding: utf-8 -*-
 PAPER_STATUS = (
-            T("Awaiting Approval"),           #0
-            T("Approved"),                    #1
-            T("Rejected/Closed/Withdrawn"),   #2
-            T("Needs Revision"),              #3
+            T("Incomplete/Not Submitted"),    #0
+            T("Awaiting Approval"),           #1
+            T("Approved"),                    #2
+            T("Rejected/Closed/Withdrawn"),   #3
+            T("Needs Revision"),              #4
         )
         
-EDIT_STATUS =     [0, 3]       # When the uesr is allowed to edit
-VISIBLE_STATUS =  [1]          # When the paper is visible to public
-        
+EDIT_STATUS =     [0, 1, 4]    # When the uesr is allowed to edit
+NEED_SUMBIT =     [0, 4]       # When the user needs to sumbit paper
+VISIBLE_STATUS =  [2]          # When the paper is visible to public
+PEND_APPROVAL =   1
+
 PAPER_CATEGORY = (
             T('Biological and Environmental Sciences'),
             T('Chemistry and Material Science'),
@@ -89,7 +92,7 @@ fields=[
     ]
 
 db.define_table('auth_user',
-                format='%(last_name)s, %(first_name)s: %(affiliation)s',
+                format='%(first_name)s %(last_name)s',
                 *fields
                 )
 
@@ -216,12 +219,27 @@ db.define_table('paper',
     format='%(title)s'
 )
 
+def paper_update(form):
+    """
+    Resets the paper status to 0, need to be submitted for approval
+    """
+    form.vars.status=PAPER_STATUS[0]
+crud.settings.update_onvalidation.paper.append(paper_update)
 
 #TODO ADD ON CREATE RUN EMAIL/UPDATE PAPER ROUTINE
 db.define_table('paper_comment',
     Field('paper', db.paper, writable=False),
-    Field('author', db.auth_user, default=auth.user, writable=False, represent=lambda x: db.auth_user._format % x),
+    Field('author', db.auth_user, default=auth.user.id, writable=False),
     Field('status', 'string', requires=IS_IN_SET(PAPER_STATUS)),
     Field('created', 'datetime', default=request.now, writable=False),
     Field('comment', 'text')
     )
+
+def paper_comment(form):
+    comment = db.paper_comment(form.vars.id)
+    paper = db.paper(comment.paper)
+    paper.update_record(status=form.vars.status)
+crud.settings.create_onaccept.paper_comment.append(paper_comment)
+
+def can_edit_paper(paper):
+    return auth.user.id in paper.authors or len(paper.authors) == 0

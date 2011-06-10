@@ -1,0 +1,10 @@
+{{extend 'layout.html'}}
+{{include 'blocks/paper_block.html'}}
+{{show_action_buttons = show_discription = False}}
+{{show_moderate_button = True}}
+
+
+<h1>Review Paper</h1>
+{{for paper in papers:}}
+    {{paper_block()}}
+{{pass}}

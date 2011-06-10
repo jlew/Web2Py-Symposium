@@ -1,0 +1,9 @@
+{{extend 'layout.html'}}
+{{include 'blocks/paper_block.html'}}
+{{show_moderation=False}}
+
+<h1>Papers for {{=db.symposium._format % symposium}}</h1>
+{{=P("%d papers approved, %d papers pending" % (len(papers), pending))}}
+{{for paper in papers:}}
+   {{paper_block()}}
+{{pass}}

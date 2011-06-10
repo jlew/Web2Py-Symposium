@@ -1,0 +1,9 @@
+{{extend 'layout.html'}}
+{{include 'blocks/paper_block.html'}}
+<h1>Manage My Papers</h1>
+
+
+
+{{for paper in papers:}}
+   {{paper_block()}}
+{{pass}}

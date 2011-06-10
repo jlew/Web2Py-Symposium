@@ -26,7 +26,7 @@ response.menu = [
     (T('Papers'), False, "#", [
         (T('View Papers'), False, URL('papers', 'index'), symp_list),
         (T('Submit Paper'), False, URL('papers', 'submit'), []),
-        (T('Edit Paper submission'), False, URL('papers', 'edit'), []),
+        (T('Manage My Papers'), False, URL('papers', 'edit'), []),
         (T('Review Papers'), False, URL('papers','review'), []),
     ]),
     ]
