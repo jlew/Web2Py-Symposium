@@ -1,2 +1,32 @@
 {{extend 'layout.html'}}
 {{=plugin_wiki.embed_page('home')}}
+
+{{for symposium in symposiums:}}
+    {{
+    authors = set()
+    mentors = set()
+    paper_count = public_paper_count = 0
+    for papers in symposium.paper.select():
+        paper_count+=1
+        if papers.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
+            public_paper_count+=1
+            pass
+        authors = authors.union(papers.authors)
+        mentors = mentors.union(papers.mentors)
+    pass
+    }}
+
+<div style="float: left;">
+<h2>{{=symposium.name}}</h2>
+{{=A(T("View Papers"), _href=URL("papers","index",args=symposium.sid))}}
+<table>
+  <tr><td>{{=T("Registration")}}</td><td>{{=symposium.reg_start.strftime(DATE_FORMAT)}} {{=T("to")}} {{=symposium.reg_end.strftime(DATE_FORMAT)}}</td></tr>
+  <tr><td>{{=T("Event Date")}}</td><td>{{=symposium.event_date.strftime(DATE_FORMAT)}}</td></tr>
+  <tr><td>{{=T("Published Papers")}}</td><td>{{=public_paper_count}}</td></tr>
+  <tr><td>{{=T("Submitted Papers")}}</td><td>{{=paper_count}}</td></tr>
+  <tr><td>{{=T("Authors")}}</td><td>{{=len(authors)}}</td></tr>
+  <tr><td>{{=T("Mentors")}}</td><td>{{=len(mentors)}}</td></tr>
+</table>
+</div>
+{{pass}}
+<br style="clear: both;" />

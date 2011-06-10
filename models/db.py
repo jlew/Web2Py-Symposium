@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+DATE_FORMAT = "%m/%d/%y"
+DATE_TIME_FORMAT = "%m/%d/%y %H:%M:%S %p"
 PAPER_STATUS = (
             T("Incomplete/Not Submitted"),    #0
             T("Awaiting Approval"),           #1

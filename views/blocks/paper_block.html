@@ -50,7 +50,7 @@
                <div style="border: 1px groove #EAEAEA; padding:5px; margin: 3px;">
                    <div style="background: #EAEAEA;">
                    <div style="float: right;">{{=h.status}}</div>
-                   <div>{{=h.created}} {{=A(db.auth_user._format % h.author, _href=URL("default","userprofile",args=h.author.id))}}</div>
+                   <div>{{=h.created.strftime(DATE_TIME_FORMAT)}} {{=A(db.auth_user._format % h.author, _href=URL("default","userprofile",args=h.author.id))}}</div>
                    </div>
                    {{=h.comment}}
                    <br style="clear: both;" />
