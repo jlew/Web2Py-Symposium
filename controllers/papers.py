@@ -43,9 +43,10 @@ def edit():
 def submit_for_approval():
     paper = db.paper(request.args(0))
     if can_edit_paper(paper):
-        paper.update_record(status = PAPER_STATUS[PEND_APPROVAL])
-        session.flash = T("Paper submitted for moderation")
-        redirect( URL("edit") )
+        db.paper_comment.paper.default = paper.id
+        db.paper_comment.status.default = PAPER_STATUS[PEND_APPROVAL]
+        db.paper_comment.status.requires = IS_IN_SET( (PAPER_STATUS[PEND_APPROVAL],) )
+        return dict(paper=paper, form=crud.create(db.paper_comment, next=URL('edit')))
     else:
         raise HTTP(401)
 
