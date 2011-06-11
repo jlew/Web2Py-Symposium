@@ -23,12 +23,15 @@ def view():
         if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
             return dict(paper=paper)
         else:
-            raise HTTP(401, "Paper is not public yet")
+            raise HTTP(401, T("Paper is not public yet"))
     else:
         raise HTTP(404)
 
 @auth.requires_login()
-def submit(): return dict(form=crud.create(db.paper))
+def submit():
+    crud.messages.submit_button = T("Save and continue")
+    return dict(form=crud.create(db.paper, next=URL('papers','edit'),
+                message=T("Paper Saved, click submit for approval when complete")))
 
 @auth.requires_login()
 def edit():
