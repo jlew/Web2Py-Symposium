@@ -1,0 +1,13 @@
+{{extend 'layout.html'}}
+<h1>{{=p_title}}</h1>
+
+<h2>{{=T("Authors")}}</h2>
+<ul>
+{{for participant in authors:}}
+<li>{{=A(db.auth_user._format % participant, _href=URL('people','profile', args=participant.id))}}, <em>{{=participant.affiliation}}</em></li>
+{{pass}}
+</ul>
+<h2>{{=T("Mentors")}}</h2>
+{{for participant in mentors:}}
+<li>{{=A(db.auth_user._format % participant, _href=URL('people','profile', args=participant.id))}}, <em>{{=participant.affiliation}}</em></li>
+{{pass}}

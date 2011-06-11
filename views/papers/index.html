@@ -4,6 +4,7 @@
 
 {{=H1(T("Papers for %s") % (db.symposium._format % symposium)) if symposium else H1(T("All Papers"))}}
 {{=P("%d papers approved, %d papers pending" % (len(papers), pending))}}
+
 {{for paper in papers:}}
    {{paper_block()}}
 {{pass}}

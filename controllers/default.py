@@ -38,4 +38,46 @@ def download():
     allows downloading of uploaded files
     http://..../[app]/default/download/[filename]
     """
+    del response.headers['Cache-Control']
+    del response.headers['Pragma']
+    del response.headers['Expires']
+    response.headers['Cache-Control'] = "max-age=3600"
     return response.download(request,db)
+
+def thumb():
+    if not request.args(2):
+        raise HTTP(404, "Image Not Found")
+    del response.headers['Cache-Control']
+    del response.headers['Pragma']
+    del response.headers['Expires']
+    response.headers['Cache-Control'] = "max-age=3600"
+
+    import os.path
+    import gluon.contenttype as c
+    try:
+        size_x = int(request.args(0))
+        size_y = int(request.args(1))
+    except:
+        raise HTTP(400, "Invalid Image Dementions")
+        
+        
+    request_path = os.path.join(request.folder, 'uploads','thumb', "%d_%d_%s" % (size_x, size_y, request.args(2)))
+    request_sorce_path = os.path.join(request.folder, 'uploads', request.args(2))
+    
+    if os.path.exists(request_path):
+        response.headers['Content-Type'] = c.contenttype(request_path) 
+        return response.stream(open(request_path, 'rb'))
+    
+    elif os.path.exists(request_sorce_path):
+        import Image
+        thumb = Image.open(request_sorce_path)
+        thumb.thumbnail((size_x,size_y), Image.ANTIALIAS)
+        try:
+            thumb.save(request_path)
+        except KeyError:
+            thumb.save(request_path, "JPEG")
+        
+        response.headers['Content-Type'] = c.contenttype(request_path) 
+        return response.stream(open(request_path, 'rb'))
+    else:
+        raise HTTP(404, "Image not found")

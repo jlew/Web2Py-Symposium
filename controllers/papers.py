@@ -16,6 +16,16 @@ def index():
 
 
     return dict(papers=papers, pending=pending, symposium=symposium)
+    
+def view():
+    paper = db.paper(request.args(0))
+    if paper:
+        if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
+            return dict(paper=paper)
+        else:
+            raise HTTP(401, "Paper is not public yet")
+    else:
+        raise HTTP(404)
 
 @auth.requires_login()
 def submit(): return dict(form=crud.create(db.paper))

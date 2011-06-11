@@ -1,0 +1,30 @@
+{{extend 'layout.html'}}
+{{include 'blocks/paper_block.html'}}
+{{show_moderation=show_discription=False}}
+
+{{=IMG(_style="float: right;", _src=URL('default','thumb',args=[200,300,profile_picture]))}}
+<h1>{{=name}}</h1>
+<em>{{=affiliation}}</em><br />
+{{=A(web_page, _href=web_page) if web_page else ""}}<br />
+
+{{=MARKMIN(short_profile)}}
+
+{{papers = db(db.paper.authors.contains(id)).select()}}
+{{if papers:}}
+    <h2 style="clear: both;">{{=T("My Papers")}}</h2>
+    {{for paper in papers:}}
+       {{if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:}}
+           {{paper_block()}}
+        {{pass}}
+    {{pass}}
+{{pass}}
+
+{{mentors = db(db.paper.mentors.contains(id)).select()}}
+{{if mentors:}}
+    <h2 style="clear: both;">{{=T("Papers I mentored")}}</h2>
+    {{for paper in mentors:}}
+       {{if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:}}
+           {{paper_block()}}
+        {{pass}}
+    {{pass}}
+{{pass}}

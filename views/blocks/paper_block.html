@@ -8,7 +8,11 @@
            
        </div>
        <div style="font-weight: bold;">
-           {{=paper.title}}
+           {{if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:}}
+               {{=A(paper.title, _href=URL('papers','view',args=paper.id))}}
+           {{else:}}
+               {{=paper.title}}
+           {{pass}}
        </div>
        <div style="float: right; clear: both;">{{=paper.category}}</div>
        <div>
@@ -39,7 +43,7 @@
        
        <div>
            {{for x in paper.authors:}}
-               {{=A(db.auth_user._format % db.auth_user(x), _href=URL("default","userprofile",args=x))}}
+               {{=A(db.auth_user._format % db.auth_user(x), _href=URL("people","profile",args=x))}}
            {{pass}}
        </div>
        <br style="clear: both;" />
@@ -50,7 +54,7 @@
                <div style="border: 1px groove #EAEAEA; padding:5px; margin: 3px;">
                    <div style="background: #EAEAEA;">
                    <div style="float: right;">{{=h.status}}</div>
-                   <div>{{=h.created.strftime(DATE_TIME_FORMAT)}} {{=A(db.auth_user._format % h.author, _href=URL("default","userprofile",args=h.author.id))}}</div>
+                   <div>{{=h.created.strftime(DATE_TIME_FORMAT)}} {{=A(db.auth_user._format % h.author, _href=URL("people","profile",args=h.author.id))}}</div>
                    </div>
                    {{=h.comment}}
                    <br style="clear: both;" />
