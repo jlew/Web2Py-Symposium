@@ -123,12 +123,6 @@ auth.messages.reset_password = 'Click on the link http://'+request.env.http_host
 crud.settings.auth = None        # =auth to enforce authorization on crud
 
 
-
-
-
-
-
-
 #########################################################################
 ## Define your tables below (or better in another model file) for example
 ##
