@@ -19,10 +19,6 @@ symp_list = [(db.symposium._format % x, False, URL('papers', 'index', args=x.sid
 
 response.menu = [
     (T('Home'), False, URL('default','index'), []),
-    (T('Symposium Management'), False, "#", [
-        (T('Edit Symposiums'), False, URL('editsymp','index'), []),
-        (T('New Symposium'), False, URL('editsymp','new'), []),
-    ]),
     (T('Papers'), False, "#", [
         (T('View Papers'), False, URL('papers', 'index'), symp_list),
         (T('Submit Paper'), False, URL('papers', 'submit'), []),
@@ -30,3 +26,11 @@ response.menu = [
         (T('Review Papers'), False, URL('papers','review'), []),
     ]),
     ]
+    
+if auth.has_membership("Symposium Admin"):
+    response.menu += [
+        (T('Symposium Management'), False, "#", [
+            (T('Edit Symposiums'), False, URL('editsymp','index'), []),
+            (T('New Symposium'), False, URL('editsymp','new'), []),
+        ])]
+    response.menu.append((T('Manage System Users'), False, URL(request.application,'plugin_useradmin','index'), []))

@@ -52,7 +52,7 @@ def submit_for_approval():
 
 
 #TODO ADD REQUIRED ROLE OF MODERATOR
-@auth.requires_login()
+@auth.requires_membership("Reviewer")
 def review():
     paper = db.paper(request.args(0))
     if paper:
