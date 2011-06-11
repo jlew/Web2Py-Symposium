@@ -160,7 +160,6 @@ class IS_VALID_SYMP(object):
         
     def __call__(self, value):
         try:
-            print value
             if db(db.symposium.id == value).select().first():
             # Check if a valid opbject, this will allow old reg to work but not add new ones    
             #if value.reg_end > request.now and value.reg_start < request.now:
