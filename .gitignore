@@ -4,3 +4,4 @@ sessions
 errors
 *.bak
 *.pyc
+uploads/*
