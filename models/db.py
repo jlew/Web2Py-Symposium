@@ -241,6 +241,12 @@ def can_edit_paper(paper):
     return auth.user.id in paper.authors or len(paper.authors) == 0
 
 
+def ensure_admin(form):
+    if form.vars.id==1:
+        auth.add_membership('Symposium Admin', 1)
+        auth.add_membership('Reviewer', 1)
+auth.settings.register_onaccept=ensure_admin
+
 if db(db.auth_group.role=="Symposium Admin").count() == 0:
     auth.add_group(role = 'Symposium Admin')
     auth.add_group(role = 'Reviewer')

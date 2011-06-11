@@ -9,7 +9,7 @@ DEFAULT = {
     'editor' : auth.user and auth.has_membership(role='Symposium Admin') or auth.user_id==1, # if current user a editor?
     'mode'   : 'html',    # 'markmin' or 'html' for wysiwyg editor
     'level'  : 3,            # 1 - wiki only, 2 - widgets enables, 3 - remplate render enabled
-    'migrate': False,         # set to False in production
+    'migrate': True,         # set to False in production
     'theme'  : 'redmond', # the jquery-ui theme, mapped into plugin_wiki/ui/%(theme)s/jquery-ui-1.8.1.custom.css
     'widgets' : 'all',       # list of widgets to be made available
     'authorize_attachments' : False # shoudl attachment be restricted to the page?
