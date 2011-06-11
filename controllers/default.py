@@ -14,7 +14,7 @@ def index():
     example action using the internationalization operator T and flash
     rendered by views/default/index.html or views/generic.html
     """
-    return dict(symposiums=db(db.symposium.id>0).select(orderby=db.symposium.event_date))
+    return dict(symposiums=db(db.symposium.id>0).select(orderby=~db.symposium.event_date))
 
 def user():
     """
