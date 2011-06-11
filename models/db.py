@@ -151,6 +151,7 @@ db.define_table('symposium',
     Field('reg_start', 'date', required=True, label=T("Registration Start")),
     Field('reg_end', 'date', required=True, label=T("Registration End")),
     Field('event_date', 'date', required=True, label=T("Symposium Date")),
+    Field('extra_info', 'text', label=T("Additional Information")),
     format='%(name)s: %(event_date)s'
 )
 

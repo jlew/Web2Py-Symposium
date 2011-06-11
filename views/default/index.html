@@ -1,6 +1,6 @@
 {{extend 'layout.html'}}
 {{=plugin_wiki.embed_page('home')}}
-
+<br style="clear: both;" />
 {{for symposium in symposiums:}}
     {{
     authors = set()
@@ -16,9 +16,10 @@
     pass
     }}
 
-<div style="float: left;">
+<div>
 <h2>{{=symposium.name}}</h2>
-{{=A(T("View Papers"), _href=URL("papers","index",args=symposium.sid))}}
+{{=A(SPAN(_class="icon book"), T("View Papers"), _href=URL("papers","index",args=symposium.sid), _class="pill button")}}
+{{=MARKMIN(symposium.extra_info)}}
 <table>
   <tr><td>{{=T("Registration")}}</td><td>{{=symposium.reg_start.strftime(DATE_FORMAT)}} {{=T("to")}} {{=symposium.reg_end.strftime(DATE_FORMAT)}}</td></tr>
   <tr><td>{{=T("Event Date")}}</td><td>{{=symposium.event_date.strftime(DATE_FORMAT)}}</td></tr>
