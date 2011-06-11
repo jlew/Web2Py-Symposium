@@ -21,7 +21,7 @@
 {{=A(SPAN(_class="icon book"), T("View Papers"), _href=URL("papers","index",args=symposium.sid), _class="pill button")}}
 {{=MARKMIN(symposium.extra_info)}}
 <table>
-  <tr><td>{{=T("Registration")}}</td><td>{{=symposium.reg_start.strftime(DATE_FORMAT)}} {{=T("to")}} {{=symposium.reg_end.strftime(DATE_FORMAT)}}</td></tr>
+  <tr><td>{{=T("Registration")}}</td><td>{{=symposium.reg_start.strftime(DATE_TIME_FORMAT)}} {{=T("to")}} {{=symposium.reg_end.strftime(DATE_TIME_FORMAT)}}</td></tr>
   <tr><td>{{=T("Event Date")}}</td><td>{{=symposium.event_date.strftime(DATE_FORMAT)}}</td></tr>
   <tr><td>{{=T("Published Papers")}}</td><td>{{=public_paper_count}}</td></tr>
   <tr><td>{{=T("Submitted Papers")}}</td><td>{{=paper_count}}</td></tr>

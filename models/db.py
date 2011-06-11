@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 DATE_FORMAT = "%m/%d/%y"
-DATE_TIME_FORMAT = "%m/%d/%y %H:%M:%S %p"
+DATE_TIME_FORMAT = "%m/%d/%y %I:%M:%S %p"
 PAPER_STATUS = (
             T("Incomplete/Not Submitted"),    #0
             T("Awaiting Approval"),           #1
@@ -142,8 +142,8 @@ crud.settings.auth = None        # =auth to enforce authorization on crud
 db.define_table('symposium',
     Field('name','string',required=True, label=T("Symposium Name")),
     Field('sid', 'string', required=True, unique=True, label=T("Easy URL"), requires=IS_SLUG()),
-    Field('reg_start', 'date', required=True, label=T("Registration Start")),
-    Field('reg_end', 'date', required=True, label=T("Registration End")),
+    Field('reg_start', 'datetime', required=True, label=T("Registration Start")),
+    Field('reg_end', 'datetime', required=True, label=T("Registration End")),
     Field('event_date', 'date', required=True, label=T("Symposium Date")),
     Field('extra_info', 'text', label=T("Additional Information")),
     format='%(name)s: %(event_date)s'
