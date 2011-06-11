@@ -6,10 +6,10 @@
 ###################################################
 
 DEFAULT = {
-    'editor' : auth.user and auth.has_membership(role='editor') or auth.user_id==1, # if current user a editor?
-    'mode'   : 'markmin',    # 'markmin' or 'html' for wysiwyg editor
+    'editor' : auth.user and auth.has_membership(role='Symposium Admin') or auth.user_id==1, # if current user a editor?
+    'mode'   : 'html',    # 'markmin' or 'html' for wysiwyg editor
     'level'  : 3,            # 1 - wiki only, 2 - widgets enables, 3 - remplate render enabled
-    'migrate': True,         # set to False in production
+    'migrate': False,         # set to False in production
     'theme'  : 'redmond', # the jquery-ui theme, mapped into plugin_wiki/ui/%(theme)s/jquery-ui-1.8.1.custom.css
     'widgets' : 'all',       # list of widgets to be made available
     'authorize_attachments' : False # shoudl attachment be restricted to the page?
@@ -252,9 +252,9 @@ class PluginWikiWidgets(object):
                 col_widths = [str(x) for x in col_widths]
             else:
                 col_widths = [x.strip() for x in col_widths.split(',')]
-	    if width=='auto':
-		width=sum([int(x) for x in col_widths])
-	elif not col_widths:
+        if width=='auto':
+            width=sum([int(x) for x in col_widths])
+        elif not col_widths:
             col_widths = [col_width for x in fields]
         if isinstance(colnames,str):
             colnames = [x.strip() for x in colnames.split(',')]
