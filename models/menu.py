@@ -15,13 +15,22 @@ response.meta.generator = 'Web2py Enterprise Framework'
 response.meta.copyright = 'Copyright 2011'
 
 
-symp_list = [(db.symposium._format % x, False, URL('papers', 'index', args=x.sid), [])
-                for x in db(db.symposium.id > 0).select(orderby=db.symposium.event_date)]
+symposiums = db(db.symposium.id > 0).select(orderby=~db.symposium.event_date)
+
+paper_symp_list = [(db.symposium._format % x, False,
+                URL('papers', 'index', args=x.sid), []) for x in symposiums]
+symp_list =  [(db.symposium._format % x, False,
+                URL('papers', 'index', args=x.sid), [
+                    (T('View Participants'), False, URL('people', 'index', args=x.sid), []),
+                    (T('View Adjenda'), False, URL('adjenda', 'index', args=x.sid), []),
+                    (T('View Papers'), False, URL('papers', 'index', args=x.sid), []),
+                ]) for x in symposiums]
 
 response.menu = [
     (T('Home'), False, URL('default','index'), []),
+    (T('Symposiums'), False, "#", symp_list),
     (T('Papers'), False, "#", [
-        (T('View Papers'), False, URL('papers', 'index'), symp_list),
+        (T('View Papers'), False, URL('papers', 'index'), paper_symp_list),
         (T('Submit Paper'), False, URL('papers', 'submit'), []),
         (T('Manage My Papers'), False, URL('papers', 'edit'), []),
         (T('Review Papers'), False, URL('papers','review'), []),
@@ -30,8 +39,12 @@ response.menu = [
     
 if auth.has_membership("Symposium Admin"):
     response.menu += [
-        (T('Symposium Management'), False, "#", [
-            (T('Edit Symposiums'), False, URL('editsymp','index'), []),
-            (T('New Symposium'), False, URL('editsymp','new'), []),
-        ])]
-    response.menu.append((T('Manage System Users'), False, URL(request.application,'plugin_useradmin','index'), []))
+        (T('Admin Actions'), False, "#", [
+            (T('Symposium Management'), False, "#", [
+                (T('Edit Symposiums'), False, URL('editsymp','index'), []),
+                (T('New Symposium'), False, URL('editsymp','new'), []),
+            ]),
+            (T('Manage System Users'), False, URL(request.application,'plugin_useradmin','index'), []),
+            (T('Wiki Pages'),False,URL('plugin_wiki','index'))
+        ])
+        ]

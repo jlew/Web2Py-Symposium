@@ -562,8 +562,8 @@ class PluginWiki(object):
                 parents[-1][1].append((title,False,url,newtree)) 
                 parents.append((indent,newtree))
         self.extra = self.extra_blocks()
-        if plugin_wiki_editor:
-            response.menu.append(('Pages',False,URL('plugin_wiki','index')))
+        #if plugin_wiki_editor:
+        #    response.menu.append(('Pages',False,URL('plugin_wiki','index')))
 
     # this embeds page attachments
     class attachments(object):   
