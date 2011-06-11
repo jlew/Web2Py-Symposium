@@ -8,14 +8,15 @@ response.title = request.application
 response.subtitle = T('customize me!')
 
 #http://dev.w3.org/html5/markup/meta.name.html
-response.meta.author = 'you'
-response.meta.description = 'Free and open source full-stack enterprise framework for agile development of fast, scalable, secure and portable database-driven web-based applications. Written and programmable in Python'
-response.meta.keywords = 'web2py, python, framework'
+response.meta.author = 'Justin Lewis <jlew.blackout@gmail.com>'
+response.meta.description = 'Symposium registration system written in the Python Web2py framework.'
+response.meta.keywords = 'Symposium, Conference'
 response.meta.generator = 'Web2py Enterprise Framework'
-response.meta.copyright = 'Copyright 2007-2010'
+response.meta.copyright = 'Copyright 2011'
 
 
-symp_list = [(db.symposium._format % x, False, URL('papers', 'index', args=x.sid), []) for x in db(db.symposium.id > 0).select(orderby=db.symposium.event_date)]
+symp_list = [(db.symposium._format % x, False, URL('papers', 'index', args=x.sid), [])
+                for x in db(db.symposium.id > 0).select(orderby=db.symposium.event_date)]
 
 response.menu = [
     (T('Home'), False, URL('default','index'), []),
