@@ -26,6 +26,14 @@ PAPER_CATEGORY = (
             T('Other'),
         )
 
+# Using ConfigParser to read config in ini
+# Allows us to prevent sensitive data in our repo
+from os.path import join
+from ConfigParser import SafeConfigParser
+
+config = SafeConfigParser()
+config.read(join(request.folder, 'config.ini'))
+
 #########################################################################
 ## This scaffolding model makes your app work on Google App Engine too
 #########################################################################
@@ -39,7 +47,7 @@ if request.env.web2py_runtime_gae:            # if running on Google App Engine
     # from google.appengine.api.memcache import Client
     # session.connect(request, response, db = MEMDB(Client()))
 else:                                         # else use a normal relational database
-    db = DAL('sqlite://storage.sqlite')       # if not, use SQLite or other DB
+    db = DAL(config.get('db','connection'))   # if not, use SQLite or other DB
 
 # by default give a view/generic.extension to all actions from localhost
 # none otherwise. a pattern can be 'controller/function.extension'
@@ -62,9 +70,10 @@ crud = Crud(db)                                # for CRUD helpers using auth
 service = Service()                            # for json, xml, jsonrpc, xmlrpc, amfrpc
 plugins = PluginManager()                      # for configuring plugins
 
-mail.settings.server = 'logging' or 'smtp.gmail.com:587'  # your SMTP server
-mail.settings.sender = 'you@gmail.com'         # your email
-mail.settings.login = 'username:password'      # your credentials or None
+mail.settings.server = config.get('mail','server')  # your SMTP server
+mail.settings.sender = config.get('mail','sender')  # your email
+mail.settings.tls = config.get('mail','tls')
+mail.settings.login = config.get('mail','login')    # your credentials or None
 
 
 
@@ -100,11 +109,11 @@ db.define_table('auth_user',
 
 
 auth.settings.create_user_groups = False
-auth.settings.hmac_key = 'sha512:5ae2aa9b-4cec-4988-b114-3106591f1f15'   # before define_tables()
+auth.settings.hmac_key = config.get('auth','hmac_key')   # before define_tables()
 auth.define_tables()                           # creates all needed tables
 auth.settings.mailer = mail                    # for user email verification
-auth.settings.registration_requires_verification = False
-auth.settings.registration_requires_approval = False
+auth.settings.registration_requires_verification = config.getboolean('auth','verification')
+auth.settings.registration_requires_approval =  config.getboolean('auth','approval')
 auth.messages.verify_email = 'Click on the link http://'+request.env.http_host+URL('default','user',args=['verify_email'])+'/%(key)s to verify your email'
 auth.settings.reset_password_requires_verification = True
 auth.messages.reset_password = 'Click on the link http://'+request.env.http_host+URL('default','user',args=['reset_password'])+'/%(key)s to reset your password'
