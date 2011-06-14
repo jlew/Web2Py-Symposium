@@ -22,7 +22,7 @@ paper_symp_list = [(db.symposium._format % x, False,
 symp_list =  [(db.symposium._format % x, False,
                 URL('papers', 'index', args=x.sid), [
                     (T('View Participants'), False, URL('people', 'index', args=x.sid), []),
-                    (T('View Adjenda'), False, URL('adjenda', 'index', args=x.sid), []),
+                    (T('View Agenda'), False, URL('agenda', 'index', args=x.sid), []),
                     (T('View Papers'), False, URL('papers', 'index', args=x.sid), []),
                 ]) for x in symposiums]
 
