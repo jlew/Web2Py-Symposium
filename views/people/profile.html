@@ -2,7 +2,7 @@
 {{include 'blocks/paper_block.html'}}
 {{show_moderation=show_discription=False}}
 
-{{=IMG(_style="float: right;", _src=URL('default','thumb',args=[200,300,profile_picture]))}}
+{{=IMG(_style="float: right;", _src=URL('default','thumb',args=[200,300,profile_picture])) if profile_picture else ""}}
 <h1>{{=name}}</h1>
 <em>{{=affiliation}}</em><br />
 {{=A(web_page, _href=web_page) if web_page else ""}}<br />
