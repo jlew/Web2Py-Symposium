@@ -1,4 +1,10 @@
 # coding: utf8
+def can_edit_paper(paper):
+    """
+    Returns true if has edit abilities on the paper
+    """
+    return auth.user.id in paper.authors or len(paper.authors) == 0
+
 def get_symposium_authors_id(symposium, all=False):
     """
     Returns a set of id's of all authors for a symposium if

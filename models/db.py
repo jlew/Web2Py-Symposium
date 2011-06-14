@@ -254,10 +254,6 @@ You may manage your submissions here: %(url)s
 
 crud.settings.create_onaccept.paper_comment.append(paper_comment)
 
-def can_edit_paper(paper):
-    return auth.user.id in paper.authors or len(paper.authors) == 0
-
-
 def ensure_admin(form):
     if form.vars.id==1:
         auth.add_membership('Symposium Admin', 1)
