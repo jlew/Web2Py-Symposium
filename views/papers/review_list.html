@@ -3,8 +3,12 @@
 {{show_action_buttons = show_discription = False}}
 {{show_moderate_button = True}}
 
-<h1>Review Paper</h1>
+<h1>{{=T("Review Paper")}}</h1>
 {{=plugin_wiki.embed_page('review_paper_list') or ""}}
+{{if papers:}}
 {{for paper in papers:}}
     {{paper_block()}}
+{{pass}}
+{{else:}}
+{{=P(T("No papers ready for review"))}}
 {{pass}}
