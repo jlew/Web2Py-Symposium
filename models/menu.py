@@ -41,7 +41,7 @@ if auth.has_membership("Symposium Admin"):
     response.menu += [
         (T('Admin Actions'), False, "#", [
             (T('Symposium Management'), False, "#", [
-                (T('Edit Symposiums'), False, URL('editsymp','index'), []),
+                (T('Manage Symposiums'), False, URL('editsymp','index'), []),
                 (T('New Symposium'), False, URL('editsymp','new'), []),
             ]),
             (T('Manage System Users'), False, URL(request.application,'plugin_useradmin','index'), []),
