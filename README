@@ -1,0 +1,43 @@
+Features
+========
+* User Accounts
+  * Email Verification
+  * Profiles
+* Symposium Management
+  * Registration period
+  * Event Date
+  * Papers registered to each symposium
+  * Scheduling Agenda (Coming Soon)
+* Papers
+  * Authors
+  * Mentors
+  * Title
+  * Description
+  * File
+  * Review Process
+
+Installation
+============
+Download a copy of the symposium registration system and
+paste into the application directory of web2py.
+
+Navigate to the site in your browser and create an account.
+
+The first account will be given full admin and reviewer
+rights.  The site will be bare as you will need to add a
+symposium as well as edit some of the pages using the wiki
+plugin supplied in the admin panel.
+
+Workflow
+========
+* Admin creates symposium
+* Users create account
+* Users submit a paper (3 steps)
+  * Fill out the paper submission form (press save and continue)
+  * Register any author and mentor that does not have an account
+  * Click Submit for approval
+* An admin with review permissions needs to review the paper and
+  either accept or return it for further revision
+* Once the paper has been approved, it will be posted live on the
+  public website
+* Scheduling coming soon
