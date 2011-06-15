@@ -112,7 +112,7 @@
       <!-- content -->
       <div id="right_sidebar" {{=XML(right_sidebar_style)}} >
             <div style="padding: 4px;">
-              {{=plugin_wiki.embed_page('meta-sidebar')}}
+              {{=plugin_wiki.embed_page('meta-sidebar') or "Please register to become admin and pre-configure this sidebar"}}
             </div>
       </div><!-- right_sidebar -->
 

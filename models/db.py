@@ -275,6 +275,10 @@ def ensure_admin(form):
     if form.vars.id==1:
         auth.add_membership('Symposium Admin', 1)
         auth.add_membership('Reviewer', 1)
+        
+        # Request that plugin_wiki pre-populate pages
+        session['pre-populate'] = True
+
 auth.settings.register_onaccept=ensure_admin
 
 if db(db.auth_group.role=="Symposium Admin").count() == 0:

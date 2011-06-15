@@ -713,3 +713,26 @@ class PluginWiki(object):
         return getattr(PluginWikiWidgets,name)(*args,**kargs)
 
 plugin_wiki=PluginWiki()
+
+if session.has_key("pre-populate"):
+    del session['pre-populate']
+    #Prepopulate wiki pages
+    db.plugin_wiki_page.insert(slug="meta-sidebar", 
+            title="META SIDEBAR",
+            body="""
+<b>How to Submit</b>
+<ol>
+<li>Register or Login</li>
+<li>Click <b>Papers</b> then <b>Submit Paper</b></li>
+<li>Fill in paper submission form, adding authors and mentors who are in the system.  Click <b>Save and continue</b></li>
+<li>Add authors and mentors who are not in the system</li>
+<li>Finally submit your paper for approval.</li>
+<li>Wait for a reviewer to approve or ask for revisions</li>
+</ol>
+""")
+
+    db.plugin_wiki_page.insert(slug="meta-footer", 
+            title="META-FOOTER",
+            body="""
+<div style="float:right;">Written by Justin Lewis</div>Symposium Registration System<br style="clear:both;" />
+""")

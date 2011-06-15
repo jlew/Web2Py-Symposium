@@ -1,5 +1,5 @@
 {{extend 'layout.html'}}
-{{=plugin_wiki.embed_page('home')}}
+{{=plugin_wiki.embed_page('home') or ""}}
 <br style="clear: both;" />
 {{for symposium in symposiums:}}
     {{
