@@ -40,11 +40,8 @@ response.menu = [
 if auth.has_membership("Symposium Admin"):
     response.menu += [
         (T('Admin Actions'), False, "#", [
-            (T('Symposium Management'), False, "#", [
-                (T('Manage Symposiums'), False, URL('editsymp','index'), []),
-                (T('New Symposium'), False, URL('editsymp','new'), []),
-            ]),
+            (T('Symposium Management'), False, URL('editsymp','index'), []),
             (T('Manage System Users'), False, URL(request.application,'plugin_useradmin','index'), []),
-            (T('Wiki Pages'),False,URL('plugin_wiki','index'))
+            (T('Edit Pages'),False,URL('plugin_wiki','index'))
         ])
         ]
