@@ -1,0 +1,21 @@
+{{extend 'layout.html'}}
+<h1>Add New Users to {{=paper.title}}</h1>
+{{=P(T("Are there any mentors or authors not in the system?  If not add them here. \
+        You should only add new users using this form, check to make sure they do not \
+        appear in the author selection section of the edit page.  They will be \
+        emailed their account information and added to your paper."))}}
+
+{{=DIV(
+    A(SPAN(_class="icon user"), T("Add Author"), _class="button pill left",
+      _href=URL("papers","register_user", args=[paper.id,'A']), cid="user_adder"),
+    A(SPAN(_class="icon user"), T("Add Mentor"),  _class="button pill right",
+      _href=URL("papers","register_user", args=[paper.id,'M']), cid="user_adder")
+   )}}
+   
+<div id="user_adder" style="min-height: 100px;">{{=P(B(T("Select a type of user to add from the links above.")))}}</div>
+
+{{=DIV(T("Navigation: "),
+    A(SPAN(_class="icon pen"), T("Edit Paper"), _href=URL('papers','edit', args=paper.id), _class="button left"),
+    A(SPAN(_class="icon book"), T("Manage Papers"), _href=URL('papers','edit'), _class="button middle"),
+    A(SPAN(_class="icon check"), T("Submit for Approval"), _href=URL('papers','submit_for_approval', args=paper.id), _class="button right"),
+)}}

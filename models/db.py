@@ -192,19 +192,36 @@ class IS_VALID_SYMP(object):
             "NONE"
    
 db.define_table('paper',
-    Field('title', 'string', required=True, label=T("Paper Title"),
-          comment=T("The title of your paper")),
-    Field('description', 'text', required=True, label=T("Paper Description"),
-          comment=T("A short description or abstract of the paper")),
+    Field('title', 'string', required=True, 
+            label=T("Paper Title"), comment="*"),
+            
+    Field('description', 'text', required=True,
+            label=T("Paper Description"), comment="* " + \
+            T("A short description or abstract of the paper")),
+            
     Field('paper', 'upload', label=T("Paper Upload"), autodelete=True,
           comment=T("You may upload a copy of your paper now or come back later.")),
-    Field('authors', 'list:reference auth_user', label=T("Paper Authors"),
-          comment=T("Please check all authors of the paper. If they do not have an account, you may come back and add them later."), default=[auth.user.id if auth.user else None]),
-    Field('mentors', 'list:reference auth_user', label=T("Paper Mentors"), default=[]),
-    Field('status', 'string', requires=IS_IN_SET(PAPER_STATUS),default=PAPER_STATUS[0], label=T("Paper Status"), writable=False),
+          
+    Field('authors', 'list:reference auth_user', label=T("Paper Authors"), required=True,
+          comment="* " + T("Please check all authors of this paper. If you have authors that\
+                     do not currently have an account, you will be given a chance to\
+                     create their accounts after submitting this form."),
+          default=[auth.user.id if auth.user else None]),
+          
+    Field('mentors', 'list:reference auth_user', label=T("Paper Mentors"), default=[],
+          comment=T("Please check all mentors of this paper. If you have mentors that\
+                     do not currently have an account, you will be given a chance to\
+                     create their accounts after submitting this form.")),
+                     
+    Field('status', 'string', requires=IS_IN_SET(PAPER_STATUS), default=PAPER_STATUS[0],
+          label=T("Paper Status"), writable=False),
+          
     Field('category', 'string', requires=IS_IN_SET(PAPER_CATEGORY)),
+    
     Field('symposium', 'reference symposium', default=get_next_symposium(), requires=IS_VALID_SYMP()),
+    
     Field('created', 'datetime', default=request.now, writable=False),
+    
     Field('modified', 'datetime', default=request.now, update=request.now, writable=False),
     
     format='%(title)s'
