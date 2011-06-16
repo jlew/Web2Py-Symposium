@@ -156,6 +156,7 @@ db.define_table('symposium',
     Field('reg_end', 'datetime', required=True, label=T("Registration End")),
     Field('event_date', 'date', required=True, label=T("Symposium Date")),
     Field('extra_info', 'text', label=T("Additional Information")),
+    Field('rooms', 'list:string', label=T("Rooms"), comment=T("Room Names for scheduling, press enter to get another room.")),
     format='%(name)s: %(event_date)s'
 )
 
@@ -224,6 +225,11 @@ db.define_table('paper',
     Field('created', 'datetime', default=request.now, writable=False),
     
     Field('modified', 'datetime', default=request.now, update=request.now, writable=False),
+    
+    Hidden('scheduled', 'boolean', default=False),
+    Hidden('schedule_room', 'integer', default=-1),
+    Hidden('schedule_start', 'time'),
+    Hidden('schedule_end', 'time'),
     
     format='%(title)s'
 )

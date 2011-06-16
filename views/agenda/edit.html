@@ -1,0 +1,80 @@
+{{extend 'layout.html'}}
+<link rel='stylesheet' type='text/css' href='/symposium/static/week-cal/libs/css/smoothness/jquery-ui-1.8.11.custom.css' />
+<link rel="stylesheet" type="text/css" href="/symposium/static/week-cal/jquery.weekcalendar.css" />
+<link rel="stylesheet" type="text/css" href="/symposium/static/week-cal/skins/default.css" />
+<link rel="stylesheet" type="text/css" href="/symposium/static/week-cal/skins/gcalendar.css" />
+
+<script type="text/javascript" src="/symposium/static/week-cal/jquery.weekcalendar.js"></script>
+<script type="text/javascript">
+
+$(document).ready(function() {
+    d = new Date("{{=symposium.event_date}}");
+    year = d.getFullYear();
+    month = d.getMonth();
+    day = d.getDate();
+    var my_data = [
+    {{offseth, offsetm = 0,0}}
+    {{for paper in papers:}}
+        {{if paper.scheduled and paper.schedule_room < len(symposium.rooms):}}
+        {"id":{{=paper.id}},
+         "start": new Date(year, month, day, {{=paper.schedule_start.hour}}, {{=paper.schedule_start.minute}}),
+         "end": new Date(year, month, day, {{=paper.schedule_end.hour}}, {{=paper.schedule_end.minute}}),
+         "title": "{{=paper.title}}",
+         "userId": {{=paper.schedule_room}}
+         },
+        {{else:}}
+        {"id":{{=paper.id}}, 
+            "start": new Date(year,month,day,{{=offseth}},{{=offsetm}}),
+            "end": new Date(year,month,day,{{=offseth}},{{=offsetm+15}}), "title": "{{=paper.title}}", "userId": {{=len(symposium.rooms)}}},
+            {{
+            offsetm+=15
+            if offsetm >= 60:
+                offseth +=1
+                offsetm = 0
+                pass
+            }}
+        {{pass}}
+    {{pass}}
+       
+            ];
+            
+            
+    update_function = function(newCalEvent){
+        $("#cal_msg").html("Sending " + newCalEvent.title + " change").show();
+        $.ajax({
+            url: "{{=URL("agenda","schedule_event")}}?id=" + newCalEvent.id +
+                 "&start_h=" + newCalEvent.start.getHours() + 
+                 "&start_m=" + newCalEvent.start.getMinutes() + 
+                 "&end_h=" + newCalEvent.end.getHours() + 
+                 "&end_m=" + newCalEvent.end.getMinutes() + 
+                 "&room=" + newCalEvent.userId,
+            
+          success: function(){
+            $("#cal_msg").html(newCalEvent.title + " Updated").delay(400).hide("slow");
+          }
+          });
+    }
+            
+    var $calendar = $('#calendar').weekCalendar({
+        date: new Date("{{=symposium.event_date}}"),
+        allowEventCreation: false,
+        timeslotsPerHour: 4,
+        timeslotHeight: 30,
+        scrollToHourMillis: 0,
+        defaultEventLength: 1,
+        height: function($calendar){ return 500; },
+        eventDrop: function(newCalEvent, oldCalEvent, element){  update_function(newCalEvent)  },
+        eventResize: function(newCalEvent, oldCalEvent, element){  update_function(newCalEvent)  },
+        data: function(start, end, callback) { callback({events: my_data}); },
+        users: {{=XML(symposium.rooms+[T("Not Yet Scheduled").xml()],False)}},
+        showAsSeparateUser: true,
+        displayOddEven: true,
+        daysToShow: 1,
+        headerSeparator: ' ',
+    });
+});
+
+</script>
+
+<div id="cal_msg"></div>
+<div id="calendar"></div>
