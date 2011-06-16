@@ -6,10 +6,10 @@ def index():
 
 @auth.requires_membership("Symposium Admin")
 def new():
-    return dict(form=crud.create(db.symposium))
+    return dict(form=crud.create(db.symposium, next=URL("editsymp","index")))
     
 @auth.requires_membership("Symposium Admin")
-def edit(): return dict(form=crud.update(db.symposium, request.args(0)))
+def edit(): return dict(form=crud.update(db.symposium, request.args(0), next=URL("editsymp","index")))
 
 @auth.requires_membership("Symposium Admin")
 def email():
