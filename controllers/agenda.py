@@ -3,7 +3,11 @@
 def index():
     symp = db(db.symposium.sid==request.args(0)).select().first()
     if symp:
-    
+        response.files.append(URL('static','week-cal/libs/css/smoothness/jquery-ui-1.8.11.custom.css'))
+        response.files.append(URL('static','week-cal/jquery.weekcalendar.css'))
+        response.files.append(URL('static','week-cal/skins/default.css'))
+        response.files.append(URL('static','week-cal/skins/gcalendar.css'))
+        response.files.append(URL('static','week-cal/jquery.weekcalendar.js'))
         return dict(symposium=symp, papers=get_symposium_visable_papers(symp))
     else:
         raise HTTP(404)
@@ -12,6 +16,11 @@ def index():
 def edit():
     symp = db.symposium(request.args(0))
     if symp:
+        response.files.append(URL('static','week-cal/libs/css/smoothness/jquery-ui-1.8.11.custom.css'))
+        response.files.append(URL('static','week-cal/jquery.weekcalendar.css'))
+        response.files.append(URL('static','week-cal/skins/default.css'))
+        response.files.append(URL('static','week-cal/skins/gcalendar.css'))
+        response.files.append(URL('static','week-cal/jquery.weekcalendar.js'))
         return dict(symposium=symp, papers=get_symposium_visable_papers(symp))
     else:
         raise HTTP(404)
