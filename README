@@ -7,7 +7,7 @@ Features
   * Registration period
   * Event Date
   * Papers registered to each symposium
-  * Scheduling Agenda (Coming Soon)
+  * Scheduling Agenda
 * Papers
   * Authors
   * Mentors
@@ -40,4 +40,13 @@ Workflow
   either accept or return it for further revision
 * Once the paper has been approved, it will be posted live on the
   public website
-* Scheduling coming soon
+* Scheduling
+  * To Schedule, simply open the schedule manager and drag papers
+    to the correct place.
+  * To add/remove/rename rooms, edit the symposium settings.  Rooms
+    may be safely added and renamed, column order is preserved.
+    Papers are locked to the column and not the room itself.  So if
+    you remove or rename a room, the papers will say in the column.
+    If a paper is scheduled in the last room and then the room was
+    removed the paper will default to the unscheduled state until
+    rescheduled or a new room is added.
