@@ -2,7 +2,7 @@
 # try something like
 @auth.requires_membership("Symposium Admin")
 def index():
-    return dict(symposiums=db(db.symposium.id>0).select())
+    return dict(symposiums=db(db.symposium.id>0).select(orderby=~db.symposium.event_date))
 
 @auth.requires_membership("Symposium Admin")
 def new():
