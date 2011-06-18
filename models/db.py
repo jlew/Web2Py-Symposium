@@ -151,7 +151,7 @@ crud.settings.auth = None        # =auth to enforce authorization on crud
 #########################################################################
 db.define_table('symposium',
     Field('name','string',required=True, label=T("Symposium Name")),
-    Field('sid', 'string', required=True, unique=True, label=T("Easy URL"), requires=IS_SLUG()),
+    Field('sid', 'string', required=True, unique=True, label=T("Easy URL")),
     Field('reg_start', 'datetime', required=True, label=T("Registration Start")),
     Field('reg_end', 'datetime', required=True, label=T("Registration End")),
     Field('event_date', 'date', required=True, label=T("Symposium Date")),
@@ -159,6 +159,10 @@ db.define_table('symposium',
     Field('rooms', 'list:string', label=T("Rooms"), comment=T("Room Names for scheduling, press enter to get another room.")),
     format='%(name)s: %(event_date)s'
 )
+
+#Add after created so we don't override the unique test
+db.symposium.sid.requires.insert(0,IS_SLUG())
+
 
 def get_next_symposium():
     return db(db.symposium.reg_end > request.now).select(orderby=db.symposium.event_date).first()
