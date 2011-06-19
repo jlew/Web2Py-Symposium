@@ -7,9 +7,16 @@ $(document).ready(function() {
     month = d.getMonth();
     day = d.getDate();
     var my_data = [
-    {{offseth, offsetm = 0,0}}
+    {{
+    offseth, offsetm = 0,0
+    first_date = None
+    not_sched = False
+    }}
     {{for paper in papers:}}
         {{if paper.scheduled and paper.schedule_room < len(symposium.rooms):}}
+        {{if first_date:}}
+            {{first_date = min(first_date, paper.schedule_start)}}
+        {{else:}}{{first_date=paper.schedule_start}}{{pass}}
         {"id":{{=paper.id}},
          "start": new Date(year, month, day, {{=paper.schedule_start.hour}}, {{=paper.schedule_start.minute}}),
          "end": new Date(year, month, day, {{=paper.schedule_end.hour}}, {{=paper.schedule_end.minute}}),
@@ -17,6 +24,7 @@ $(document).ready(function() {
          "userId": {{=paper.schedule_room}}
          },
         {{else:}}
+        {{not_sched=True}}
         {"id":{{=paper.id}}, 
             "start": new Date(year,month,day,{{=offseth}},{{=offsetm}}),
             "end": new Date(year,month,day,{{=offseth}},{{=offsetm+15}}), "title": "{{=paper.title}}", "userId": {{=len(symposium.rooms)}}},
@@ -33,7 +41,7 @@ $(document).ready(function() {
             ];
 
     var $calendar = $('#calendar').weekCalendar({
-        date: new Date("{{=symposium.event_date}}"),
+        date: new Date("{{=symposium.event_date}} {{=first_date if first_date else ""}}"),
         readonly: true,
         timeslotsPerHour: 4,
         timeslotHeight: 30,
@@ -44,7 +52,7 @@ $(document).ready(function() {
         data: function(start, end, callback) {
             callback({events: my_data});
         },
-        users: {{=XML(symposium.rooms+[T("Not Yet Scheduled").xml()],False)}},
+        users: {{=XML(symposium.rooms+[T("Not Yet Scheduled").xml()],False) if not_sched else XML(symposium.rooms,False)}},
         showAsSeparateUser: true,
         displayOddEven: true,
         daysToShow: 1,
