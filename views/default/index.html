@@ -18,7 +18,11 @@
 
 <div>
 <h2>{{=symposium.name}}</h2>
-{{=A(SPAN(_class="icon book"), T("View Papers"), _href=URL("papers","index",args=symposium.sid), _class="pill button")}}
+{{=DIV(
+    A(SPAN(_class="icon book"), T("Papers"), _href=URL("papers","index",args=symposium.sid), _class="pill button left"),
+    A(SPAN(_class="icon user"), T("Participants"), _href=URL("people","index",args=symposium.sid), _class="pill button middle"),
+    A(SPAN(_class="icon clock"), T("Agenda"), _href=URL("agenda","index",args=symposium.sid), _class="pill button right"),
+)}}
 {{=MARKMIN(symposium.extra_info)}}
 <table>
   <tr><td>{{=T("Registration")}}</td><td>{{=symposium.reg_start.strftime(DATE_TIME_FORMAT)}} {{=T("to")}} {{=symposium.reg_end.strftime(DATE_TIME_FORMAT)}}</td></tr>
