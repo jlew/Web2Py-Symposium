@@ -651,7 +651,6 @@
         var self = this, options = this.options;
         if (options.buttons) {
             var calendarNavHtml = '';
-
             calendarNavHtml += '<div class=\"ui-widget-header wc-toolbar\">';
               calendarNavHtml += '<div class=\"wc-display\"></div>';
               calendarNavHtml += '<div class=\"wc-nav\">';
@@ -661,7 +660,6 @@
               calendarNavHtml += '</div>';
               calendarNavHtml += '<h1 class=\"wc-title\"></h1>';
             calendarNavHtml += '</div>';
-
             $(calendarNavHtml).appendTo($calendarContainer);
 
             $calendarContainer.find('.wc-nav .wc-today')
@@ -715,6 +713,13 @@
             $calendarContainer.find('.wc-title')
               .height(_height)
               .css('line-height', _height + 'px');
+        }else{
+            var calendarNavHtml = '';
+            calendarNavHtml += '<div class=\"ui-widget-header wc-toolbar\">';
+              calendarNavHtml += '<h1 class=\"wc-title\"></h1>';
+            calendarNavHtml += '</div>';
+            $(calendarNavHtml).appendTo($calendarContainer);
+
         }
       },
 
