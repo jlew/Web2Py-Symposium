@@ -34,5 +34,5 @@ def get_symposium_mentors_id(symposium, all=False):
     mentors = set()
     for papers in symposium.paper.select():
         if all or papers.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
-            authors = authors.union(papers.authors)
+            mentors = mentors.union(papers.authors)
     return mentors
