@@ -1,13 +1,47 @@
 {{extend 'layout.html'}}
-<h1>{{=p_title}}</h1>
+<h1>{{=T("Participants")}}</h1>
+{{for data in ret:}}
+    {{if all:}}
+        {{=H1(A(db.symposium._format % data['symposium'], _href=URL('people','index', args=data['symposium'].sid)))}}
+    {{else:}}
+        {{=H1(db.symposium._format % data['symposium'])}}
+    {{pass}}
 
-<h2>{{=T("Authors")}}</h2>
-<ul>
-{{for participant in authors:}}
-<li>{{=A(db.auth_user._format % participant, _href=URL('people','profile', args=participant.id))}}, <em>{{=participant.affiliation}}</em></li>
-{{pass}}
-</ul>
-<h2>{{=T("Mentors")}}</h2>
-{{for participant in mentors:}}
-<li>{{=A(db.auth_user._format % participant, _href=URL('people','profile', args=participant.id))}}, <em>{{=participant.affiliation}}</em></li>
+    {{if data['symposium'].event_date < request.now.date() and all:}}
+        {{=A(T('This symposium has passed, Show Participants'),
+             _href="#",
+             _onclick="$('#symp_people_%d').show('slow'); $(this).hide(); return false;" % data['symposium'].id)}}
+
+        <div id="symp_people_{{=data['symposium'].id}}" style="display: none;">
+    {{else:}}
+        <div id="symp_people_{{=data['symposium'].id}}">
+    {{pass}}
+    <b>{{=T("Authors")}}</b><br />
+    {{if data['authors']:}}
+        <ul>
+            {{for participant in data['authors']:}}
+            <li>
+                {{=A(db.auth_user._format % participant, _href=URL('people','profile', args=participant.id))}},
+                <em>{{=participant.affiliation}}</em>
+            </li>
+            {{pass}}
+        </ul>
+    {{else:}}
+        {{=P(T("No Authors at this time"))}}
+    {{pass}}
+
+    <b>{{=T("Mentors")}}</b><br />
+    {{if data['mentors']:}}
+        <ul>
+            {{for participant in data['mentors']:}}
+            <li>
+                {{=A(db.auth_user._format % participant, _href=URL('people','profile', args=participant.id))}},
+                <em>{{=participant.affiliation}}</em>
+            </li>
+            {{pass}}
+        </ul>
+    {{else:}}
+        {{=P(T("No Authors at this time"))}}
+    {{pass}}
+    </div>
 {{pass}}

@@ -2,31 +2,21 @@
 # try something like
 def index(): 
     if request.args(0):
-        symposiums=db(db.symposium.sid==request.args(0)).select()
+        symposiums = db(db.symposium.sid == request.args(0)).select()
+        all = False
     else:
-        symposiums=db(db.symposium.id>0).select()
+        symposiums = db(db.symposium.id > 0).select(orderby=~db.symposium.event_date)
+        all = True
     
-    authors = set()
-    mentors = set()
+    # Build Dict of all symposiums containing the symposium,
+    # its papers, and the number of pending/non-approved papers
+    ret = []
     for symposium in symposiums:
-        for papers in symposium.paper.select():
-            authors = authors.union(papers.authors)
-            mentors = mentors.union(papers.mentors)
-    if len(symposiums) == 1:
-        p_title = T("Participants from %s" % (db.symposium._format % symposiums.first()))
-    else:
-        p_title = T("Participants")
-        
-    authors=[db.auth_user(x) for x in authors]
-    authors.sort(key = lambda x: db.auth_user._format % x)
-    
-    mentors=[db.auth_user(x) for x in mentors]
-    mentors.sort(key = lambda x: db.auth_user._format % x)
-    
-    return dict(p_title=p_title,
-                authors=authors,
-                mentors=mentors
-                )
+        ret.append( {"symposium": symposium,
+                   "mentors": [db.auth_user(x) for x in get_symposium_mentors_id(symposium)],
+                   "authors": [db.auth_user(x) for x in get_symposium_authors_id(symposium)]})
+
+    return dict(ret=ret, all=all)
 
 def profile(): 
     user = db.auth_user(request.args(0))

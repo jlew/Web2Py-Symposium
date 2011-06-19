@@ -2,9 +2,30 @@
 {{include 'blocks/paper_block.html'}}
 {{show_moderation=show_discription=False}}
 
-{{=H1(T("Papers for %s") % (db.symposium._format % symposium)) if symposium else H1(T("All Papers"))}}
-{{=P("%d papers approved, %d papers pending" % (len(papers), pending))}}
+<h1>{{=T("Papers")}}</h1>
+{{for data in ret:}}
+    {{if all:}}
+        {{=H1(A(db.symposium._format % data['symposium'], _href=URL('papers','index', args=data['symposium'].sid)))}}
+    {{else:}}
+        {{=H1(db.symposium._format % data['symposium'])}}
+    {{pass}}
 
-{{for paper in papers:}}
-   {{paper_block()}}
+    {{=P("%d papers approved, %d papers pending" % (len(data['papers']), data['pending']))}}
+    {{if data['symposium'].event_date < request.now.date() and all:}}
+        {{=A(T('This symposium has passed, Show Papers'),
+             _href="#",
+             _onclick="$('#symp_paper_%d').show('slow'); $(this).hide(); return false;" % data['symposium'].id)}}
+
+        <div id="symp_paper_{{=data['symposium'].id}}" style="display: none;">
+    {{else:}}
+        <div id="symp_paper_{{=data['symposium'].id}}">
+    {{pass}}
+    {{if data['papers']:}}
+        {{for paper in data['papers']:}}
+            {{paper_block()}}
+        {{pass}}
+    {{else:}}
+        {{=T("No approved papers at this time")}}
+    {{pass}}
+    </div>
 {{pass}}
