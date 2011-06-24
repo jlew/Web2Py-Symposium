@@ -505,7 +505,15 @@ a.button:hover span.icon.user { background-position: 0 -869px }
  *  HERE YOU CAN START TO WRITE YOUR OWN DIVS
  */
 
-
+/* Styling for a comma separated list of values from a ul */
+/* Adapted from http://thingelstad.com/unordered-lists-to-comma-separated-list/ */
+ul.comma-separated { display: inline; list-style: none; margin: 0; padding: 0; }
+ul.comma-separated li { display: inline; }
+ul.comma-separated li:first-child:before { content:""; }
+ul.comma-separated li:before { content: ", "; white-space: pre;}
+ul.comma-separated li:last-child:before { content:" and "; white-space: pre;}
+ul.comma-separated li:last-child:after { content: "."; }
+ul.comma-separated li:only-child:before { content:""; }
 
 
 
@@ -553,4 +561,3 @@ a.button:hover span.icon.user { background-position: 0 -869px }
   p, h2, h3 { orphans: 3; widows: 3; }
   h2, h3{ page-break-after: avoid; }
 }
-

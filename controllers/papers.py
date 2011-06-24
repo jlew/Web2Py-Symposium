@@ -65,6 +65,10 @@ def edit():
 @auth.requires_login()
 def submit_for_approval():
     paper = db.paper(request.args(0))
+
+    if not paper:
+        raise HTTP(404)
+
     if can_edit_paper(paper):
         db.paper_comment.paper.default = paper.id
         db.paper_comment.status.default = PAPER_STATUS[PEND_APPROVAL]
@@ -73,6 +77,26 @@ def submit_for_approval():
     else:
         raise HTTP(401)
 
+@auth.requires_login()
+def attach_file():
+    paper = db.paper(request.args(0))
+    if not paper:
+        raise HTTP(404)
+
+    if can_edit_paper(paper):
+
+        if request.args(1):
+            attachment = db.paper_attachment(request.args(1))
+
+            if attachment and attachment.paper.id == paper.id:
+                return dict(paper=paper, form=crud.update(db.paper_attachment, request.args(1), next=URL('edit')))
+            else:
+                raise HTTP(404)
+        else:
+            db.paper_attachment.paper.default = paper.id
+            return dict(paper=paper, form=crud.create(db.paper_attachment, next=URL('edit')))
+    else:
+        raise HTTP(401)
 
 @auth.requires_membership("Reviewer")
 def review():

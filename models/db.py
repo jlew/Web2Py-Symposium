@@ -125,6 +125,20 @@ You may manage your submissions here: %(url)s
 crud.settings.create_onaccept.paper_comment.append(paper_comment)
 
 #########################################################################
+# Paper_attachment Table, used to attach additional files like
+# presentation materials
+#########################################################################
+db.define_table('paper_attachment',
+    Field('paper', db.paper, writable=False),
+    Field('author', db.auth_user, default=auth.user.id if auth.user else None, writable=False),
+    Field('title', 'string', required=True, label=T("Title")),
+    Field('file', 'upload', required=True, requires=IS_LENGTH(minsize=0)),
+    Field('created', 'datetime', default=request.now, writable=False),
+    Field('comment', 'string', label=T("Short Comment/Description")),
+    format = "%(title)s"
+    )
+
+#########################################################################
 # Helper to create admin groups and accounts when the first user is
 # created.  Also sets session pre-populate flag to cause the wiki-plugin
 # to build its original pages

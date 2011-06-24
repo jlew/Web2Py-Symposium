@@ -29,12 +29,15 @@
                {{if paper.status in [PAPER_STATUS[x] for x in EDIT_STATUS]:}}
                    {{=A(SPAN(_class="icon pen"), T("Edit"), _href=URL("edit",args=paper.id), _class="button")}}
                {{pass}}
+               {{=A(SPAN(_class="icon book"), T("Attach File"), _href=URL("attach_file",args=paper.id), _class="button")}}
            {{pass}}
            {{if show_moderate_button:}}
                {{=A(SPAN(_class="icon clock"), T("Review"), _href=URL("review",args=paper.id), _class="button")}}
            {{pass}}
            {{if paper.paper:}}
            {{=A(SPAN(_class="icon downarrow"), T("Download Paper"), _href=URL('default','download', args=paper.paper), _class="button")}}
+           {{else:}}
+           {{=A(SPAN(_class="icon downarrow"), T("Download Not Avaliable"), _href="#", _class="button negative active")}}
            {{pass}}
        </div>
        {{if show_discription:}}
@@ -42,9 +45,23 @@
        {{pass}}
        
        <div>
+           {{=T("Authors:")}}<ul class="comma-separated">
            {{for x in paper.authors:}}
-               {{=A(db.auth_user._format % db.auth_user(x), _href=URL("people","profile",args=x))}}
+               <li>{{=A(db.auth_user._format % db.auth_user(x), _href=URL("people","profile",args=x))}}</li>
            {{pass}}
+           </ul>
+       </div>
+       <div>
+           {{=T("Additional Files:")}}<ul class="comma-separated">
+           {{for file in paper.paper_attachment.select():}}
+               <li>
+                   {{=A(file.title, _href=URL("default","download",args=file.file), _title=file.comment)}}
+                   {{if show_action_buttons:}}
+                       [{{=A(T("EDIT"), _href=URL("attach_file", args=[paper.id, file.id]))}}]
+                   {{pass}}
+               </li>
+           {{pass}}
+           </ul>
        </div>
        <br style="clear: both;" />
        {{if show_moderation:}}
