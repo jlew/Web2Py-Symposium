@@ -1,153 +1,10 @@
 # -*- coding: utf-8 -*-
-DATE_FORMAT = "%m/%d/%y"
-DATE_TIME_FORMAT = "%m/%d/%y %I:%M:%S %p"
-PAPER_STATUS = (
-            T("Incomplete/Not Submitted"),    #0
-            T("Awaiting Approval"),           #1
-            T("Approved"),                    #2
-            T("Rejected/Closed/Withdrawn"),   #3
-            T("Needs Revision"),              #4
-        )
-        
-EDIT_STATUS =     [0, 1, 4]    # When the uesr is allowed to edit
-NEED_SUMBIT =     [0, 4]       # When the user needs to sumbit paper
-VISIBLE_STATUS =  [2]          # When the paper is visible to public
-PEND_APPROVAL =   1
-
-PAPER_CATEGORY = (
-            T('Biological and Environmental Sciences'),
-            T('Chemistry and Material Science'),
-            T('Physics and Astronomy'),
-            T('Information, Computational, and Mathematical Sciences'),
-            T('Engineering and Technology'),
-            T('Humanities and Social Sciences'),
-            T('Business'),
-            T('Fine and Applied Arts'),
-            T('Other'),
-        )
-
-# Using ConfigParser to read config in ini
-# Allows us to prevent sensitive data in our repo
-from os.path import join
-from ConfigParser import SafeConfigParser
-
-config = SafeConfigParser()
-config.read(join(request.folder, 'config.ini'))
-
-#########################################################################
-## This scaffolding model makes your app work on Google App Engine too
-#########################################################################
-
-if request.env.web2py_runtime_gae:            # if running on Google App Engine
-    db = DAL('google:datastore')              # connect to Google BigTable
-                                              # optional DAL('gae://namespace')
-    session.connect(request, response, db = db) # and store sessions and tickets there
-    ### or use the following lines to store sessions in Memcache
-    # from gluon.contrib.memdb import MEMDB
-    # from google.appengine.api.memcache import Client
-    # session.connect(request, response, db = MEMDB(Client()))
-else:                                         # else use a normal relational database
-    db = DAL(config.get('db','connection'))   # if not, use SQLite or other DB
-
 # by default give a view/generic.extension to all actions from localhost
 # none otherwise. a pattern can be 'controller/function.extension'
 response.generic_patterns = ['*'] if request.is_local else []
 
 #########################################################################
-## Here is sample code if you need for
-## - email capabilities
-## - authentication (registration, login, logout, ... )
-## - authorization (role based authorization)
-## - services (xml, csv, json, xmlrpc, jsonrpc, amf, rss)
-## - crud actions
-## (more options discussed in gluon/tools.py)
-#########################################################################
-
-from gluon.tools import Mail, Auth, Crud, Service, PluginManager, prettydate
-mail = Mail()                                  # mailer
-auth = Auth(db)                                # authentication/authorization
-crud = Crud(db)                                # for CRUD helpers using auth
-service = Service()                            # for json, xml, jsonrpc, xmlrpc, amfrpc
-plugins = PluginManager()                      # for configuring plugins
-
-mail.settings.server = config.get('mail','server')  # your SMTP server
-mail.settings.sender = config.get('mail','sender')  # your email
-mail.settings.tls = config.get('mail','tls')
-mail.settings.login = config.get('mail','login')    # your credentials or None
-
-
-
-
-def Hidden(*a,**b):
-    b['writable']=b['readable']=False
-    return Field(*a,**b)
-    
-fields=[
-    Field('first_name', length=512,default='',comment='*'),
-    Field('last_name', length=512,default='',comment='*'),
-    Field('affiliation', length=512, label='Affiliation/Title',
-           default="Rochester Institute of Technology, Student", required=True),
-    Field('email', length=512,default='',comment='*',
-          requires=(IS_EMAIL(),IS_NOT_IN_DB(db,'auth_user.email'))),
-    Field('password', 'password', readable=False, label='Password',
-          requires=[CRYPT(auth.settings.hmac_key)]),
-    Field('web_page',requires=IS_EMPTY_OR(IS_URL())),
-    Field('mobile_number',default=''),    
-    Field('short_profile','text',default=''),
-    Field('profile_picture','upload', autodelete=True),
-    Hidden('registered_by','integer',default=0), #nobody
-    Hidden('registration_id', length=512,default=''),
-    Hidden('registration_key', length=512,default=''),
-    Hidden('reset_password_key', length=512,default='',
-          label=auth.messages.label_reset_password_key),
-    ]
-
-db.define_table('auth_user',
-                format='%(first_name)s %(last_name)s',
-                *fields
-                )
-
-
-auth.settings.create_user_groups = False
-auth.settings.hmac_key = config.get('auth','hmac_key')   # before define_tables()
-auth.define_tables()                           # creates all needed tables
-auth.settings.mailer = mail                    # for user email verification
-auth.settings.registration_requires_verification = config.getboolean('auth','verification')
-auth.settings.registration_requires_approval =  config.getboolean('auth','approval')
-auth.messages.verify_email = 'Click on the link http://'+request.env.http_host+URL('default','user',args=['verify_email'])+'/%(key)s to verify your email'
-auth.settings.reset_password_requires_verification = True
-auth.messages.reset_password = 'Click on the link http://'+request.env.http_host+URL('default','user',args=['reset_password'])+'/%(key)s to reset your password'
-auth.messages.email_sent = "Verificaion Email Sent, please verify your email before you login"
-
-#########################################################################
-## If you need to use OpenID, Facebook, MySpace, Twitter, Linkedin, etc.
-## register with janrain.com, uncomment and customize following
-# from gluon.contrib.login_methods.rpx_account import RPXAccount
-# auth.settings.actions_disabled = \
-#    ['register','change_password','request_reset_password']
-# auth.settings.login_form = RPXAccount(request, api_key='...',domain='...',
-#    url = "http://localhost:8000/%s/default/user/login" % request.application)
-## other login methods are in gluon/contrib/login_methods
-#########################################################################
-
-crud.settings.auth = None        # =auth to enforce authorization on crud
-
-
-#########################################################################
-## Define your tables below (or better in another model file) for example
-##
-## >>> db.define_table('mytable',Field('myfield','string'))
-##
-## Fields can be 'string','text','password','integer','double','boolean'
-##       'date','time','datetime','blob','upload', 'reference TABLENAME'
-## There is an implicit 'id integer autoincrement' field
-## Consult manual for more options, validators, etc.
-##
-## More API examples for controllers:
-##
-## >>> db.mytable.insert(myfield='value')
-## >>> rows=db(db.mytable.myfield=='value').select(db.mytable.ALL)
-## >>> for row in rows: print row.id, row.myfield
+# Symposium Table
 #########################################################################
 db.define_table('symposium',
     Field('name','string',required=True, label=T("Symposium Name")),
@@ -163,40 +20,15 @@ db.define_table('symposium',
 #Add after created so we don't override the unique test
 db.symposium.sid.requires.insert(0,IS_SLUG())
 
-
 def get_next_symposium():
+    """
+    Returns the next upcoming symposium.
+    """
     return db(db.symposium.reg_end > request.now).select(orderby=db.symposium.event_date).first()
 
-
-class IS_VALID_SYMP(object):
-    def __init__(self, error_message='This Symposium is not or no longer accepting registrations'):
-        self.error_message = error_message
-        self.multiple=False
-        
-    def __call__(self, value):
-        try:
-            if db(db.symposium.id == value).select().first():
-            # Check if a valid opbject, this will allow old reg to work but not add new ones    
-            #if value.reg_end > request.now and value.reg_start < request.now:
-                return (value, None)
-
-            else:
-                return (value, self.error_message)
-
-        except:
-            return (value, self.error_message)
-            
-    def options(self):
-        return [(x.id, "%s (%s)" % (x.name, x.event_date))
-            for x in db(db.symposium.reg_end > request.now).select(orderby=db.symposium.event_date)]
-        
-    def formatter(self, value):
-        v = db.symposium(value)
-        if v:
-            return db.symposium._format % v
-        else:
-            "NONE"
-   
+#########################################################################
+# Paper Table
+#########################################################################
 db.define_table('paper',
     Field('title', 'string', required=True, 
             label=T("Paper Title"), comment="*"),
@@ -245,7 +77,10 @@ def paper_update(form):
     form.vars.status=PAPER_STATUS[0]
 crud.settings.update_onvalidation.paper.append(paper_update)
 
-#TODO ADD ON CREATE RUN EMAIL/UPDATE PAPER ROUTINE
+
+#########################################################################
+# Paper_comment Table, used to keep track of the review process
+#########################################################################
 db.define_table('paper_comment',
     Field('paper', db.paper, writable=False),
     Field('author', db.auth_user, default=auth.user.id if auth.user else None, writable=False),
@@ -255,10 +90,17 @@ db.define_table('paper_comment',
     )
 
 def paper_comment(form):
+    """
+    When a comment has been posted, this method is called to update
+    the paper's status and email all authors that there has been an
+    update on their paper's status.
+    """
+    # Update Paper Status
     comment = db.paper_comment(form.vars.id)
     paper = db.paper(comment.paper)
     paper.update_record(status=form.vars.status)
 
+    # Email authors
     author_list = [db.auth_user(author).email for author in paper.authors]
     mail.send(to=author_list, subject=T("Symposium Paper Status Update"),
     message=T("""
@@ -282,8 +124,20 @@ You may manage your submissions here: %(url)s
 
 crud.settings.create_onaccept.paper_comment.append(paper_comment)
 
+#########################################################################
+# Helper to create admin groups and accounts when the first user is
+# created.  Also sets session pre-populate flag to cause the wiki-plugin
+# to build its original pages
+#########################################################################
 def ensure_admin(form):
+    """
+    When a user is created for the first time, this function will
+    create the admin and review groups and add the new user to thoes
+    new groups.
+    """
     if form.vars.id==1:
+        auth.add_group(role = 'Symposium Admin')
+        auth.add_group(role = 'Reviewer')
         auth.add_membership('Symposium Admin', 1)
         auth.add_membership('Reviewer', 1)
         
@@ -291,7 +145,3 @@ def ensure_admin(form):
         session['pre-populate'] = True
 
 auth.settings.register_onaccept=ensure_admin
-
-if db(db.auth_group.role=="Symposium Admin").count() == 0:
-    auth.add_group(role = 'Symposium Admin')
-    auth.add_group(role = 'Reviewer')

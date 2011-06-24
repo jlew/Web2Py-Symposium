@@ -6,6 +6,10 @@ def can_edit_paper(paper):
     return auth.user.id in paper.authors or len(paper.authors) == 0
     
 def get_symposium_visable_papers(symposium):
+    """
+    Returns a list of papers that are in a visible state for
+    a given symposium.
+    """
     paper_request = db(db.paper.symposium==symposium).select()
     papers=[]
     for paper in paper_request:
