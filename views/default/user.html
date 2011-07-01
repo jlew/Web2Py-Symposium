@@ -1,5 +1,6 @@
 {{extend 'layout.html'}}
 <h2>{{=T( request.args(0).replace('_',' ').capitalize() )}}</h2>
+{{if request.args(0)=='profile':}}{{=A(T("View Public Profile"), _href=URL("people","profile",args=auth.user.id))}}{{pass}}
 <div id="web2py_user_form">
 {{=form}}
 {{if request.args(0)=='login':}}
