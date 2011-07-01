@@ -31,6 +31,7 @@
   <tr><td>{{=T("Submitted Papers")}}</td><td>{{=paper_count}}</td></tr>
   <tr><td>{{=T("Authors")}}</td><td>{{=len(authors)}}</td></tr>
   <tr><td>{{=T("Mentors")}}</td><td>{{=len(mentors)}}</td></tr>
+  <tr><td>{{=T("Attendees")}}</td><td>{{=len(symposium.attendees or [])}}</td></tr>
 </table>
 </div>
 {{pass}}

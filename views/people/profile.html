@@ -28,3 +28,13 @@
         {{pass}}
     {{pass}}
 {{pass}}
+
+{{symposiums = db(db.symposium.attendees.contains(id)).select()}}
+{{if symposiums:}}
+    <h2 style="clear: both;">{{=T("Symposiums")}}</h2>
+    <ul>
+    {{for symposium in symposiums:}}
+       <li>{{=db.symposium._format % symposium}}</li>
+    {{pass}}
+    </ul>
+{{pass}}

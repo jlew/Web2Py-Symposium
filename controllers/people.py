@@ -14,7 +14,8 @@ def index():
     for symposium in symposiums:
         ret.append( {"symposium": symposium,
                    "mentors": [db.auth_user(x) for x in get_symposium_mentors_id(symposium)],
-                   "authors": [db.auth_user(x) for x in get_symposium_authors_id(symposium)]})
+                   "authors": [db.auth_user(x) for x in get_symposium_authors_id(symposium)],
+                   "attendees": [db.auth_user(x) for x in symposium.attendees or []]})
 
     return dict(ret=ret, all=all)
 

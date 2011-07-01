@@ -45,6 +45,22 @@
             {{=P(T("No Mentors at this time"))}}
         {{pass}}
         </div>
+
+        <b>{{=T("Attendees")}}</b><br />
+        {{if data['attendees']:}}
+            <ul>
+                {{for participant in data['attendees']:}}
+                <li>
+                    {{=A(db.auth_user._format % participant, _href=URL('people','profile', args=participant.id))}},
+                    <em>{{=participant.affiliation}}</em>
+                </li>
+                {{pass}}
+            </ul>
+        {{else:}}
+            {{=P(T("No Attendees at this time"))}}
+        {{pass}}
+        </div>
+
     {{pass}}
 {{else:}}
     {{=P(T("No Symposiums at this time."))}}
