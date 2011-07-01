@@ -58,7 +58,8 @@ def edit():
         db.paper.symposium.writable = False
         
         crud.messages.submit_button = T("Save and continue")
-        return dict(form=crud.update(db.paper, request.args(0), next=URL('papers','edit_members', args=paper.id)))
+        return dict(form=crud.update(db.paper, request.args(0), next=URL('papers','edit_members', args=paper.id), 
+                                      message=T("Paper Saved, click submit for approval when complete")))
     else:
         raise HTTP(401)
         
@@ -73,7 +74,8 @@ def submit_for_approval():
         db.paper_comment.paper.default = paper.id
         db.paper_comment.status.default = PAPER_STATUS[PEND_APPROVAL]
         db.paper_comment.status.requires = IS_IN_SET( (PAPER_STATUS[PEND_APPROVAL],) )
-        return dict(paper=paper, form=crud.create(db.paper_comment, next=URL('edit')))
+        return dict(paper=paper, form=crud.create(db.paper_comment, next=URL('edit'),
+                        message=T("Paper moderation submission sucessful")))
     else:
         raise HTTP(401)
 
@@ -89,12 +91,14 @@ def attach_file():
             attachment = db.paper_attachment(request.args(1))
 
             if attachment and attachment.paper.id == paper.id:
-                return dict(paper=paper, form=crud.update(db.paper_attachment, request.args(1), next=URL('edit')))
+                return dict(paper=paper, form=crud.update(db.paper_attachment, request.args(1), next=URL('edit'),
+                                            message=T("Attachment Updated")))
             else:
                 raise HTTP(404)
         else:
             db.paper_attachment.paper.default = paper.id
-            return dict(paper=paper, form=crud.create(db.paper_attachment, next=URL('edit')))
+            return dict(paper=paper, form=crud.create(db.paper_attachment, next=URL('edit'),
+                                            message=T("Attachment Sucessful")))
     else:
         raise HTTP(401)
 
@@ -104,7 +108,7 @@ def review():
     if paper:
         db.paper_comment.paper.default = paper.id
         db.paper_comment.status.default = paper.status
-        return dict(paper=paper, form=crud.create(db.paper_comment, next=URL('review')))
+        return dict(paper=paper, form=crud.create(db.paper_comment, next=URL('review'), message=T("Paper status updated")))
     else:
         response.view = "papers/review_list.html"
         return dict(papers=db(db.paper.status==PAPER_STATUS[PEND_APPROVAL]).select())
@@ -168,8 +172,7 @@ Random Generated Password: %(password)s
 
 You may view and update your account profile here: %(url)s
 
-You may receive another email requiring you to confirm your email
-before you will be able to login.
+Your papers can be viewed and managed here: %(manage_paper_url)s
 """) % {
         "name": db.auth_user._format % user,
         "user": db.auth_user._format % auth.user,
@@ -177,9 +180,11 @@ before you will be able to login.
         "email": user.email,
         "password": the_pass,
         "url":"http://%s%s" % (request.env.http_host, URL("default","user",args="profile")),
+        "manage_paper_url":"http://%s%s" % (request.env.http_host, URL("papers","edit")),
         "type": T("Author") if request.args(1) == "A" else T("Mentor"),
         "title": paper.title,
         })
     
     crud.settings.create_onaccept.auth_user.insert(0, user_callback)
-    return dict(title=T("Author") if request.args(1) == "A" else T("Mentor"), form=crud.create(db.auth_user))
+    return dict(title=T("Author") if request.args(1) == "A" else T("Mentor"),
+                form=crud.create(db.auth_user, message=T("Account created and linked to paper")))
