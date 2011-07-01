@@ -6,3 +6,5 @@ errors
 *.pyc
 uploads/*
 config.ini
+.DS_Store
+*~
