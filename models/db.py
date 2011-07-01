@@ -132,7 +132,7 @@ db.define_table('paper_attachment',
     Field('paper', db.paper, writable=False),
     Field('author', db.auth_user, default=auth.user.id if auth.user else None, writable=False),
     Field('title', 'string', required=True, label=T("Title")),
-    Field('file', 'upload', required=True, requires=IS_LENGTH(minsize=0)),
+    Field('file', 'upload', required=True, requires=IS_NOT_EMPTY()),
     Field('created', 'datetime', default=request.now, writable=False),
     Field('comment', 'string', label=T("Short Comment/Description")),
     format = "%(title)s"
