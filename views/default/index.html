@@ -17,7 +17,17 @@
     }}
 
 <div>
+{{if auth.user:}}
+    {{if auth.user.id in (symposium.attendees or []):}}
+        <h2 style="display: inline;">{{=symposium.name}}</h2> ({{=T("You are Attending")}})<br />
+    {{else:}}
+        <h2 style="display: inline;">{{=symposium.name}}</h2>
+        {{=A(T("Attend"), _href=URL("symposium","attend",args=symposium.id), _class="button")}}<br />
+    {{pass}}
+{{else:}}
 <h2>{{=symposium.name}}</h2>
+{{pass}}
+
 {{=DIV(
     A(SPAN(_class="icon book"), T("Papers"), _href=URL("papers","index",args=symposium.sid), _class="pill button left"),
     A(SPAN(_class="icon user"), T("Participants"), _href=URL("people","index",args=symposium.sid), _class="pill button middle"),
