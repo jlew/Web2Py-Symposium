@@ -40,16 +40,10 @@ db.define_table('paper',
     Field('paper', 'upload', label=T("Paper Upload"), autodelete=True,
           comment=T("You may upload a copy of your paper now or come back later.")),
           
-    Field('authors', 'list:reference auth_user', label=T("Paper Authors"), required=True,
-          comment="* " + T("Please check all authors of this paper. If you have authors that\
-                     do not currently have an account, you will be given a chance to\
-                     create their accounts after submitting this form."),
+    Hidden('authors', 'list:reference auth_user', label=T("Paper Authors"), required=True,
           default=[auth.user.id if auth.user else None]),
           
-    Field('mentors', 'list:reference auth_user', label=T("Paper Mentors"), default=[],
-          comment=T("Please check all mentors of this paper. If you have mentors that\
-                     do not currently have an account, you will be given a chance to\
-                     create their accounts after submitting this form.")),
+    Hidden('mentors', 'list:reference auth_user', label=T("Paper Mentors"), default=[]),
                      
     Field('status', 'string', requires=IS_IN_SET(PAPER_STATUS), default=PAPER_STATUS[0],
           label=T("Paper Status"), writable=False),

@@ -49,6 +49,7 @@ fields=[
     Field('short_profile','text',default=''),
     Field('profile_picture','upload', autodelete=True),
     Hidden('registered_by','integer',default=0), #nobody
+    Hidden('search_name',compute=lambda r: "%s, %s (%s)" %( r['last_name'], r['first_name'], r['affiliation'])),
     Hidden('registration_id', length=512,default=''),
     Hidden('registration_key', length=512,default=''),
     Hidden('reset_password_key', length=512,default='',
