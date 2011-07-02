@@ -40,7 +40,7 @@ db.define_table('paper',
     Field('paper', 'upload', label=T("Paper Upload"), autodelete=True,
           comment=T("You may upload a copy of your paper now or come back later.")),
           
-    Hidden('authors', 'list:reference auth_user', label=T("Paper Authors"), required=True,
+    Hidden('authors', 'list:reference auth_user', label=T("Paper Authors"),
           default=[auth.user.id if auth.user else None]),
           
     Hidden('mentors', 'list:reference auth_user', label=T("Paper Mentors"), default=[]),
