@@ -1,0 +1,15 @@
+{{extend 'layout.html'}}
+{{=DIV(T("Navigation: "),
+    A(SPAN(_class="icon pen"), T("Edit Paper"), _class="button left active"),
+    A(SPAN(_class="icon user"), T("Manage Authors & Mentors"), _href=URL('papers','edit_members', args=paper.id), _class="button middle"),
+    A(SPAN(_class="icon check"), T("Submit for Approval"), _href=URL('papers','submit_for_approval', args=paper.id), _class="button middle"),
+    A(SPAN(_class="icon book"), T("Back to Manage Papers"), _href=URL('papers','edit'), _class="button rigt"),
+)}}
+<h1>{{=T("Edit Paper")}}</h1>
+{{=form}}
+{{=DIV(T("Navigation: "),
+    A(SPAN(_class="icon pen"), T("Edit Paper"), _class="button left active"),
+    A(SPAN(_class="icon user"), T("Manage Authors & Mentors"), _href=URL('papers','edit_members', args=paper.id),  _class="button middle"),
+    A(SPAN(_class="icon check"), T("Submit for Approval"), _href=URL('papers','submit_for_approval', args=paper.id), _class="button middle"),
+    A(SPAN(_class="icon book"), T("Back to Manage Papers"), _href=URL('papers','edit'), _class="button rigt"),
+)}}

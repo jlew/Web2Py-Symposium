@@ -1,4 +1,16 @@
 {{extend 'layout.html'}}
+{{=DIV(T("Navigation: "),
+    A(SPAN(_class="icon pen"), T("Edit Paper"), _href=URL('papers','edit', args=paper.id), _class="button left"),
+    A(SPAN(_class="icon user"), T("Manage Authors & Mentors"), _href=URL('papers','edit_members', args=paper.id), _class="button middle"),
+    A(SPAN(_class="icon check"), T("Submit for Approval"), _class="button middle active"),
+    A(SPAN(_class="icon book"), T("Back to Manage Papers"), _href=URL('papers','edit'), _class="button rigt"),
+)}}
 <h1>{{=T("Submit Paper For Approval")}}</h1>
 {{=plugin_wiki.embed_page('submit_paper_for_approval') or ""}}
 {{=form}}
+{{=DIV(T("Navigation: "),
+    A(SPAN(_class="icon pen"), T("Edit Paper"), _href=URL('papers','edit', args=paper.id), _class="button left"),
+    A(SPAN(_class="icon user"), T("Manage Authors & Mentors"), _href=URL('papers','edit_members', args=paper.id), _class="button middle"),
+    A(SPAN(_class="icon check"), T("Submit for Approval"), _class="button middle active"),
+    A(SPAN(_class="icon book"), T("Back to Manage Papers"), _href=URL('papers','edit'), _class="button rigt"),
+)}}

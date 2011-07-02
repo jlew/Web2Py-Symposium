@@ -58,7 +58,8 @@ def edit():
         db.paper.symposium.writable = False
         
         crud.messages.submit_button = T("Save and continue")
-        return dict(form=crud.update(db.paper, request.args(0), next=URL('papers','edit_members', args=paper.id), 
+        return dict(paper=paper, 
+                    form=crud.update(db.paper, request.args(0), next=URL('papers','edit_members', args=paper.id), 
                                       message=T("Paper Saved, click submit for approval when complete")))
     else:
         raise HTTP(401)
@@ -116,8 +117,69 @@ def review():
 @auth.requires_login()      
 def edit_members():
     paper =db.paper(request.args(0))
+    if not paper:
+        raise HTTP(404)
+
     if can_edit_paper(paper):
         return dict(paper=paper)
+    else:
+        raise HTTP(401)
+
+@auth.requires_login()
+def add_by_id():
+    paper = db.paper(request.args(0))
+    usr = db.auth_user(request.args(2))
+
+    if not paper or not usr:
+        raise HTTP(404)
+
+    if can_edit_paper(paper):
+
+        if request.args(1) == "A":
+            if not usr.id in paper.authors:
+                paper.authors.append(usr.id)
+                paper.update_record(authors=paper.authors)
+            session.s_val = request.vars.s
+            session.flash=T("Author Added")
+        elif request.args(1) == "M":
+            if not usr.id in paper.mentors:
+                paper.mentors.append(usr.id)
+                paper.update_record(mentors=paper.mentors)
+            session.s_val = request.vars.s
+            session.flash=T("Mentor Added")
+        else:
+            raise HTTP(400)
+
+        redirect( URL("papers","edit_members", args=paper.id))
+
+    else:
+        raise HTTP(401)
+
+@auth.requires_login()
+def rem_by_id():
+    paper = db.paper(request.args(0))
+    usr = db.auth_user(request.args(2))
+
+    if not paper or not usr:
+        raise HTTP(404)
+
+    if can_edit_paper(paper):
+
+        if request.args(1) == "A":
+            if usr.id in paper.authors:
+                paper.authors.remove(usr.id)
+                paper.update_record(authors=paper.authors)
+            session.flash=T("Author Removed")
+        elif request.args(1) == "M":
+            if usr.id in paper.mentors:
+                paper.mentors.remove(usr.id)
+                paper.update_record(mentors=paper.mentors)
+            session.flash=T("Mentor Removed")
+        else:
+            raise HTTP(400)
+
+        redirect( URL("papers","edit_members", args=paper.id))
+
     else:
         raise HTTP(401)
 

@@ -1,21 +1,136 @@
 {{extend 'layout.html'}}
-<h1>Add New Users to {{=paper.title}}</h1>
-{{=P(T("Are there any mentors or authors not in the system?  If not add them here. \
-        You should only add new users using this form, check to make sure they do not \
-        appear in the author selection section of the edit page.  They will be \
-        emailed their account information and added to your paper."))}}
+<style type="text/css">
+    .paper_member_img{
+        width: 75px; height: 75px; float: left; text-align: center; padding-right: 10px;
+    }
 
-{{=DIV(
-    A(SPAN(_class="icon user"), T("Add Author"), _class="button pill left",
-      _href=URL("papers","register_user", args=[paper.id,'A']), cid="user_adder"),
-    A(SPAN(_class="icon user"), T("Add Mentor"),  _class="button pill right",
-      _href=URL("papers","register_user", args=[paper.id,'M']), cid="user_adder")
-   )}}
-   
-<div id="user_adder" style="min-height: 100px;">{{=P(B(T("Select a type of user to add from the links above.")))}}</div>
-
+    .paper_member_ctr{
+        clear: left; height: 75px;
+    }
+</style>
 {{=DIV(T("Navigation: "),
     A(SPAN(_class="icon pen"), T("Edit Paper"), _href=URL('papers','edit', args=paper.id), _class="button left"),
-    A(SPAN(_class="icon book"), T("Manage Papers"), _href=URL('papers','edit'), _class="button middle"),
-    A(SPAN(_class="icon check"), T("Submit for Approval"), _href=URL('papers','submit_for_approval', args=paper.id), _class="button right"),
+    A(SPAN(_class="icon user"), T("Manage Authors & Mentors"), _class="button middle active"),
+    A(SPAN(_class="icon check"), T("Submit for Approval"), _href=URL('papers','submit_for_approval', args=paper.id), _class="button middle"),
+    A(SPAN(_class="icon book"), T("Back to Manage Papers"), _href=URL('papers','edit'), _class="button rigt"),
+)}}
+<hr>
+<h1>{{=paper.title}}</h1>
+
+{{author_ids = []}}
+{{mentor_ids = []}}
+<table width="100%">
+<tr><td>
+{{=H2(T("Authors"))}}
+{{back="fff"}}
+{{for usr in [db.auth_user(x) for x in paper.authors]:}}
+{{author_ids.append(usr.id)}}
+{{back = "fff" if back == "eee" else "eee"}}
+<div class="paper_member_ctr" style="background: #{{=back}};">
+    <div class="paper_member_img">
+        {{=IMG(_src=(URL('default','thumb',args=[75,75,usr.profile_picture]) if usr.profile_picture else URL('static','images/no-photo.png')))}}
+    </div>
+    <div>{{=usr.first_name}} {{=usr.last_name}}<br />{{=usr.affiliation}}</div>
+    {{=A(SPAN(_class="icon cross"), T("Remove as author"), _href=URL('papers','rem_by_id', args=[paper.id, "A", usr.id]), _class="button negative")}}
+</div>
+{{pass}}
+</td><td>
+{{=H2(T("Mentors"))}}
+{{back="fff"}}
+{{for usr in [db.auth_user(x) for x in paper.mentors]:}}
+{{mentor_ids.append(usr.id)}}
+{{back = "fff" if back == "eee" else "eee"}}
+<div class="paper_member_ctr" style="background: #{{=back}};">
+    <div class="paper_member_img">
+        {{=IMG(_src=(URL('default','thumb',args=[75,75,usr.profile_picture]) if usr.profile_picture else URL('static','images/no-photo.png')))}}
+    </div>
+    <div>{{=usr.first_name}} {{=usr.last_name}}<br />{{=usr.affiliation}}</div>
+    {{=A(SPAN(_class="icon cross"), T("Remove as mentor"), _href=URL('papers','rem_by_id', args=[paper.id, "M", usr.id]), _class="button negative")}}
+</div>
+{{pass}}
+</td></tr></table>
+<hr>
+<h1>{{=T("Add Authors and Mentors")}}</h1>
+<script type="text/javascript">
+var authors = {{=author_ids}};
+var mentors = {{=mentor_ids}};
+
+pending_request = false;
+function pull_choices(){
+    if( pending_request ){
+        pending_request.abort();
+    }
+
+    request_url = "{{=URL('people','search_api', extension='json')}}?search=" + escape($('#search_name').val()) ;
+    $("#search_return").html("{{=T("Loading...")}}");
+    backgrd = "fff";
+    pending_request = $.getJSON(request_url, function(data){
+        if(data){
+            if( data.result.length > 0){
+                 $("#search_return").html("");
+                 $.each(data.result, function(key,val){
+                     if(val['profile_picture']){
+                         img_url = "{{=URL('default','thumb',args=[75,75])}}/" + val['profile_picture'];
+                     }else{
+                         img_url = "{{=URL('static','images/no-photo.png')}}";
+                     }
+
+                    backgrd = (backgrd == "fff")?"eee":"fff";
+                    if( authors.indexOf(val['id']) == -1 ){
+                        author_link = "<a class='button' href='{{=URL('papers','add_by_id',args=[paper.id, 'A'])}}/" +
+                                    val['id'] + "?s=" + escape($("#search_name").val()) + "'>" +
+                                "<span class='icon plus'></span>{{=T("Add as Author")}}</a>";
+                    }else{
+                        author_link = "<a class='button negative active'>" +
+                                "<span class='icon user'></span>{{=T("Is Author")}}</a>";
+                    }
+
+                    if( mentors.indexOf(val['id']) == -1){
+                        mentor_link = "<a class='button' href='{{=URL('papers','add_by_id',args=[paper.id, 'M'])}}/" +
+                                    val['id'] + "?s=" + escape($("#search_name").val()) + "'>" +
+                                "<span class='icon plus'></span>{{=T("Add as Mentor")}}</a>";
+                    }else{
+                        mentor_link = "<a class='button negative active' >" +
+                                "<span class='icon plus'></span>{{=T("Is Mentor")}}</a>";
+                    }
+
+                    $("#search_return").append("<div class='paper_member_ctr' style='background: #" + backgrd + ";'>" +
+                        "<div class='paper_member_img'><img src='"+img_url+"'></div>" +
+                        "<div>" +
+                            val['first_name'] + " " + val['last_name'] + "<br />" + val['affiliation'] +
+                        "</div>" + author_link + mentor_link +
+                        "</div>")
+                });
+
+            }else{
+                $("#search_return").html("{{=T("No users found.")}}");
+            }
+            $("#search_return").append('{{=DIV( T("They do not have an account? "),
+             A(SPAN(_class="icon user"), T("Create New Author"), _class="button left",
+                  _href=URL("papers","register_user", args=[paper.id,'A']), cid="search_return"),
+             A(SPAN(_class="icon user"), T("Create New Mentor"), _class="button left",
+                  _href=URL("papers","register_user", args=[paper.id,'M']), cid="search_return"))}}');
+        }else{
+            $("#search_return").html("{{=T("Search Failed")}}");
+        }
+    });
+}
+</script>
+
+<form onsubmit="return false;">
+Search: <input type="text" id="search_name" onkeyup="javascript:pull_choices();" value="{{=session.s_val or ""}}">
+</form>
+<div id="search_return">{{=T("Search for members above. If they are not in the system you will be given the option to add them.")}}</div>
+
+{{if session.s_val:}}
+<script type="text/javascript">$("#search_name").val(unescape("{{=session.s_val}}")); pull_choices();</script>
+{{del session.s_val}}
+{{pass}}
+
+<hr />
+{{=DIV(T("Navigation: "),
+    A(SPAN(_class="icon pen"), T("Edit Paper"), _href=URL('papers','edit', args=paper.id), _class="button left"),
+    A(SPAN(_class="icon user"), T("Manage Authors & Mentors"), _class="button middle active"),
+    A(SPAN(_class="icon check"), T("Submit for Approval"), _href=URL('papers','submit_for_approval', args=paper.id), _class="button middle"),
+    A(SPAN(_class="icon book"), T("Back to Manage Papers"), _href=URL('papers','edit'), _class="button rigt"),
 )}}
