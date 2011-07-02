@@ -22,7 +22,7 @@
         <h2 style="display: inline;">{{=symposium.name}}</h2> ({{=T("You are Attending")}})<br />
     {{else:}}
         <h2 style="display: inline;">{{=symposium.name}}</h2>
-        {{=A(T("Attend"), _href=URL("symposium","attend",args=symposium.id), _class="button")}}<br />
+        {{=A(T("Attend"), _href=URL("symposium","attend",args=symposium.sid), _class="button")}}<br />
     {{pass}}
 {{else:}}
 <h2>{{=symposium.name}}</h2>

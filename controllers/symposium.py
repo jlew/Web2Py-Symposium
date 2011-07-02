@@ -4,7 +4,7 @@ def index(): return dict(message="hello from symposium.py")
 
 @auth.requires_login()
 def attend():
-    symp = db.symposium(request.args(0))
+    symp = db(db.symposium.sid == request.args(0)).select().first()
     
     if not symp:
         raise HTTP(404)
