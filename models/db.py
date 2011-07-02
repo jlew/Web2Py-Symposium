@@ -8,7 +8,8 @@ response.generic_patterns = ['*'] if request.is_local else []
 #########################################################################
 db.define_table('symposium',
     Field('name','string',required=True, label=T("Symposium Name")),
-    Field('sid', 'string', required=True, unique=True, label=T("Easy URL")),
+    Field('sid', 'string', required=True, unique=True, label=T("Symposium UID"),
+           comment=T("This is a short id for the symposium to be used in the url. Example: ugradresearch2011.")),
     Field('reg_start', 'datetime', required=True, label=T("Registration Start")),
     Field('reg_end', 'datetime', required=True, label=T("Registration End")),
     Field('event_date', 'date', required=True, label=T("Symposium Date")),
