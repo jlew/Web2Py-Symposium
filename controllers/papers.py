@@ -168,8 +168,11 @@ def rem_by_id():
         if request.args(1) == "A":
             if usr.id in paper.authors:
                 paper.authors.remove(usr.id)
-                paper.update_record(authors=paper.authors)
-            session.flash=T("Author Removed")
+                if len(paper.authors) == 0:
+                    session.flash = T("You can not remove the only author.")
+                else:
+                    paper.update_record(authors=paper.authors)
+                    session.flash=T("Author Removed")
         elif request.args(1) == "M":
             if usr.id in paper.mentors:
                 paper.mentors.remove(usr.id)
