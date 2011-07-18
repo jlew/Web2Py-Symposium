@@ -12,15 +12,41 @@ def index():
     # its papers, and the number of pending/non-approved papers
     ret = []
     for symposium in symposiums:
-        s_block = {"symposium":symposium, "papers":[], "pending":0}
+        s_block = {"symposium":symposium, "papers":[], "pending":0, "approved":0}
         for paper in symposium.paper.select(orderby=db.paper.title):
             if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
                 s_block['papers'].append(paper)
+                s_block['approved'] += 1
             else:
                 s_block['pending'] += 1
         ret.append(s_block)
 
-    return dict(ret=ret, all=all)
+    return dict(ret=ret, all=all, c_show_moderation = False)
+
+@auth.requires_membership("Symposium Admin")
+def admin_index():
+    if request.args(0):
+        symposiums = db(db.symposium.sid == request.args(0)).select()
+        all = False
+    else:
+        symposiums = db(db.symposium.id > 0).select(orderby=~db.symposium.event_date)
+        all = True
+
+    # Build Dict of all symposiums containing the symposium,
+    ret = []
+    for symposium in symposiums:
+        s_block = {"symposium":symposium, "papers":[], "pending":0, "approved":0}
+        for paper in symposium.paper.select(orderby=db.paper.title):
+            if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
+                s_block['papers'].append(paper)
+                s_block['approved'] += 1
+            else:
+                s_block['papers'].append(paper)
+                s_block['pending'] += 1
+        ret.append(s_block)
+
+    response.view="papers/index.html"
+    return dict(ret=ret, all=all, c_show_moderation = True)
     
 def view():
     paper = db.paper(request.args(0))

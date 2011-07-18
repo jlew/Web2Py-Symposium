@@ -1,17 +1,27 @@
 {{extend 'layout.html'}}
 {{include 'blocks/paper_block.html'}}
-{{show_moderation=show_discription=show_action_buttons=False}}
+{{show_discription=show_action_buttons=False}}
+
+{{show_moderation = c_show_moderation}}
+
 
 <h1>{{=T("Papers")}}</h1>
+{{if auth.has_membership("Symposium Admin"):}}
+    {{if not c_show_moderation:}}
+        {{=A(T("Goto Admin Mode (View All Papers, including incomplete papers)"), _href=URL('admin_index', args=request.args))}}
+    {{else:}}
+        {{=A(T("Goto Normal Mode (View only approved papers)"), _href=URL('index', args=request.args))}}
+    {{pass}}
+{{pass}}
 {{if ret:}}
     {{for data in ret:}}
         {{if all:}}
-            {{=H1(A(db.symposium._format % data['symposium'], _href=URL('papers','index', args=data['symposium'].sid)))}}
+            {{=H1(A(db.symposium._format % data['symposium'], _href=URL(args=data['symposium'].sid)))}}
         {{else:}}
             {{=H1(db.symposium._format % data['symposium'])}}
         {{pass}}
     
-        {{=P("%d papers approved, %d papers pending" % (len(data['papers']), data['pending']))}}
+        {{=P("%d papers approved, %d papers pending" % (data['approved'], data['pending']))}}
         {{if data['symposium'].event_date < request.now.date() and all:}}
             {{=A(T('This symposium has passed, Show Papers'),
                  _href="#",
