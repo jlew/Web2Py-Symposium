@@ -107,9 +107,9 @@ function pull_choices(){
             }
             $("#search_return").append('{{=DIV( T("They do not have an account? "),
              A(SPAN(_class="icon user"), T("Create New Author"), _class="button left",
-                  _href=URL("papers","register_user", args=[paper.id,'A']), cid="search_return"),
+                  _href="#", _onclick="popup('%s')" % URL("papers","register_user", args=[paper.id,'A'])),
              A(SPAN(_class="icon user"), T("Create New Mentor"), _class="button left",
-                  _href=URL("papers","register_user", args=[paper.id,'M']), cid="search_return"))}}');
+                  _href="#", _onclick="popup('%s')" % URL("papers","register_user", args=[paper.id,'M'])))}}');
         }else{
             $("#search_return").html("{{=T("Search Failed")}}");
         }
