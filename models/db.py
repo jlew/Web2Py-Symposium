@@ -7,12 +7,12 @@ response.generic_patterns = ['*'] if request.is_local else []
 # Symposium Table
 #########################################################################
 db.define_table('symposium',
-    Field('name','string',required=True, label=T("Symposium Name")),
-    Field('sid', 'string', required=True, unique=True, label=T("Symposium UID"),
+    Field('name','string',required=True, notnull=True, label=T("Symposium Name")),
+    Field('sid', 'string', required=True, notnull=True, unique=True, label=T("Symposium UID"),
            comment=T("This is a short id for the symposium to be used in the url. Example: ugradresearch2011.")),
-    Field('reg_start', 'datetime', required=True, label=T("Registration Start")),
-    Field('reg_end', 'datetime', required=True, label=T("Registration End")),
-    Field('event_date', 'date', required=True, label=T("Symposium Date")),
+    Field('reg_start', 'datetime', required=True, notnull=True, label=T("Registration Start")),
+    Field('reg_end', 'datetime', required=True, notnull=True, label=T("Registration End")),
+    Field('event_date', 'date', required=True, notnull=True, label=T("Symposium Date")),
     Field('extra_info', 'text', label=T("Additional Information")),
     Field('rooms', 'list:string', label=T("Rooms"), comment=T("Room Names for scheduling, press enter to get another room.")),
     format='%(name)s: %(event_date)s'
@@ -31,10 +31,10 @@ def get_next_symposium():
 # Paper Table
 #########################################################################
 db.define_table('paper',
-    Field('title', 'string', required=True, 
+    Field('title', 'string', required=True, notnull=True,
             label=T("Paper Title"), comment="*"),
             
-    Field('description', 'text', required=True,
+    Field('description', 'text', required=True, notnull=True,
             label=T("Paper Description"), comment="* " + \
             T("A short description or abstract of the paper")),
             
@@ -126,8 +126,8 @@ crud.settings.create_onaccept.paper_comment.append(paper_comment)
 db.define_table('paper_attachment',
     Field('paper', db.paper, writable=False),
     Field('author', db.auth_user, default=auth.user.id if auth.user else None, writable=False),
-    Field('title', 'string', required=True, label=T("Title")),
-    Field('file', 'upload', required=True, requires=IS_NOT_EMPTY()),
+    Field('title', 'string', required=True, notnull=True, label=T("Title")),
+    Field('file', 'upload', required=True, notnull=True),
     Field('created', 'datetime', default=request.now, writable=False),
     Field('comment', 'string', label=T("Short Comment/Description")),
     format = "%(title)s"
