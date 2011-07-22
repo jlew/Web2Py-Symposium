@@ -4,7 +4,7 @@
 <div style="border: 1px solid #EAEAEA; padding: 5px; margin: 10px;">
    <div style="width: 100%; background: #EAEAEA;">
        <div style="float: right; font-weight: bold;">
-           {{=paper.status if show_moderation else ""}}
+           {{=paper.status if show_moderation else ""}} {{=paper.format if paper.format else ""}}
            
        </div>
        <div style="font-weight: bold;">

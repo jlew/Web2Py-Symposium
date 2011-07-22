@@ -27,3 +27,11 @@ PAPER_CATEGORY = (
             T('Fine and Applied Arts'),
             T('Other'),
         )
+
+PRESENTATION_FORMAT = (
+            T("Lecture Presentation"),
+            T("Poster Session"),
+            T("Discussion Group"),
+            T("Pannel Q/A"),
+            T("Remote Teleconference")
+        )

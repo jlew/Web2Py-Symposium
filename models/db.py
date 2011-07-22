@@ -51,6 +51,8 @@ db.define_table('paper',
           
     Field('category', 'string', requires=IS_IN_SET(PAPER_CATEGORY)),
     
+    Field('format', label=T("Presentation Format"), requires=IS_IN_SET(PRESENTATION_FORMAT), default=PRESENTATION_FORMAT[0]),
+    
     Field('symposium', 'reference symposium', default=get_next_symposium(), requires=IS_VALID_SYMP()),
     
     Field('created', 'datetime', default=request.now, writable=False),
