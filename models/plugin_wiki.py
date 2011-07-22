@@ -734,5 +734,5 @@ if session.has_key("pre-populate"):
     db.plugin_wiki_page.insert(slug="meta-footer", 
             title="META-FOOTER",
             body="""
-<div style="float:right;">Written by Justin Lewis</div>Symposium Registration System<br style="clear:both;" />
+<div style="float:right;"><a href="https://github.com/jlew/Web2Py-Symposium">Written by Justin Lewis</a></div>Symposium Registration System<br style="clear:both;" />
 """)
