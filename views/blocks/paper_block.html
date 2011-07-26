@@ -55,6 +55,13 @@
            </ul>
        </div>
        <div>
+           {{=T("Mentors:")}}<ul class="comma-separated">
+           {{for x in paper.mentors:}}
+               <li>{{=A(db.auth_user._format % db.auth_user(x), _href=URL("people","profile",args=x))}}</li>
+           {{pass}}
+           </ul>
+       </div>
+       <div>
            {{=T("Additional Files:")}}<ul class="comma-separated">
            {{for file in paper.paper_attachment.select():}}
                <li>
