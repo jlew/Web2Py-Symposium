@@ -45,5 +45,5 @@ def search_api():
         db.auth_user.affiliation,
         db.auth_user.search_name,
         db.auth_user.profile_picture,
-        orderby=(db.auth_user.first_name, db.auth_user.first_name))
+        orderby=(db.auth_user.first_name, db.auth_user.first_name), limitby=(0,20))
     return dict(result=result)
