@@ -1,18 +1,7 @@
 {{extend 'layout.html'}}
 {{extend 'layout.html'}}
-{{=DIV(T("Navigation: "),
-    A(SPAN(_class="icon pen"), T("Create Paper"), _class="button left active"),
-    A(SPAN(_class="icon user"), T("Manage Authors & Mentors"), _class="button middle"),
-    A(SPAN(_class="icon check"), T("Submit for Approval"),  _class="button middle"),
-    A(SPAN(_class="icon book"), T("Back to Manage Papers"), _class="button rigt"),
-)}}
-<h1>Submit Paper</h1>
+{{=XML(T("Steps:  <b>Create Paper</b> --> Manage Authors & Mentors --> Submit for Approval --> Wait for approval"))}}
+<h1>Create Paper</h1>
 {{=plugin_wiki.embed_page('submit_paper') or ""}}
 {{=form}}
 {{extend 'layout.html'}}
-{{=DIV(T("Navigation: "),
-    A(SPAN(_class="icon pen"), T("Create Paper"), _class="button left active"),
-    A(SPAN(_class="icon user"), T("Manage Authors & Mentors"), _class="button middle"),
-    A(SPAN(_class="icon check"), T("Submit for Approval"), _class="button middle"),
-    A(SPAN(_class="icon book"), T("Back to Manage Papers"), _class="button rigt"),
-)}}

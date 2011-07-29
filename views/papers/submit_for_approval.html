@@ -1,9 +1,12 @@
 {{extend 'layout.html'}}
-{{=DIV(T("Navigation: "),
-    A(SPAN(_class="icon pen"), T("Edit Paper"), _href=URL('papers','edit', args=paper.id), _class="button left"),
-    A(SPAN(_class="icon user"), T("Manage Authors & Mentors"), _href=URL('papers','edit_members', args=paper.id), _class="button middle"),
-    A(SPAN(_class="icon check"), T("Submit for Approval"), _class="button middle active"),
-    A(SPAN(_class="icon book"), T("Back to Manage Papers"), _href=URL('papers','edit'), _class="button rigt"),
+{{=DIV(T("Steps: "),
+    A(T("Create/Edit Paper"), _href=URL('papers','edit', args=paper.id)),
+    T(" --> "),
+    A(T("Manage Authors & Mentors"), _href=URL('papers','edit_members', args=paper.id)),
+    T(" --> "),
+    B(T("Submit for Approval")),
+    T(" --> "),
+    A(T("Back to Manage Papers"), _href=URL('papers','edit')),
 )}}
 <h1>{{=T("Submit Paper For Approval")}}</h1>
 {{=plugin_wiki.embed_page('submit_paper_for_approval') or ""}}
@@ -13,9 +16,13 @@
 </div>
 
 {{=form}}
-{{=DIV(T("Navigation: "),
-    A(SPAN(_class="icon pen"), T("Edit Paper"), _href=URL('papers','edit', args=paper.id), _class="button left"),
-    A(SPAN(_class="icon user"), T("Manage Authors & Mentors"), _href=URL('papers','edit_members', args=paper.id), _class="button middle"),
-    A(SPAN(_class="icon check"), T("Submit for Approval"), _class="button middle active"),
-    A(SPAN(_class="icon book"), T("Back to Manage Papers"), _href=URL('papers','edit'), _class="button rigt"),
+
+{{=DIV(T("Steps: "),
+    A(T("Create/Edit Paper"), _href=URL('papers','edit', args=paper.id)),
+    T(" --> "),
+    A(T("Manage Authors & Mentors"), _href=URL('papers','edit_members', args=paper.id)),
+    T(" --> "),
+    B(T("Submit for Approval")),
+    T(" --> "),
+    A(T("Back to Manage Papers"), _href=URL('papers','edit')),
 )}}
