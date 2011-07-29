@@ -3,7 +3,10 @@ def can_edit_paper(paper):
     """
     Returns true if has edit abilities on the paper
     """
-    return auth.has_membership("Symposium Admin") or auth.user.id in paper.authors or len(paper.authors) == 0
+    return auth.has_membership("Symposium Admin") or\
+            auth.user.id in paper.authors or\
+            auth.user.id in paper.mentors or\
+            len(paper.authors) == 0
     
 def get_symposium_visable_papers(symposium):
     """
