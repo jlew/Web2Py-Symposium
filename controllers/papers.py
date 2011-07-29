@@ -86,7 +86,7 @@ def edit():
         crud.messages.submit_button = T("Save and continue")
         return dict(paper=paper, 
                     form=crud.update(db.paper, request.args(0), next=URL('papers','edit_members', args=paper.id), 
-                                      message=T("Paper Saved, click submit for approval when complete"), deletable=False))
+                                      message=T("Paper Saved, click submit for approval when complete"), deletable=auth.has_membership("Symposium Admin")))
     else:
         raise HTTP(401)
         
