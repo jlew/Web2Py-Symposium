@@ -26,6 +26,7 @@ def profile():
         profile_picture=user.profile_picture,
         short_profile = user.short_profile,
         web_page = user.web_page,
+        email = user.email,
         id = user.id)
 
 def search_api():
