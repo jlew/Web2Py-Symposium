@@ -279,3 +279,20 @@ Your papers can be viewed and managed here: %(manage_paper_url)s
     crud.settings.create_onaccept.auth_user.insert(0, user_callback)
     return dict(title=T("Author") if request.args(1) == "A" else T("Mentor"),
                 form=crud.create(db.auth_user, message=T("Account created and linked to paper")))
+                
+@auth.requires_membership("Symposium Admin")
+def batch():
+    papers = db(db.paper.id>0).select()
+    return dict(papers=papers)
+
+@auth.requires_membership("Symposium Admin")
+def edit_cell():
+    paper = db.paper[request.args(1)]
+    if not paper:
+        raise HTTP(404)
+        
+    form = SQLFORM(db.paper, paper, fields=[request.args(0)], showid=False, ignore_rw=True,
+                   labels={request.args(0):""}, formstyle="divs", comments=False)
+    if form.accepts(request.vars, session):
+        return dict(msg=batch_cell_view(request.args(0), db.paper[request.args(1)]))
+    return dict(form=form)
