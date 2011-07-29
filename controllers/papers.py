@@ -51,12 +51,16 @@ def admin_index():
 def view():
     paper = db.paper(request.args(0))
     if paper:
-        if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
+        if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS] or can_edit_paper(paper):
             return dict(paper=paper)
         else:
             raise HTTP(401, T("Paper is not public yet"))
     else:
         raise HTTP(404)
+        
+def abstract():
+    response.view="papers/abstract.html"
+    return view()
 
 @auth.requires_login()
 def submit():

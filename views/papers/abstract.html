@@ -1,0 +1,22 @@
+<html>
+<head><title>ABSTRACT: {{=paper.title}}</title></head>
+<body>
+<center>
+<h1>{{=paper.title}}</h1>
+<p>
+{{for author in paper.authors:}}
+    {{db_person=db.auth_user[author]}}
+    {{=db_person.first_name}} {{=db_person.last_name}}. <i>{{=db_person.affiliation}}</i>, {{=db_person.email}}.<br />
+{{pass}}
+</p>
+
+{{if paper.mentors:}}
+<b>Mentors</b>
+<p>
+{{for mentor in paper.mentors:}}
+    {{=db_person.first_name}} {{=db_person.last_name}}. <i>{{=db_person.affiliation}}</i>, {{=db_person.email}}.<br />
+{{pass}}
+{{pass}}
+</center>
+{{=MARKMIN(paper.description)}}
+</body>

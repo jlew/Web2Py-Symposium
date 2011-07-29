@@ -16,7 +16,10 @@
 )}}
 <hr>
 <h1>{{=paper.title}}</h1>
-
+{{=T("Abstract Preview")}}
+<div style="border: 1px solid #000;">
+{{=LOAD("papers","abstract", args=paper.id)}}
+</div>
 {{author_ids = []}}
 {{mentor_ids = []}}
 <table width="100%">

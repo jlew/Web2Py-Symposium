@@ -6,6 +6,10 @@
     A(SPAN(_class="icon book"), T("Back to Manage Papers"), _href=URL('papers','edit'), _class="button rigt"),
 )}}
 <h1>{{=T("Edit Paper")}}</h1>
+{{=T("Abstract Preview")}}
+<div style="border: 1px solid #000;">
+{{=LOAD("papers","abstract", args=paper.id)}}
+</div>
 {{=form}}
 {{=DIV(T("Navigation: "),
     A(SPAN(_class="icon pen"), T("Edit Paper"), _class="button left active"),
