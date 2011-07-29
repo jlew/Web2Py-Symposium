@@ -291,8 +291,15 @@ def edit_cell():
     if not paper:
         raise HTTP(404)
         
+    if request.vars.has_key("return"):
+        return dict(msg=batch_cell_view(request.args(0), paper))
+        
     form = SQLFORM(db.paper, paper, fields=[request.args(0)], showid=False, ignore_rw=True,
                    labels={request.args(0):""}, formstyle="divs", comments=False)
     if form.accepts(request.vars, session):
         return dict(msg=batch_cell_view(request.args(0), db.paper[request.args(1)]))
-    return dict(form=form)
+    return dict(form=DIV(form,A(
+                            T("Cancel"),
+                            _href=URL(args=request.args, vars={"return":True}), cid="pid_%s_%d" % (request.args(0), paper.id),
+                            _style="position: absolute; bottom: 3px; left: 80px;"
+                            ), _style="position: relative;"))
