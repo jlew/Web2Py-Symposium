@@ -14,6 +14,7 @@
 <b>Mentors</b>
 <p>
 {{for mentor in paper.mentors:}}
+    {{db_person=db.auth_user[mentor]}}
     {{=db_person.first_name}} {{=db_person.last_name}}. <i>{{=db_person.affiliation}}</i>, {{=db_person.email}}.<br />
 {{pass}}
 {{pass}}
