@@ -49,9 +49,10 @@ td.hideme:hover span.small{
     {{=batch_cell_view('symposium', paper, "hideme")}}
     {{=batch_cell_view('category', paper)}}
    
-    <td class="hideme">
+    <td class="hideme" id="people_{{=paper.id}}">
         <nobr>{{=T("A: %d M: %d", (len(paper.authors), len(paper.mentors)))}}</nobr>
         <span>
+        <a href="{{=URL('papers','edit_members',args=paper.id)}}" onclick="$('#people_{{=paper.id}}').html('May have updated, refresh for update.')", target="_NEW">{{=T("Modify authors or mentors")}}</a><br />
         {{=db.paper.authors.label}}
         <ul>
         {{for x in paper.authors:}}
