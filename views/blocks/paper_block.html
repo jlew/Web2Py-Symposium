@@ -48,21 +48,26 @@
        {{pass}}
        
        <div>
-           {{=T("Authors:")}}<ul class="comma-separated">
+           {{=T("Authors:")}}<ul>
            {{for x in paper.authors:}}
-               <li>{{=A(db.auth_user._format % db.auth_user(x), _href=URL("people","profile",args=x))}}</li>
+               <li>{{=A(db.auth_user(x).search_name, _href=URL("people","profile",args=x))}}</li>
            {{pass}}
            </ul>
        </div>
+       
+       {{if len(paper.mentors) > 0:}}
        <div>
-           {{=T("Mentors:")}}<ul class="comma-separated">
+           {{=T("Mentors:")}}<ul>
            {{for x in paper.mentors:}}
-               <li>{{=A(db.auth_user._format % db.auth_user(x), _href=URL("people","profile",args=x))}}</li>
+               <li>{{=A(db.auth_user(x).search_name, _href=URL("people","profile",args=x))}}</li>
            {{pass}}
            </ul>
        </div>
+       {{pass}}
+       
+        {{if paper.paper_attachment.count() > 0:}}
        <div>
-           {{=T("Additional Files:")}}<ul class="comma-separated">
+           {{=T("Additional Files:")}}<ul>
            {{for file in paper.paper_attachment.select():}}
                <li>
                    {{=A(file.title, _href=URL("default","download",args=file.file), _title=file.comment)}}
@@ -73,6 +78,7 @@
            {{pass}}
            </ul>
        </div>
+       {{pass}}
        <br style="clear: both;" />
        {{if show_moderation:}}
            <div>Paper Moderation History:
