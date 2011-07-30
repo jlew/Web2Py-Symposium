@@ -9,14 +9,10 @@ $(document).ready(function() {
     var my_data = [
     {{
     offseth, offsetm = 0,0
-    first_date = None
     not_sched = False
     }}
     {{for paper in papers:}}
         {{if paper.scheduled and paper.schedule_room < len(symposium.rooms):}}
-        {{if first_date:}}
-            {{first_date = min(first_date, paper.schedule_start)}}
-        {{else:}}{{first_date=paper.schedule_start}}{{pass}}
         {"id":{{=paper.id}},
          "start": new Date(year, month, day, {{=paper.schedule_start.hour}}, {{=paper.schedule_start.minute}}),
          "end": new Date(year, month, day, {{=paper.schedule_end.hour}}, {{=paper.schedule_end.minute}}),
@@ -41,7 +37,7 @@ $(document).ready(function() {
             ];
 
     var $calendar = $('#calendar').weekCalendar({
-        date: new Date("{{=symposium.event_date}} {{=first_date if first_date else ""}}"),
+        date: new Date("{{=symposium.event_date}}"),
         readonly: true,
         timeslotsPerHour: 4,
         timeslotHeight: 80,
