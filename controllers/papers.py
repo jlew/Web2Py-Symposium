@@ -88,9 +88,20 @@ def edit():
         db.paper.symposium.writable = False
         
         crud.messages.submit_button = T("Save and continue")
-        return dict(paper=paper, 
-                    form=crud.update(db.paper, request.args(0), next=URL('papers','edit_members', args=paper.id), 
-                                      message=T("Paper Saved, click submit for approval when complete"), deletable=auth.has_membership("Symposium Admin")))
+
+        def deleted_paper(form):
+            """
+            HACK/WORK AROUND FOR WEB2PY BUG
+            http://www.mail-archive.com/web2py@googlegroups.com/msg42421.html
+            """
+            session.flash = T("Paper Deleted")
+            redirect(URL('papers','edit'))
+
+        return dict(paper=paper, form=crud.update(db.paper, request.args(0),
+                             next=URL('papers','edit_members', args=paper.id),
+                             ondelete=deleted_paper,
+                             message=T("Paper Saved, click submit for approval when complete"),
+                             deletable=auth.has_membership("Symposium Admin")))
     else:
         raise HTTP(401)
         
