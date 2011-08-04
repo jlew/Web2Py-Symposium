@@ -42,7 +42,12 @@ db.define_table('paper',
                 """))),
             
     Field('paper', 'upload', label=T("Paper Upload"), autodelete=True,
-          comment=T("You may upload a copy of your paper now or come back later.")),
+          comment=XML(T("""
+              You may upload a copy of your paper now or come back later.
+              <b>You must upload your paper before you submit for approval.</b>
+              At anytime (even after approval) You may to add additional presentation
+              materials from the manage my papers screen.
+              """))),
           
     Hidden('authors', 'list:reference auth_user', label=T("Paper Authors"),
           default=[auth.user.id if auth.user else None]),
@@ -52,11 +57,16 @@ db.define_table('paper',
     Field('status', 'string', requires=IS_IN_SET(PAPER_STATUS), default=PAPER_STATUS[0],
           label=T("Paper Status"), writable=False),
           
-    Field('category', 'string', requires=IS_IN_SET(PAPER_CATEGORY)),
+    Field('category', 'string', requires=IS_IN_SET(PAPER_CATEGORY),
+        comment=T("Pick the category that best matches your paper.  This will be used for scheduling purposes.")),
     
-    Field('format', label=T("Presentation Format"), requires=IS_IN_SET(PRESENTATION_FORMAT), default=PRESENTATION_FORMAT[0]),
+    Field('format', label=T("Presentation Format"), requires=IS_IN_SET(PRESENTATION_FORMAT),
+        default=PRESENTATION_FORMAT[0], comment=T("The method/format of the presentation you will give at the symposium.")),
     
-    Field('symposium', 'reference symposium', default=get_next_symposium(), requires=IS_VALID_SYMP()),
+    Field('symposium', 'reference symposium', default=get_next_symposium(), requires=IS_VALID_SYMP(),
+        comment=XML(T("""
+            The symposium you are submitting your paper to. <b>Please make sure you choose the correct symposium</b>.
+            """))),
     
     Field('created', 'datetime', default=request.now, writable=False),
     
