@@ -35,8 +35,11 @@ db.define_table('paper',
             label=T("Paper Title"), comment="*"),
             
     Field('description', 'text', required=True, notnull=True,
-            label=T("Paper Description"), comment="* " + \
-            T("A short description or abstract of the paper")),
+            label=T("Paper Description"), comment=XML(T("""*
+                <b>This is the body text of your abstract.</b><br/>
+                It will be used as the main body of an automatically generated
+                abstract for your submission, authors and mentors can be managed later on.
+                """))),
             
     Field('paper', 'upload', label=T("Paper Upload"), autodelete=True,
           comment=T("You may upload a copy of your paper now or come back later.")),
