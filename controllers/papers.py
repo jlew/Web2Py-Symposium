@@ -66,10 +66,7 @@ def abstract():
 def submit():
     crud.messages.submit_button = T("Save and continue")
     def user_callback(form):
-        """
-        This is a hack, to get around a bug that is not putting in the
-        correct id.
-        """
+        session.supress_paper_warning = form.vars.id
         redirect( URL('papers','edit_members', args=form.vars.id) )
         
     crud.settings.create_onaccept.paper.append(user_callback)

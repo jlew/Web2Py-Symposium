@@ -103,6 +103,7 @@
 
       <!-- content -->
       <div id="content" {{=XML(style_content)}} >
+        {{=DIV(XML(response.notice_msg), _style="background: #ffffe3; margin: 5px 100px; padding: 10px; border: 3px solid #EDEF85;") if response.has_key("notice_msg") else ""}}
         {{include}} 
       </div>
       <!-- content -->

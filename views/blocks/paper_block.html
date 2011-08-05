@@ -8,6 +8,7 @@
            
        </div>
        <div style="font-weight: bold;">
+           {{=A(_name=paper.id)}}
            {{if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:}}
                {{=A(paper.title, _href=URL('papers','view',args=paper.id))}}
            {{else:}}
