@@ -10,12 +10,13 @@
 )}}
 <h1>{{=T("Submit Paper For Approval")}}</h1>
 {{=plugin_wiki.embed_page('submit_paper_for_approval') or ""}}
+
+{{=form}}
+
 {{=T("Abstract Preview")}}
 <div style="border: 1px solid #000;">
 {{=LOAD("papers","abstract", args=paper.id)}}
 </div>
-
-{{=form}}
 
 {{=DIV(T("Steps: "),
     A(T("Create/Edit Paper"), _href=URL('papers','edit', args=paper.id)),

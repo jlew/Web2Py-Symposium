@@ -112,9 +112,10 @@ def submit_for_approval():
     if can_edit_paper(paper):
         db.paper_comment.paper.default = paper.id
         db.paper_comment.status.default = PAPER_STATUS[PEND_APPROVAL]
+        db.paper_comment.status.writable = db.paper_comment.status.readable = False
         db.paper_comment.status.requires = IS_IN_SET( (PAPER_STATUS[PEND_APPROVAL],) )
         return dict(paper=paper, form=crud.create(db.paper_comment, next=URL('edit'),
-                        message=T("Paper moderation submission sucessful")))
+                        message=T("Seccessfully Submitted for Review")))
     else:
         raise HTTP(401)
 
