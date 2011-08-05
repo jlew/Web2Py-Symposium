@@ -6,7 +6,8 @@ if auth.user:
     # If we are supressing the paper warning, we want to revoke the supress
     # if they have left the paper controller or have returned to the manage my papers screen
     if session.has_key("supress_paper_warning") and (request.controller != "papers" or \
-       (request.controller == "papers" and request.function == "edit" and len(request.args) == 0)):
+       (request.controller == "papers" and request.function == "edit" and len(request.args) == 0) or \
+       (request.controller == "papers" and (request.function in ["index", "admin_index", "view", "batch"]))):
         del session.supress_paper_warning
 
     # Show warnings for incomplete papers that is not the one being created
