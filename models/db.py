@@ -108,7 +108,7 @@ def paper_comment(form):
     # Update Paper Status
     comment = db.paper_comment(form.vars.id)
     paper = db.paper(comment.paper)
-    paper.update_record(status=form.vars.status)
+    paper.update_record(status=comment.status)
 
     # Email authors
     author_list = [db.auth_user(author).email for author in paper.authors]
