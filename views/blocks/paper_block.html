@@ -19,9 +19,9 @@
        <div>
            {{=paper.symposium.name}}
        </div>
-       {{if paper.scheduled:}}
+       {{if paper.scheduled and paper.schedule_start and paper.schedule_end:}}
        <div>
-           <b>{{=T("Scheduled:")}} {{=paper.symposium.rooms[paper.schedule_room]}} {{=paper.schedule_start}} - {{=paper.schedule_end}}</b>
+           <b>{{=T("Scheduled:")}} {{=paper.symposium.rooms[paper.schedule_room]}} {{=paper.schedule_start.strftime(TIME_FORMAT)}} - {{=paper.schedule_end.strftime(TIME_FORMAT)}}</b>
        </div>
        {{pass}}
    </div>

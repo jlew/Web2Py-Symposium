@@ -1,6 +1,7 @@
 # coding: utf8
 DATE_FORMAT = "%m/%d/%y"
 DATE_TIME_FORMAT = "%m/%d/%y %I:%M:%S %p"
+TIME_FORMAT = "%I:%M:%S %p"
 
 # The status the paper may take, the first one is the default status
 PAPER_STATUS = (
