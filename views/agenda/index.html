@@ -578,9 +578,9 @@ div.box {
                 {{pass}}
             </td>
 
-            <td>
+            <td style="font-size: 80%;">
                 {{if paper.scheduled and paper.schedule_start and paper.schedule_end:}}
-                    {{=paper.schedule_start.strftime(TIME_FORMAT)}} - {{=paper.schedule_end.strftime(TIME_FORMAT)}}
+                    <nobr>{{=paper.schedule_start.strftime(TIME_FORMAT)}}</nobr><br><nobr>{{=paper.schedule_end.strftime(TIME_FORMAT)}}</nobr>
                 {{else:}}
                     {{=T("NOT AVAILABLE")}}
                 {{pass}}
