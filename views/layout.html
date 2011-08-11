@@ -46,7 +46,7 @@
     #prior of using it, because of static width size of content, you can use
     #left_sidebar, right_sidebar, both or none (False left and right)    
     left_sidebar_enabled = globals().get('left_sidebar_enabled',False)
-    right_sidebar_enabled = True
+    right_sidebar_enabled = globals().get('right_sidebar_enabled',True)
     if left_sidebar_enabled and right_sidebar_enabled: width_content='63%'
     elif left_sidebar_enabled != right_sidebar_enabled: width_content='740px'
     else: width_content='100%'
