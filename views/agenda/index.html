@@ -571,7 +571,7 @@ div.box {
         {{for paper in papers:}}
         <tr>
             <td>
-                {{if (paper.schedule_room > 0 and len(paper.symposium.rooms) > paper.schedule_room):}}
+                {{if (paper.schedule_room >= 0 and len(paper.symposium.rooms) > paper.schedule_room):}}
                     {{=paper.symposium.rooms[paper.schedule_room]}}
                 {{else:}}
                     {{=T("NOT AVAILABLE")}}
