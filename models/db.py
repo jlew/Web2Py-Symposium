@@ -63,14 +63,11 @@ db.define_table('paper',
     Field('format', label=T("Presentation Format"), requires=IS_IN_SET(PRESENTATION_FORMAT),
         default=PRESENTATION_FORMAT[0], comment=T("The method/format of the presentation you will give at the symposium.")),
     
-    Field('symposium', 'reference symposium', default=get_next_symposium(), requires=IS_VALID_SYMP(),
-        comment=XML(T("""
-            The symposium you are submitting your paper to. <b>Please make sure you choose the correct symposium</b>.
-            """))),
+    Field('symposium', 'reference symposium', writable=False),
     
-    Field('created', 'datetime', default=request.now, writable=False),
+    Hidden('created', 'datetime', default=request.now, writable=False),
     
-    Field('modified', 'datetime', default=request.now, update=request.now, writable=False),
+    Hidden('modified', 'datetime', default=request.now, update=request.now, writable=False),
     
     Hidden('scheduled', 'boolean', default=False),
     Hidden('schedule_room', 'integer', default=-1),

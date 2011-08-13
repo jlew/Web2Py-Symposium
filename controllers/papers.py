@@ -64,14 +64,41 @@ def abstract():
 
 @auth.requires_login()
 def submit():
-    crud.messages.submit_button = T("Save and continue")
-    def user_callback(form):
-        session.supress_paper_warning = form.vars.id
-        redirect( URL('papers','edit_members', args=form.vars.id) )
-        
-    crud.settings.create_onaccept.paper.append(user_callback)
-    return dict(form=crud.create(db.paper,
-                message=T("Paper Saved, click submit for approval when complete")))
+    if request.vars.symp:
+        valid_sym = db(
+                       (db.symposium.reg_end > request.now) &
+                       (db.symposium.reg_start < request.now) &
+                       (db.symposium.sid == request.vars.symp)
+                      ).select(orderby=db.symposium.event_date)
+    else:
+        valid_sym = db(
+                       (db.symposium.reg_end > request.now) &
+                       (db.symposium.reg_start < request.now)
+                      ).select(orderby=db.symposium.event_date)
+
+    if len(valid_sym) == 0:
+        if request.vars.symp:
+            raise HTTP(404, T("That id does not match an open symposium"))    
+        else:
+            return dict(form = T("No Symposiums open for registration"))
+
+    elif len(valid_sym) > 1:
+        choices = []
+        for x in valid_sym:
+            choices.append(LI(A(db.symposium._format % x, _href=URL(vars={"symp":x.sid}))))
+
+        return dict(form = DIV(T("Select the symposium you wich to submit to."),UL(choices)))
+
+    else:
+        crud.messages.submit_button = T("Save and continue")
+        db.paper.symposium.default = valid_sym.first().id
+        def user_callback(form):
+            session.supress_paper_warning = form.vars.id
+            redirect( URL('papers','edit_members', args=form.vars.id) )
+
+        crud.settings.create_onaccept.paper.append(user_callback)
+        return dict(form=crud.create(db.paper,
+                    message=T("Paper Saved, click submit for approval when complete")))
 
 @auth.requires_login()
 def edit():
