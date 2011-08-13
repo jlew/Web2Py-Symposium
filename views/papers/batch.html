@@ -1,0 +1,74 @@
+{{extend 'layout.html'}}
+<h1>{{=T("Batch Edit")}}</h1>
+
+<style>
+tr:nth-child(odd)    { background-color:#eee; }
+tr:nth-child(even)    { background-color:#fff; }
+
+td.hideme{
+    position: relative;
+}
+
+td.hideme span{
+    display: none;
+    position: absolute;
+}
+
+td.hideme:hover span{
+    display: block;
+    background: #ffffff;
+    border: 1px solid #000;
+    z-index: 100;
+    width: 500px;
+    height: 300px;
+    left: -150px;
+    padding: 4px;
+    overflow: auto;
+}
+
+td.hideme:hover span.small{
+    height: 50px;
+}
+
+</style>
+<table>
+<tr>
+    <th>{{=T("Status")}}</th>
+    <th width="33%">{{=db.paper.title.label}}</th>
+    <th>{{=db.paper.description.label}}</th>
+    <th>{{=db.paper.symposium.label}}</th>
+    <th>{{=db.paper.category.label}}</th>
+    <th>{{=T("People")}}</th>
+    <th>{{=db.paper.format.label}}</th>
+</tr>
+{{for paper in papers:}}
+<tr>
+    {{=batch_cell_view('status', paper)}}
+    {{=batch_cell_view('title', paper)}}
+    {{=batch_cell_view('description', paper, "hideme")}}
+    {{=batch_cell_view('symposium', paper, "hideme")}}
+    {{=batch_cell_view('category', paper)}}
+   
+    <td class="hideme" id="people_{{=paper.id}}">
+        <nobr>{{=T("A: %d M: %d", (len(paper.authors), len(paper.mentors)))}}</nobr>
+        <span>
+        <a href="{{=URL('papers','edit_members',args=paper.id)}}" onclick="$('#people_{{=paper.id}}').html('May have updated, refresh for update.')", target="_NEW">{{=T("Modify authors or mentors")}}</a><br />
+        {{=db.paper.authors.label}}
+        <ul>
+        {{for x in paper.authors:}}
+               <li>{{=A( ("\"" + db.auth_user._format + "\" <%(email)s>") % db.auth_user(x), _href=URL("people","profile",args=x))}}</li>
+           {{pass}}
+           </ul>
+           {{=db.paper.mentors.label}}
+           <ul>
+        {{for x in paper.mentors:}}
+               <li>{{=A( ("\"" + db.auth_user._format + "\" <%(email)s>") % db.auth_user(x), _href=URL("people","profile",args=x))}}</li>
+           {{pass}}
+           </ul>
+        </span>
+    </td>
+    {{=batch_cell_view('format', paper)}}
+</tr>
+{{pass}}
+</table>
+{{#=BEAUTIFY(response._vars)}}

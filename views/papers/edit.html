@@ -1,29 +1,28 @@
 {{extend 'layout.html'}}
+
 {{=DIV(T("Steps: "),
-    A(T("Create/Edit Paper"), _href=URL('papers','edit', args=paper.id)),
+    B(T("Create/Edit Paper")),
     T(" --> "),
     A(T("Manage Authors & Mentors"), _href=URL('papers','edit_members', args=paper.id)),
     T(" --> "),
-    B(T("Submit for Approval")),
+    A(T("Submit for Approval"), _href=URL('papers','submit_for_approval', args=paper.id)),
     T(" --> "),
     A(T("Back to Manage Papers"), _href=URL('papers','edit')),
 )}}
-<h1>{{=T("Submit Paper For Approval")}}</h1>
-{{=plugin_wiki.embed_page('submit_paper_for_approval') or ""}}
 
-{{=form}}
-
+<h1>{{=T("Edit Paper")}}</h1>
 {{=T("Abstract Preview")}}
 <div style="border: 1px solid #000;">
 {{=LOAD("papers","abstract", args=paper.id)}}
 </div>
+{{=form}}
 
 {{=DIV(T("Steps: "),
-    A(T("Create/Edit Paper"), _href=URL('papers','edit', args=paper.id)),
+    B(T("Create/Edit Paper")),
     T(" --> "),
     A(T("Manage Authors & Mentors"), _href=URL('papers','edit_members', args=paper.id)),
     T(" --> "),
-    B(T("Submit for Approval")),
+    A(T("Submit for Approval"), _href=URL('papers','submit_for_approval', args=paper.id)),
     T(" --> "),
     A(T("Back to Manage Papers"), _href=URL('papers','edit')),
 )}}

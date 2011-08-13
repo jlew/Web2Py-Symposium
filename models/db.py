@@ -7,11 +7,12 @@ response.generic_patterns = ['*'] if request.is_local else []
 # Symposium Table
 #########################################################################
 db.define_table('symposium',
-    Field('name','string',required=True, label=T("Symposium Name")),
-    Field('sid', 'string', required=True, unique=True, label=T("Easy URL")),
-    Field('reg_start', 'datetime', required=True, label=T("Registration Start")),
-    Field('reg_end', 'datetime', required=True, label=T("Registration End")),
-    Field('event_date', 'date', required=True, label=T("Symposium Date")),
+    Field('name','string',required=True, notnull=True, label=T("Symposium Name")),
+    Field('sid', 'string', required=True, notnull=True, unique=True, label=T("Symposium UID"),
+           comment=T("This is a short id for the symposium to be used in the url. Example: ugradresearch2011.")),
+    Field('reg_start', 'datetime', required=True, notnull=True, label=T("Registration Start")),
+    Field('reg_end', 'datetime', required=True, notnull=True, label=T("Registration End")),
+    Field('event_date', 'date', required=True, notnull=True, label=T("Symposium Date")),
     Field('extra_info', 'text', label=T("Additional Information")),
     Field('rooms', 'list:string', label=T("Rooms"), comment=T("Room Names for scheduling, press enter to get another room.")),
     Field('attendees', 'list:reference auth_user', writable=False),
@@ -31,37 +32,43 @@ def get_next_symposium():
 # Paper Table
 #########################################################################
 db.define_table('paper',
-    Field('title', 'string', required=True, 
+    Field('title', 'string', required=True, notnull=True,
             label=T("Paper Title"), comment="*"),
             
-    Field('description', 'text', required=True,
-            label=T("Paper Description"), comment="* " + \
-            T("A short description or abstract of the paper")),
+    Field('description', 'text', required=True, notnull=True,
+            label=T("Paper Description"), comment=XML(T("""*
+                <b>This is the body text of your abstract.</b><br/>
+                It will be used as the main body of an automatically generated
+                abstract for your submission, authors and mentors can be managed later on.
+                """))),
             
     Field('paper', 'upload', label=T("Paper Upload"), autodelete=True,
-          comment=T("You may upload a copy of your paper now or come back later.")),
+          comment=XML(T("""
+              You may upload a copy of your paper now or come back later.
+              <b>You must upload your paper before you submit for approval.</b>
+              At anytime (even after approval) You may to add additional presentation
+              materials from the manage my papers screen.
+              """))),
           
-    Field('authors', 'list:reference auth_user', label=T("Paper Authors"), required=True,
-          comment="* " + T("Please check all authors of this paper. If you have authors that\
-                     do not currently have an account, you will be given a chance to\
-                     create their accounts after submitting this form."),
+    Hidden('authors', 'list:reference auth_user', label=T("Paper Authors"),
           default=[auth.user.id if auth.user else None]),
           
-    Field('mentors', 'list:reference auth_user', label=T("Paper Mentors"), default=[],
-          comment=T("Please check all mentors of this paper. If you have mentors that\
-                     do not currently have an account, you will be given a chance to\
-                     create their accounts after submitting this form.")),
+    Hidden('mentors', 'list:reference auth_user', label=T("Paper Mentors"), default=[]),
                      
     Field('status', 'string', requires=IS_IN_SET(PAPER_STATUS), default=PAPER_STATUS[0],
           label=T("Paper Status"), writable=False),
           
-    Field('category', 'string', requires=IS_IN_SET(PAPER_CATEGORY)),
+    Field('category', 'string', requires=IS_IN_SET(PAPER_CATEGORY),
+        comment=T("Pick the category that best matches your paper.  This will be used for scheduling purposes.")),
     
-    Field('symposium', 'reference symposium', default=get_next_symposium(), requires=IS_VALID_SYMP()),
+    Field('format', label=T("Presentation Format"), requires=IS_IN_SET(PRESENTATION_FORMAT),
+        default=PRESENTATION_FORMAT[0], comment=T("The method/format of the presentation you will give at the symposium.")),
     
-    Field('created', 'datetime', default=request.now, writable=False),
+    Field('symposium', 'reference symposium', writable=False),
     
-    Field('modified', 'datetime', default=request.now, update=request.now, writable=False),
+    Hidden('created', 'datetime', default=request.now, writable=False),
+    
+    Hidden('modified', 'datetime', default=request.now, update=request.now, writable=False),
     
     Hidden('scheduled', 'boolean', default=False),
     Hidden('schedule_room', 'integer', default=-1),
@@ -99,7 +106,7 @@ def paper_comment(form):
     # Update Paper Status
     comment = db.paper_comment(form.vars.id)
     paper = db.paper(comment.paper)
-    paper.update_record(status=form.vars.status)
+    paper.update_record(status=comment.status)
 
     # Email authors
     author_list = [db.auth_user(author).email for author in paper.authors]
@@ -132,8 +139,8 @@ crud.settings.create_onaccept.paper_comment.append(paper_comment)
 db.define_table('paper_attachment',
     Field('paper', db.paper, writable=False),
     Field('author', db.auth_user, default=auth.user.id if auth.user else None, writable=False),
-    Field('title', 'string', required=True, label=T("Title")),
-    Field('file', 'upload', required=True, requires=IS_NOT_EMPTY()),
+    Field('title', 'string', required=True, notnull=True, label=T("Title")),
+    Field('file', 'upload', required=True, notnull=True),
     Field('created', 'datetime', default=request.now, writable=False),
     Field('comment', 'string', label=T("Short Comment/Description")),
     format = "%(title)s"

@@ -31,10 +31,10 @@ def email():
             users = users.union(get_symposium_mentors_id(symposium, True))
     
         emails = [db.auth_user(u).email for u in users]
-        emails.append(auth.user.email) #make sure the sender gets a copy of the email
         
         mail.send(reply_to=auth.user.email,
-                  to=emails,
+                  to=auth.user.email,
+                  bcc=emails,
                   subject=form.vars.subject,
                   message=form.vars.message + "\n\n\n" +
                           T("This message was sent on behalf of %(name)s for your involvment in %(symp_name)s: %(symp_date)s") %

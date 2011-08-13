@@ -3,3 +3,8 @@
 {{show_moderation=show_action_buttons=False}}
 
 {{paper_block()}}
+
+{{=A(T("Abstract"), _href=URL("papers","abstract", args=paper.id))}}
+<div style="border: 1px solid #000;">
+{{=LOAD("papers","abstract", args=paper.id)}}
+</div>

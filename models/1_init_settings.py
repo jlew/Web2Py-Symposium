@@ -47,8 +47,9 @@ fields=[
     Field('web_page',requires=IS_EMPTY_OR(IS_URL())),
     Field('mobile_number',default=''),    
     Field('short_profile','text',default=''),
-    Field('profile_picture','upload', autodelete=True),
+    Field('profile_picture','upload', autodelete=True, requires=IS_EMPTY_OR(IS_IMAGE())),
     Hidden('registered_by','integer',default=0), #nobody
+    Hidden('search_name',compute=lambda r: "%s %s (%s)" %( r['first_name'], r['last_name'], r['affiliation'])),
     Hidden('registration_id', length=512,default=''),
     Hidden('registration_key', length=512,default=''),
     Hidden('reset_password_key', length=512,default='',

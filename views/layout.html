@@ -15,10 +15,6 @@
     <!-- http://dev.w3.org/html5/markup/meta.name.html -->
     <meta name="application-name" content="{{=request.application}}" /> 
     
-    <!-- Speaking of Google, don't forget to set your site up: 
-     http://google.com/webmasters -->
-    <meta name="google-site-verification" content="" />
-    
     <!--  Mobile Viewport Fix
       j.mp/mobileviewport & davidbcalhoun.com/2010/viewport-metatag 
       device-width: Occupy full width of the screen in its current orientation
@@ -50,7 +46,7 @@
     #prior of using it, because of static width size of content, you can use
     #left_sidebar, right_sidebar, both or none (False left and right)    
     left_sidebar_enabled = globals().get('left_sidebar_enabled',False)
-    right_sidebar_enabled = True
+    right_sidebar_enabled = globals().get('right_sidebar_enabled',True)
     if left_sidebar_enabled and right_sidebar_enabled: width_content='63%'
     elif left_sidebar_enabled != right_sidebar_enabled: width_content='740px'
     else: width_content='100%'
@@ -107,6 +103,7 @@
 
       <!-- content -->
       <div id="content" {{=XML(style_content)}} >
+        {{=DIV(XML(response.notice_msg), _style="background: #ffffe3; margin: 5px 100px; padding: 10px; border: 3px solid #EDEF85;") if response.has_key("notice_msg") else ""}}
         {{include}} 
       </div>
       <!-- content -->
@@ -132,21 +129,6 @@
     <!--[if lt IE 7 ]>
     <script src="{{=URL('static','js/dd_belatedpng.js')}}"></script>
     <script> DD_belatedPNG.fix('img, .png_bg'); //fix any <img> or .png_bg background-images </script>
-    <![endif]-->
-    
-    <!-- asynchronous google analytics: mathiasbynens.be/notes/async-analytics-snippet 
-     change the UA-XXXXX-X to be your site's ID -->
-    <!--   
-       <script>
-         var _gaq = [['_setAccount', 'UA-XXXXX-X'], ['_trackPageview']];
-         (function(d, t) {
-         var g = d.createElement(t),
-         s = d.getElementsByTagName(t)[0];
-         g.async = true;
-         g.src = '//www.google-analytics.com/ga.js';
-         s.parentNode.insertBefore(g, s);
-         })(document, 'script');
-       </script>
-       -->    
+    <![endif]-->  
   </body>
 </html>

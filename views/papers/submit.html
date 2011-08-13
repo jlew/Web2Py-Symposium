@@ -1,4 +1,7 @@
 {{extend 'layout.html'}}
-<h1>Submit Paper</h1>
+{{extend 'layout.html'}}
+{{=XML(T("Steps:  <b>Create Paper</b> --> Manage Authors & Mentors --> Submit for Approval --> Wait for approval"))}}
+<h1>Create Paper</h1>
 {{=plugin_wiki.embed_page('submit_paper') or ""}}
 {{=form}}
+{{extend 'layout.html'}}

@@ -27,4 +27,25 @@ def profile():
         profile_picture=user.profile_picture,
         short_profile = user.short_profile,
         web_page = user.web_page,
+        email = user.email,
         id = user.id)
+
+def search_api():
+    request_filter =  (db.auth_user.id > 0)
+    if request.vars.first_name:
+        request_filter = request_filter & db.auth_user.first_name.contains(request.vars.first_name)
+    if request.vars.last_name:
+        request_filter = request_filter & db.auth_user.last_name.contains(request.vars.last_name)
+    if request.vars.affiliation:
+        request_filter = request_filter & db.auth_user.affiliation.contains(request.vars.affiliation)
+    if request.vars.search:
+        request_filter = request_filter & db.auth_user.search_name.contains(request.vars.search)
+
+    result = db(request_filter).select(db.auth_user.id,
+        db.auth_user.first_name,
+        db.auth_user.last_name,
+        db.auth_user.affiliation,
+        db.auth_user.search_name,
+        db.auth_user.profile_picture,
+        orderby=(db.auth_user.first_name, db.auth_user.first_name), limitby=(0,20))
+    return dict(result=result)

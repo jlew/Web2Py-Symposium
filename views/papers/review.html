@@ -3,6 +3,10 @@
 {{show_action_buttons=False}}
 <h1>Review Paper</h1>
 {{=plugin_wiki.embed_page('review_paper') or ""}}
+{{=T("Abstract Preview")}}
+<div style="border: 1px solid #000;">
+{{=LOAD("papers","abstract", args=paper.id)}}
+</div>
 {{paper_block()}}
 <hr />
 {{=form}}

@@ -3,7 +3,10 @@ def can_edit_paper(paper):
     """
     Returns true if has edit abilities on the paper
     """
-    return auth.user.id in paper.authors or len(paper.authors) == 0
+    return auth.has_membership("Symposium Admin") or\
+            auth.user.id in paper.authors or\
+            auth.user.id in paper.mentors or\
+            len(paper.authors) == 0
     
 def get_symposium_visable_papers(symposium):
     """
@@ -40,3 +43,33 @@ def get_symposium_mentors_id(symposium, all=False):
         if all or papers.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
             mentors = mentors.union(papers.mentors)
     return mentors
+
+def batch_cell_view(cell, paper, td_class=""):
+    def link_wrap(content):
+        return TD(
+                  A(content,
+                      _href=URL("papers","edit_cell",args=[cell,paper.id], extension="load"),
+                      cid="pid_%s_%d" % (cell, paper.id),
+                      _style="text-decoration: none;"),
+                  _id="pid_%s_%d" % (cell, paper.id),
+                  _class=td_class)
+
+    if cell == "status":
+        return link_wrap(paper.status[:6])
+        
+    elif cell == "title":
+        return link_wrap(paper.title)
+        
+    elif cell=="description":
+        msg = B(I(T("Short Abstract"))) if len(paper.description) < 200 else T("Abstract")
+        return link_wrap( DIV( msg, SPAN(paper.description) ) )
+        
+    elif cell=="symposium":
+        smp = db.symposium[paper.symposium]
+        return link_wrap( DIV( smp.sid, SPAN(smp.name, _class="small") ) )
+        
+    elif cell=="category":
+        return link_wrap(paper.category)
+        
+    elif cell=="format":
+        return link_wrap(paper.format)
