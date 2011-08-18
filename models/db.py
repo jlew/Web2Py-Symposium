@@ -109,7 +109,8 @@ def paper_comment(form):
 
     # Email authors
     author_list = [db.auth_user(author).email for author in paper.authors]
-    mail.send(to=author_list, subject=T("Symposium Paper Status Update"),
+    mentor_list = [db.auth_user(mentor).email for mentor in paper.mentors]
+    mail.send(to=author_list, cc=mentor_list, subject=T("Symposium Paper Status Update"),
     message=T("""
 The Paper titled "%(title)s" has just been updated.
 
