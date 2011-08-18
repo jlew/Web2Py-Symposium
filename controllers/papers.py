@@ -51,7 +51,7 @@ def admin_index():
 def view():
     paper = db.paper(request.args(0))
     if paper:
-        if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS] or can_edit_paper(paper):
+        if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS] or can_edit_paper(paper) or auth.has_membership("Reviewer"):
             return dict(paper=paper)
         else:
             raise HTTP(401, T("Paper is not public yet"))
@@ -175,7 +175,8 @@ def review():
     if paper:
         db.paper_comment.paper.default = paper.id
         db.paper_comment.status.default = paper.status
-        return dict(paper=paper, form=crud.create(db.paper_comment, next=URL('review'), message=T("Paper status updated")))
+        db.paper_comment.status.label = T("Next Status")
+        return dict(paper=paper, form=crud.create(db.paper_comment, next=URL('abstract',args=paper.id), message=T("Paper status updated")))
     else:
         response.view = "papers/review_list.html"
         return dict(papers=db(db.paper.status==PAPER_STATUS[PEND_APPROVAL]).select())

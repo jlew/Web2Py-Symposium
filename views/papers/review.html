@@ -1,4 +1,3 @@
-{{extend 'layout.html'}}
 {{include 'blocks/paper_block.html'}}
 {{show_action_buttons=False}}
 <h1>Review Paper</h1>
@@ -9,4 +8,5 @@
 </div>
 {{paper_block()}}
 <hr />
+{{=B(T("Current Status"))}}: {{=paper.status}}
 {{=form}}

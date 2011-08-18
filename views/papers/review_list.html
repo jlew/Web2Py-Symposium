@@ -1,14 +1,103 @@
+{{right_sidebar_enabled=False}}
+{{response.files.insert(2,URL('static','js/jquery.dataTables.min.js'))}}
+{{response.files.insert(3,URL('static','js/ColVis.min.js'))}}
+{{response.files.insert(3,URL('static','data_table.css'))}}
 {{extend 'layout.html'}}
-{{include 'blocks/paper_block.html'}}
-{{show_action_buttons = show_discription = False}}
-{{show_moderate_button = True}}
+
+<script type="text/javascript" charset="utf-8">
+    var oTable;
+
+    $(document).ready(function() {
+        oTable = $('#dataTable').dataTable( {
+                        "bFilter": true,
+                        "bSort": true,
+                        "bInfo": true,
+                        "sDom": 'C<"clear">lfrtip',
+                        "aoColumnDefs": [
+                                { "bSortable": false, "aTargets": [ 0 ] }
+                        ],
+                        "aaSorting": [[1, 'asc']]
+                        } );
+    } );
+
+    function toggle_details(img, url) {
+        var nTr = img.parentNode.parentNode;
+        if ( img.src.match('details_close') ){
+            /* This row is already open - close it */
+            img.src = "{{=URL('static','images/details_open.png')}}";
+            oTable.fnClose( nTr );
+
+        }else{
+            /* Open this row */
+            img.src = "{{=URL('static','images/details_close.png')}}";
+            $.ajax({
+                url: url,
+                success: function(data){
+                    r = Math.floor(Math.random()*10000000);
+                    d = $('<div />').html($('<div />', {id: "d_" + r}).html(data));
+                    oTable.fnOpen( nTr, d.html(), 'details' );
+                    web2py_trap_form(url,"d_"+r);
+                    web2py_ajax_init();
+                }
+            });
+        }
+    }
+</script>
 
 <h1>{{=T("Review Paper")}}</h1>
 {{=plugin_wiki.embed_page('review_paper_list') or ""}}
 {{if papers:}}
-{{for paper in papers:}}
-    {{paper_block()}}
-{{pass}}
+<table id="dataTable" width="100%">
+    <thead>
+        <tr>
+            <th width="25px;">Review</th>
+            <th>Title</th>
+            <th>Symposium</th>
+            <th>Category</th>
+            <th>Format</th>
+            <th>Author(s)</th>
+            <th>Mentor(s)</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{for paper in papers:}}
+        <tr>
+            <td align="center">
+                <img
+                    src="{{=URL('static','images/details_open.png')}}"
+                    onclick="toggle_details(this,'{{=URL('papers','review',args=paper.id)}}')">
+            </td>
+            <td>
+                {{=paper.title}}
+            </td>
+            <td>
+                {{=db.symposium._format % paper.symposium}}
+            </td>
+            <td>
+                {{=paper.category}}
+            </td>
+            <td>
+                {{=paper.format}}
+            </td>
+            <td>
+                <ul>
+                {{for x in [db.auth_user(y) for y in paper.authors]:}}
+                    <li>{{=A( db.auth_user._format % x, _href=URL("people","profile",args=x.id), _title=x.search_name)}}</li>
+               {{pass}}
+               </ul>
+           </td>
+           <td>
+                <ul>
+                {{for x in [db.auth_user(y) for y in paper.mentors]:}}
+                    <li>{{=A( db.auth_user._format % x, _href=URL("people","profile",args=x.id), _title=x.search_name)}}</li>
+               {{pass}}
+               </ul>
+           </td>
+        </tr>
+        {{pass}}
+    </tbody>
+</table>
+</table>
 {{else:}}
 {{=P(T("No papers ready for review"))}}
 {{pass}}
