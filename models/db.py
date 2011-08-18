@@ -61,7 +61,7 @@ db.define_table('paper',
         comment=T("Pick the category that best matches your paper.  This will be used for scheduling purposes.")),
     
     Field('format', label=T("Presentation Format"), requires=IS_IN_SET(PRESENTATION_FORMAT),
-        default=PRESENTATION_FORMAT[0], comment=T("The method/format of the presentation you will give at the symposium.")),
+       comment=T("The method/format of the presentation you will give at the symposium.")),
     
     Field('symposium', 'reference symposium', writable=False),
     
