@@ -1,8 +1,5 @@
 {{extend 'layout.html'}}
-{{include 'blocks/paper_block.html'}}
-{{show_moderation=show_action_buttons=False}}
-
-{{paper_block()}}
+{{include 'papers/view_min.html'}}
 
 {{=A(T("Abstract"), _href=URL("papers","abstract", args=paper.id))}}
 <div style="border: 1px solid #000;">

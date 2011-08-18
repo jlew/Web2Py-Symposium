@@ -50,6 +50,10 @@ def admin_index():
     
 def view():
     paper = db.paper(request.args(0))
+
+    if request.vars.has_key("minview"):
+        response.view = "papers/view_min.html"
+
     if paper:
         if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS] or can_edit_paper(paper) or auth.has_membership("Reviewer"):
             return dict(paper=paper)
