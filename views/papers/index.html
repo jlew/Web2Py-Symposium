@@ -31,8 +31,12 @@ width: 100%;
             }).columnFilter({
                     aoColumns: [null,
                                 { type: "text" },
+                                {{if all:}}
                                 { type: "select", 
                                   values: ['{{=XML("','".join([ db.symposium._format % x for x in db(db.symposium.id>0).select()]))}}'] },
+                                  {{else:}}
+                                  null,
+                                  {{pass}}
                                 { type: "select", values: ['{{=XML("','".join([ x.xml() for x in PAPER_CATEGORY]))}}'] },
                                 { type: "select", values: ['{{=XML("','".join([ x.xml() for x in PRESENTATION_FORMAT]))}}'] },
                                 null,
