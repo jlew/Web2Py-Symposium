@@ -1,51 +1,131 @@
+{{right_sidebar_enabled=False}}
+{{response.files.insert(2,URL('static','js/jquery.dataTables.min.js'))}}
+{{response.files.insert(3,URL('static','js/ColVis.min.js'))}}
+{{response.files.insert(4,URL('static','js/jquery.dataTables.rowGrouping.js'))}}
+{{response.files.insert(5,URL('static','js/jquery.dataTables.columnFilter.js'))}}
+{{response.files.insert(6,URL('static','data_table.css'))}}
 {{extend 'layout.html'}}
+<style>
+table tfoot input, table tfoot select{
+width: 100%;
+}
+</style>
+<script type="text/javascript" charset="utf-8">
+    var oTable;
+
+    $(document).ready(function() {
+           oTable = $('#dataTable').dataTable( {
+                //"bPaginate": false,
+                //"bLengthChange": false,
+                "bFilter": true,
+                "bSort": true,
+                "bInfo": true,
+                "sDom": 'C<"clear">lfrtip',
+                "bAutoWidth": true,
+                "sPaginationType": "full_numbers",
+                "aoColumnDefs": [
+                        { "bSortable": false, "aTargets": [ 0 ] }
+                ],
+                "aaSorting": [[1, 'asc']],
+                "bAutoWidth": true
+            }).columnFilter({
+                    aoColumns: [null,
+                                null,
+                                null,
+                                { type: "text" },
+                                {{if all:}}
+                                { type: "select", 
+                                  values: ['{{=XML("','".join([ db.symposium._format % x for x in db(db.symposium.id>0).select()]))}}'] },
+                                  {{else:}}
+                                  null,
+                                  {{pass}}
+                                { type: "select", values: ['{{=T("Author")}}','{{=T("Mentor")}}'] },
+                                ]
+                });
+            {{if all:}}
+            oTable.rowGrouping({"iGroupingColumnIndex":4, "iGroupingColumnIndex2": 5});
+            {{else:}}
+            oTable.rowGrouping({"iGroupingColumnIndex":5});
+            {{pass}}
+
+    } );
+    
+    function toggle_details(img, url) {
+        var nTr = img.parentNode.parentNode;
+        if ( img.src.match('details_close') ){
+            /* This row is already open - close it */
+            img.src = "{{=URL('static','images/details_open.png')}}";
+            oTable.fnClose( nTr );
+
+        }else{
+            /* Open this row */
+            img.src = "{{=URL('static','images/details_close.png')}}";
+            $.ajax({
+                url: url,
+                success: function(data){
+                    r = Math.floor(Math.random()*10000000);
+                    d = $('<div />').html($('<div />', {id: "d_" + r}).html(data));
+                    oTable.fnOpen( nTr, d.html(), 'details' );
+                    web2py_trap_form(url,"d_"+r);
+                    web2py_ajax_init();
+                }
+            });
+        }
+    }
+</script>
 <h1>{{=T("Participants")}}</h1>
-{{if ret:}}
+<table id="dataTable" width="100%">
+    <thead>
+        <tr>
+            <th width="75px"></th>
+            <th>{{=db.auth_user.first_name.label}}</th>
+            <th>{{=db.auth_user.last_name.label}}</th>
+            <th>{{=db.auth_user.affiliation.label}}</th>
+            <th>{{=T("Symposium")}}</th>
+            <th width="75px">{{=T("Role")}}</th>
+        </tr>
+    </thead>
+    <tbody>
     {{for data in ret:}}
-        {{if all:}}
-            {{=H1(A(db.symposium._format % data['symposium'], _href=URL('people','index', args=data['symposium'].sid)))}}
-        {{else:}}
-            {{=H1(db.symposium._format % data['symposium'])}}
+        {{for participant in data['authors']:}}
+            <tr>
+                <td align="center">
+                    <img
+                        src="{{=URL('static','images/details_open.png')}}"
+                        onclick="toggle_details(this,'{{=URL('people','profile',args=participant.id, vars={'minview':True})}}')">
+                </td>
+                <td>{{=A(participant.first_name, _href=URL('people','profile', args=participant.id))}}</td>
+                <td>{{=A(participant.last_name, _href=URL('people','profile', args=participant.id))}}</td>
+                <td>{{=participant.affiliation}}</td>
+                <td>{{=db.symposium._format % data['symposium']}}</td>
+                <td>{{=T("Author")}}</td>
+            </tr>
         {{pass}}
-    
-        {{if data['symposium'].event_date < request.now.date() and all:}}
-            {{=A(T('This symposium has passed, Show Participants'),
-                 _href="#",
-                 _onclick="$('#symp_people_%d').show('slow'); $(this).hide(); return false;" % data['symposium'].id)}}
-    
-            <div id="symp_people_{{=data['symposium'].id}}" style="display: none;">
-        {{else:}}
-            <div id="symp_people_{{=data['symposium'].id}}">
+
+        {{for participant in data['mentors']:}}
+            <tr>
+                <td align="center">
+                    <img
+                        src="{{=URL('static','images/details_open.png')}}"
+                        onclick="toggle_details(this,'{{=URL('people','profile',args=participant.id, vars={'minview':True})}}')">
+                </td>
+                <td>{{=A(participant.first_name, _href=URL('people','profile', args=participant.id))}}</td>
+                <td>{{=A(participant.last_name, _href=URL('people','profile', args=participant.id))}}</td>
+                <td>{{=participant.affiliation}}</td>
+                <td>{{=db.symposium._format % data['symposium']}}</td>
+                <td>{{=T("Mentor")}}</td>
+            </tr>
         {{pass}}
-        <b>{{=T("Authors")}}</b><br />
-        {{if data['authors']:}}
-            <ul>
-                {{for participant in data['authors']:}}
-                <li>
-                    {{=A(db.auth_user._format % participant, _href=URL('people','profile', args=participant.id))}},
-                    <em>{{=participant.affiliation}}</em>
-                </li>
-                {{pass}}
-            </ul>
-        {{else:}}
-            {{=P(T("No Authors at this time"))}}
-        {{pass}}
-    
-        <b>{{=T("Mentors")}}</b><br />
-        {{if data['mentors']:}}
-            <ul>
-                {{for participant in data['mentors']:}}
-                <li>
-                    {{=A(db.auth_user._format % participant, _href=URL('people','profile', args=participant.id))}},
-                    <em>{{=participant.affiliation}}</em>
-                </li>
-                {{pass}}
-            </ul>
-        {{else:}}
-            {{=P(T("No Mentors at this time"))}}
-        {{pass}}
-        </div>
     {{pass}}
-{{else:}}
-    {{=P(T("No Symposiums at this time."))}}
-{{pass}}
+    </tbody>
+    <tfoot>
+        <tr>
+            <th width="25px"></th>
+            <th>{{=db.auth_user.first_name.label}}</th>
+            <th>{{=db.auth_user.last_name.label}}</th>
+            <th>{{=db.auth_user.affiliation.label}}</th>
+            <th>{{=T("Symposium")}}</th>
+            <th>{{=T("Role")}}</th>
+        </tr>
+    </tfoot>
+</table>

@@ -18,7 +18,9 @@ def index():
 
     return dict(ret=ret, all=all)
 
-def profile(): 
+def profile():
+    if request.vars.has_key("minview"):
+        response.view = "people/profile_min.html"
     user = db.auth_user(request.args(0))
     name = db.auth_user._format % user
     return dict(name=name,
