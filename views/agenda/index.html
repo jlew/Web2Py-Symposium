@@ -1,24 +1,43 @@
 {{right_sidebar_enabled=False}}
 {{response.files.insert(2,URL('static','js/jquery.dataTables.min.js'))}}
 {{response.files.insert(3,URL('static','js/ColVis.min.js'))}}
-{{response.files.insert(3,URL('static','data_table.css'))}}
+{{response.files.insert(4,URL('static','js/jquery.dataTables.columnFilter.js'))}}
+{{response.files.insert(5,URL('static','data_table.css'))}}
 {{extend 'layout.html'}}
+<style>
+table tfoot input, table tfoot select{
+width: 100%;
+}
+</style>
 <script type="text/javascript" charset="utf-8">
     var oTable;
 
     $(document).ready(function() {
            oTable = $('#dataTable').dataTable( {
-                "bPaginate": false,
-                "bLengthChange": false,
+                //"bPaginate": false,
+                //"bLengthChange": false,
                 "bFilter": true,
                 "bSort": true,
                 "bInfo": true,
                 "sDom": 'C<"clear">lfrtip',
+                "bAutoWidth": true,
+                "sPaginationType": "full_numbers",
                 "aoColumnDefs": [
                         { "bSortable": false, "aTargets": [ 0 ] }
                 ],
                 "bAutoWidth": true
-            });
+            }).columnFilter({
+                    aoColumns: [null,
+                                { type: "select", 
+                                  values: ['{{=XML("','".join(symposium.rooms))}}','{{=T("NOT AVAILABLE")}}'] },
+                                null,
+                                { type: "select", values: ['{{=XML("','".join([ x.xml() for x in PAPER_CATEGORY]))}}'] },
+                                { type: "select", values: ['{{=XML("','".join([ x.xml() for x in PRESENTATION_FORMAT]))}}'] },
+                                { type: "text" },
+                                null,
+                                null
+                                ]
+                });
     } );
     
     function toggle_details(img, url) {
@@ -50,13 +69,13 @@
     <thead>
         <tr>
             <th width="25px;"></th>
-            <th>Room</th>
-            <th>Time</th>
-            <th>Category</th>
-            <th>Format</th>
-            <th>Title</th>
-            <th>Author(s)</th>
-            <th>Mentor(s)</th>
+            <th>{{=db.paper.schedule_room.label}}</th>
+            <th>{{=T("Time")}}</th>
+            <th>{{=db.paper.category.label}}</th>
+            <th>{{=db.paper.format.label}}</th>
+            <th>{{=db.paper.title.label}}</th>
+            <th>{{=db.paper.authors.label}}</th>
+            <th>{{=db.paper.mentors.label}}</th>
         </tr>
     </thead>
     <tbody>
@@ -108,4 +127,16 @@
         </tr>
         {{pass}}
     </tbody>
+    <tfoot>
+        <tr>
+            <th width="25px;"></th>
+            <th>{{=db.paper.schedule_room.label}}</th>
+            <th>{{=T("Time")}}</th>
+            <th>{{=db.paper.category.label}}</th>
+            <th>{{=db.paper.format.label}}</th>
+            <th>{{=db.paper.title.label}}</th>
+            <th>{{=db.paper.authors.label}}</th>
+            <th>{{=db.paper.mentors.label}}</th>
+        </tr>
+    </tfoot>
 </table>

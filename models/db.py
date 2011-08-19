@@ -70,7 +70,7 @@ db.define_table('paper',
     Hidden('modified', 'datetime', default=request.now, update=request.now, writable=False),
     
     Hidden('scheduled', 'boolean', default=False),
-    Hidden('schedule_room', 'integer', default=-1),
+    Hidden('schedule_room', 'integer', default=-1, label=T("Room")),
     Hidden('schedule_start', 'time'),
     Hidden('schedule_end', 'time'),
     
