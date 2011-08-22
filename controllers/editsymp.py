@@ -9,7 +9,29 @@ def new():
     return dict(form=crud.create(db.symposium, next=URL("editsymp","index")))
     
 @auth.requires_membership("Symposium Admin")
-def edit(): return dict(form=crud.update(db.symposium, request.args(0), next=URL("editsymp","index")))
+def edit():
+    return dict(form=crud.update(db.symposium, request.args(0), next=URL("editsymp","index")))
+
+@auth.requires_membership("Symposium Admin")
+def add_timeblock():
+    symp = db.symposium( request.args(0) )
+    
+    if not symp:
+        raise HTTP(404)
+    
+    db.timeblock.symposium.default = symp.id
+    return dict(form=crud.create(db.timeblock, next=URL("editsymp","index")))
+    
+@auth.requires_membership("Symposium Admin")
+def add_room():
+    symp = db.symposium( request.args(0) )
+    
+    if not symp:
+        raise HTTP(404)
+        
+    db.room.symposium.default = symp.id
+    return dict(form=crud.create(db.room, next=URL("editsymp","index")))
+
 
 @auth.requires_membership("Symposium Admin")
 def email():

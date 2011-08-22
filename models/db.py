@@ -21,6 +21,29 @@ db.define_table('symposium',
 #Add after created so we don't override the unique test
 db.symposium.sid.requires.insert(0,IS_SLUG())
 
+db.define_table('timeblock',
+    Field('start_time', 'time'),
+    Field('desc', 'text'),
+    Field('symposium', db.symposium, writable=False),
+    format = "%(start_time)s: %(desc)s",
+)
+
+db.define_table('room',
+    Field('symposium', db.symposium, writable=False),
+    Field('name'),
+    Field('location'),
+    format = "%(name)s: %(location)s"
+)
+
+db.define_table('session',
+    Field('name'),
+    Field('theme'),
+    Field('timeblock', db.timeblock),
+    Field('room', db.room),
+    Field('judges', 'list:reference auth_user'),
+    format = "%(timeblock)s %(name)s"
+)
+
 def get_next_symposium():
     """
     Returns the next upcoming symposium.
