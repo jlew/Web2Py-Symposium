@@ -8,9 +8,12 @@ def index():
             raise HTTP(404)
 
         papers = db(db.paper.symposium == symp).select(orderby=(db.paper.symposium,db.paper.title))
+        session['filter'] = symp.sid
         all = False
     else:
+        symp = False
         papers = db(db.paper.id > 0).select(orderby=(db.paper.symposium,db.paper.title))
+        session['filter'] = ""
         all = True
 
     ret_papers = []
@@ -18,7 +21,7 @@ def index():
         if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
             ret_papers.append(paper)
 
-    return dict(papers=ret_papers, all=all, c_show_moderation = False)
+    return dict(papers=ret_papers, all=all, c_show_moderation = False, symp=symp)
 
 
 @auth.requires_membership("Symposium Admin")
@@ -31,16 +34,19 @@ def admin_index():
             raise HTTP(404)
 
         papers = db(db.paper.symposium == symp).select(orderby=(db.paper.symposium,db.paper.title))
+        session['filter'] = symp.sid
         all = False
     else:
+        symp = False
         papers = db(db.paper.id > 0).select(orderby=(db.paper.symposium,db.paper.title))
+        session['filter'] = ""
         all = True
 
     ret_papers = []
     for paper in papers:
         ret_papers.append(paper)
 
-    return dict(papers=ret_papers, all=all, c_show_moderation = True)
+    return dict(papers=ret_papers, all=all, c_show_moderation=True, symp=symp)
 
 def view():
     paper = db.paper(request.args(0))

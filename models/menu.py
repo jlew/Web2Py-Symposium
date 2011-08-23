@@ -14,18 +14,6 @@ response.meta.keywords = 'Symposium, Conference'
 response.meta.generator = 'Web2py Enterprise Framework'
 response.meta.copyright = 'Copyright 2011'
 
-#Symposium list required for Symposium and paper Menus
-symposiums_past = db(db.symposium.event_date < request.now.date()).select(orderby=~db.symposium.event_date)
-symposiums = db(db.symposium.event_date >= request.now.date()).select(orderby=~db.symposium.event_date)
-
-# Build agenda Menu
-# TODO: Remove this agenda menu to fid the other menu style, need to rewrite agenda system to do this
-current_symp = [(db.symposium._format % x, False, URL('agenda', 'index', args=x.sid), []) for x in symposiums]
-past_symp = [(db.symposium._format % x, False,  URL('agenda', 'index', args=x.sid), []) for x in symposiums_past]
-
-if past_symp:
-    current_symp.append( (T("Past Symposiums"), False, "#", past_symp) )
-
 paper_menu=[]
 # If logged in, show submit and manage options
 if auth.user:
@@ -38,9 +26,9 @@ if auth.has_membership("Reviewer"):
 
 response.menu = [
         (T('Home'), False, URL('default','index'), []),
-        (T('Papers'), False, URL('papers','index'), paper_menu),
-        (T('People'), False, URL('people','index'), []),
-        (T('Agenda'), False, "#", current_symp),
+        (T('Papers'), False, URL('papers','index', args=session.get('filter', "")), paper_menu),
+        (T('People'), False, URL('people','index', args=session.get('filter', "")), []),
+        (T('Agenda'), False, URL('agenda','index', args=session.get('filter', "")), []),
     ]
     
 # Add an admin menu if in admin group

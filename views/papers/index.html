@@ -56,6 +56,13 @@ width: 100%;
 </script>
 
 <h1>{{=T("Papers")}}</h1>
+<div style="font-size: 70%;">
+{{if symp:}}
+    {{=T("Showing only papers from %s.", symp.name)}} {{=A(T("View All Papers"), _href=URL())}}
+{{else:}}
+    {{=T("Showing all papers")}}
+{{pass}}
+</div>
 {{if auth.has_membership("Symposium Admin"):}}
     {{if not c_show_moderation:}}
         {{=A(T("Goto Admin Mode (View All Papers, including incomplete papers)"), _href=URL('admin_index', args=request.args))}}
