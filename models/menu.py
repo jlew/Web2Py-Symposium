@@ -24,20 +24,23 @@ if auth.user:
 if auth.has_membership("Reviewer"):
         paper_menu += [(T('Review Papers'), False, URL('papers','review'), [])]
 
-response.menu = [
+def build_menu():
+    response.menu = [
         (T('Home'), False, URL('default','index'), []),
         (T('Papers'), False, URL('papers','index', args=session.get('filter', "")), paper_menu),
         (T('People'), False, URL('people','index', args=session.get('filter', "")), []),
         (T('Agenda'), False, URL('agenda','index', args=session.get('filter', "")), []),
     ]
     
-# Add an admin menu if in admin group
-if auth.has_membership("Symposium Admin"):
-    response.menu += [
-        (T('Admin Actions'), False, "#", [
-            (T('Symposium Management'), False, URL('editsymp','index'), []),
-            (T('Manage System Users'), False, URL(request.application,'plugin_useradmin','index'), []),
-            (T('Batch Edit Papers'), False, URL('papers','batch'), []),
-            (T('Edit Pages'),False,URL('plugin_wiki','index'), []),
-        ])
-        ]
+    # Add an admin menu if in admin group
+    if auth.has_membership("Symposium Admin"):
+        response.menu += [
+            (T('Admin Actions'), False, "#", [
+                (T('Symposium Management'), False, URL('editsymp','index'), []),
+                (T('Manage System Users'), False, URL(request.application,'plugin_useradmin','index'), []),
+                (T('Batch Edit Papers'), False, URL('papers','batch'), []),
+                (T('Edit Pages'),False,URL('plugin_wiki','index'), []),
+            ])
+            ]
+
+build_menu()

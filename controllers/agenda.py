@@ -7,10 +7,16 @@ def index():
 
         if not symp:
             raise HTTP(404)
+        session['filter'] = symp.sid
+        #Flush menus
+        build_menu()
 
     else:
         symposiums = db(db.symposium.sid>0).select()
         symp = False
+        session['filter'] = ""
+        #Flush menus
+        build_menu()
 
     ret_list = []
     import datetime

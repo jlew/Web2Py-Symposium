@@ -9,11 +9,15 @@ def index():
 
         papers = db(db.paper.symposium == symp).select(orderby=(db.paper.symposium,db.paper.title))
         session['filter'] = symp.sid
+        #Flush menus
+        build_menu()
         all = False
     else:
         symp = False
         papers = db(db.paper.id > 0).select(orderby=(db.paper.symposium,db.paper.title))
         session['filter'] = ""
+        #Flush menus
+        build_menu()
         all = True
 
     ret_papers = []
@@ -35,11 +39,15 @@ def admin_index():
 
         papers = db(db.paper.symposium == symp).select(orderby=(db.paper.symposium,db.paper.title))
         session['filter'] = symp.sid
+        #Flush menus
+        build_menu()
         all = False
     else:
         symp = False
         papers = db(db.paper.id > 0).select(orderby=(db.paper.symposium,db.paper.title))
         session['filter'] = ""
+        #Flush menus
+        build_menu()
         all = True
 
     ret_papers = []
