@@ -28,7 +28,8 @@ width: 100%;
                 "aoColumnDefs": [
                         { "bSortable": false, "aTargets": [ 0 ] }
                 ],
-                "bAutoWidth": true
+                "bAutoWidth": true,
+                "aLengthMenu": [[10, 25, 50, 100, 250, -1], [10, 25, 50, 100, 250, "All"]]
             }).columnFilter({
                     aoColumns: [null,
                                 { type: "select", values: ['{{=XML("','".join([ x for x in room_list]))}}'] },
