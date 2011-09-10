@@ -3,6 +3,7 @@
 # none otherwise. a pattern can be 'controller/function.extension'
 response.generic_patterns = ['*'] if request.is_local else []
 
+API_SAFE = {}
 #########################################################################
 # Symposium Table
 #########################################################################
@@ -17,6 +18,7 @@ db.define_table('symposium',
     Field('rooms', 'list:string', label=T("Rooms"), comment=T("Room Names for scheduling, press enter to get another room.")),
     format='%(name)s: %(event_date)s'
 )
+API_SAFE[db.symposium._tablename] = ['id','name','sid','reg_start','reg_end','event_date','extra_info']
 
 #Add after created so we don't override the unique test
 db.symposium.sid.requires.insert(0,IS_SLUG())
@@ -76,6 +78,10 @@ db.define_table('paper',
     
     format='%(title)s'
 )
+API_SAFE[db.paper._tablename] = [
+    'id','title','description','paper','authors','mentors',
+    'status','category','format','symposium', 'created', 'modified',
+    'scheduled', 'schedule_room', 'schedule_start', 'schedule_end' ]
 
 def paper_update(form):
     """
@@ -145,6 +151,13 @@ db.define_table('paper_attachment',
     Field('comment', 'string', label=T("Short Comment/Description")),
     format = "%(title)s"
     )
+API_SAFE[db.paper_attachment._tablename] = [
+    'id','paper','author','title','file','created', 'comment' ]
+
+# DEFINE FOR USER TABLE AS WELL
+API_SAFE[db.auth_user._tablename] = [
+    'id','first_name','last_name','affiliation','web_page','short_profile',
+    'profile_picture','email']
 
 #########################################################################
 # Helper to create admin groups and accounts when the first user is
