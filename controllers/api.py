@@ -17,13 +17,15 @@ def _setup_api_request( db_type ):
             'args': request.args,
             'url': request.url,
             'user': {
-                    "Name":db.auth_user._format % auth.user,
-                    "ID":auth.user.id
+                    "name": db.auth_user._format % auth.user,
+                    "id": auth.user.id,
                 } if auth.user else None
             },
         'result_info': {}
         }
     query_filters = {}
+    
+    query = (db_type.id > 0)
     
     # Set page and limit
     if request.vars.perpage != "all":
@@ -43,13 +45,14 @@ def _setup_api_request( db_type ):
     
     # Automatically Filter fields
     response_fields = []
+    allowed_fields = API_SAFE[db_type._tablename]
     if request.vars.fields:
         field_list = request.vars.fields.split("|")
         
         for field in field_list:
             if db_type.has_key(field):
                 # Make sure non-admins can't ask for protected values
-                if field in API_SAFE[db_type._tablename] or auth.has_membership("Symposium Admin"):
+                if field in allowed_fields or auth.has_membership("Symposium Admin"):
                     response_fields.append( db_type[field] )
                 else:
                     response_flags['result_info']['errors'] = response_flags['result_info'].get('errors', []) + ["Protected Field: %s" % field]
@@ -59,12 +62,16 @@ def _setup_api_request( db_type ):
     # If no fields requested and not admin, use API_SAFE fields
     # Otherwise leave response_fields empty which will publish all fields
     if len( response_fields ) == 0 and not auth.has_membership("Symposium Admin"):
-        for field in API_SAFE[db_type._tablename]:
-            response_fields.append( db_type[field] )
-            
+        for field in allowed_fields:
+            response_fields.append( db_type[field] )        
     response_flags['result_info']['fields'] = [x.name for x in response_fields]
 
-    return response_flags, query_filters, response_fields
+    # Filter out fields
+    for field in allowed_fields:
+        if request.vars.has_key(field):
+            query &= db_type[field].contains(request.vars.get(field))
+
+    return query, response_flags, query_filters, response_fields
 
 def _do_query(query, filters, response_flags, response_fields):
     """
@@ -75,11 +82,11 @@ def _do_query(query, filters, response_flags, response_fields):
     response_flags['result_info']['records'] = db(query).count()
     response_flags['result_info']['total_pages'] = response_flags['result_info']['records'] / response_flags['result_info']['per_page']
     
-    # TODO: REMOVE ME
-    response_flags['result_info']['sql'] = {
-        'query': str(query),
-        'filters': str(filters),
-    }
+    # Helpful for debugging
+    #response_flags['result_info']['sql'] = {
+    #    'query': str(query),
+    #    'filters': str(filters),
+    #}
         
         
     response_flags['result'] = result.as_list()
@@ -88,18 +95,14 @@ def _do_query(query, filters, response_flags, response_fields):
 
     return response_fields
 
-def index(): return dict(message="hello from api.py")
+def index(): return dict()
 
 def symposiums():
-    response_flags, query_filters, response_fields = _setup_api_request(db.symposium)
-    query = (db.symposium.id > 0)
-     
-    # Run Request
+    query, response_flags, query_filters, response_fields = _setup_api_request(db.symposium)
     return _do_query(query, query_filters, response_flags, response_fields)
 
 def papers():
-    response_flags, query_filters, response_fields = _setup_api_request(db.paper)
-    query = (db.paper.id > 0)
+    query, response_flags, query_filters, response_fields = _setup_api_request(db.paper)
     
     # Filter Out non-visble if non-admin
     if auth.has_membership("Symposium Admin") and request.vars.show_private:
@@ -116,10 +119,11 @@ def papers():
     
     # Run Request
     return _do_query(query, query_filters, response_flags, response_fields)
-    
+
+def paper_attachments():
+    query, response_flags, query_filters, response_fields = _setup_api_request(db.paper_attachment)
+    return _do_query(query, query_filters, response_flags, response_fields)
+
 def people():
-    response_flags, query_filters, response_fields = _setup_api_request(db.auth_user)
-    query = (db.auth_user.id > 0)
-     
-    # Run Request
+    query, response_flags, query_filters, response_fields = _setup_api_request(db.auth_user)
     return _do_query(query, query_filters, response_flags, response_fields)

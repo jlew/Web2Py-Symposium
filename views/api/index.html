@@ -1,0 +1,173 @@
+{{extend 'layout.html'}}
+
+<h1>Data API</h1>
+<h2>Request Types</h2>
+json, xml, load (html debug render)
+
+<h2>Common API Options</h2>
+<table>
+    <tr><th width="150">Var</th><th>Description</th><th>Default</th></tr>
+    <tr>
+        <td>page</td>
+        <td>The page to request</td>
+        <td>1</td>
+    </tr>
+    <tr>
+        <td>perpage</td>
+        <td>How many records per page.  Accepts numbers and "all".</td>
+        <td>25</td>
+    </tr>
+    <tr>
+        <td>sort</td>
+        <td>Accepts the field to be sorted by</td>
+        <td>None</td>
+    </tr>
+    <tr>
+        <td>sortdir</td>
+        <td>The direction to sort.  Accepts desc for descending, otherwise assending.</td>
+        <td>assending</td>
+    </tr>
+    <tr>
+        <td>fields</td>
+        <td>The fields to be returned by the api.  Seporate fileds with a pipe "|".
+        <td>All fields (see below list)</td>
+    </tr>
+</table>
+
+<h2>Filter by Field</h2>
+All api requests will accept a field as a varable for filtering.  Example: title=Git.
+
+<h2>All Api Calls</h2>
+<table width="100%">
+    <tr><th colspan=2 style="background: #eee;">symposiums</th></tr>
+    <tr>
+        <td width="150">Fields:</td>
+        <td>{{=", ".join(API_SAFE[db.symposium._tablename])}}</td>
+    </tr>
+    {{if auth.has_membership("Symposium Admin"):}}
+    <tr>
+        <td>Admin Fields:</td>
+        <td>{{=", ".join(set(db.symposium.fields()) - set(API_SAFE[db.symposium._tablename]))}}</td>
+    </tr>
+   {{pass}}
+   
+    <tr><th colspan=2 style="background: #eee;">papers</th></tr>
+    <tr>
+        <td>Fields:</td>
+        <td>{{=", ".join(API_SAFE[db.paper._tablename])}}</td>
+    </tr>
+    {{if auth.has_membership("Symposium Admin"):}}
+    <tr>
+        <td>Admin Fields:</td>
+        <td>{{=", ".join(set(db.paper.fields()) - set(API_SAFE[db.paper._tablename]))}}</td>
+    </tr>
+   {{pass}}
+   <tr>
+       <td>Extra Options</td>
+       <td><b>show_private</b>: Admin Only Flag. when set to true, api will return all papers regardless of visible status.</td>
+   </tr>
+   
+    <tr><th colspan=2 style="background: #eee;">paper_attachments</th></tr>
+    <tr>
+        <td>Fields:</td>
+        <td>{{=", ".join(API_SAFE[db.paper_attachment._tablename])}}</td>
+    </tr>
+    {{if auth.has_membership("Symposium Admin"):}}
+    <tr>
+        <td>Admin Fields:</td>
+        <td>{{=", ".join(set(db.paper_attachment.fields()) - set(API_SAFE[db.paper_attachment._tablename]))}}</td>
+    </tr>
+   {{pass}}
+    
+    <tr><th colspan=2 style="background: #eee;">people</th></tr>
+    <tr>
+        <td>Fields:</td>
+        <td>{{=", ".join(API_SAFE[db.auth_user._tablename])}}</td>
+    </tr>
+    {{if auth.has_membership("Symposium Admin"):}}
+    <tr>
+        <td>Admin Fields:</td>
+        <td>{{=", ".join(set(db.auth_user.fields()) - set(API_SAFE[db.auth_user._tablename]))}}</td>
+    </tr>
+   {{pass}}
+</table>
+<h2>Example Request</h2>
+Here is an example that requests specific fields and filters on last_name in xml and json.
+<h3>XML</h3>
+{{=A("...api/people.xml?last_name=lewis&fields=first_name|last_name|affiliation|web_page",
+     _href=URL("api","people", extension="xml", vars={"last_name":"lewis", "fields":"first_name|last_name|affiliation|web_page"}))}}
+
+<pre style="white-space: pre; font-size: 80%; line-height: normal;">&lt;?xml version="1.0" encoding="UTF-8"?>
+
+&lt;document>
+  &lt;api>
+    &lt;request>
+      &lt;url>/symposium/api/people.xml&lt;/url>
+      &lt;args>&lt;/args>
+      &lt;user>None&lt;/user>
+      &lt;vars>
+        &lt;fields>first_name|last_name|affiliation|web_page&lt;/fields>
+        &lt;last_name>lewis&lt;/last_name>
+      &lt;/vars>
+      &lt;time>2011-09-10 18:57:48.667610&lt;/time>
+    &lt;/request>
+    &lt;result_info>
+      &lt;per_page>25&lt;/per_page>
+      &lt;total_pages>0&lt;/total_pages>
+      &lt;page>1&lt;/page>
+      &lt;records>2&lt;/records>
+      &lt;fields>
+        &lt;item>first_name&lt;/item>
+        &lt;item>last_name&lt;/item>
+        &lt;item>affiliation&lt;/item>
+        &lt;item>web_page&lt;/item>
+      &lt;/fields>
+    &lt;/result_info>
+    &lt;result>
+      &lt;item>
+        &lt;web_page>http://jlewopensource.com&lt;/web_page>
+        &lt;affiliation>Rochester Institute of Technology, Alumni&lt;/affiliation>
+        &lt;first_name>Justin&lt;/first_name>
+        &lt;last_name>Lewis&lt;/last_name>
+      &lt;/item>
+      &lt;item>
+        &lt;web_page>None&lt;/web_page>
+        &lt;affiliation>Syracuse University, Mentor&lt;/affiliation>
+        &lt;first_name>Katharine &lt;/first_name>
+        &lt;last_name>Lewis&lt;/last_name>
+      &lt;/item>
+    &lt;/result>
+  &lt;/api>
+&lt;/document>
+</pre>
+
+<h3>Json</h3>
+{{=A("...api/people.json?last_name=lewis&fields=first_name|last_name|affiliation|web_page",
+     _href=URL("api","people", extension="json", vars={"last_name":"lewis", "fields":"first_name|last_name|affiliation|web_page"}))}}
+<pre style="white-space: pre; font-size: 80%; line-height: normal;">{"api":
+    {"request":
+        {"url":"/symposium/api/people.json",
+         "args":[],
+         "user":
+            {"name":"Justin Lewis",
+             "id":3},
+         "vars":
+            {"fields":"first_name|last_name|affiliation|web_page",
+             "last_name":"lewis"},
+         "time":"2011-09-10 19:08:04.000331"},
+     "result_info":
+        {"per_page":25,
+         "total_pages":0,
+         "page":1,
+         "records":2,
+         "fields":["first_name","last_name","affiliation","web_page"]},
+     "result":[
+        {"web_page":"http://jlewopensource.com",
+         "affiliation":"Rochester Institute of Technology, Alumni",
+         "first_name":"Justin",
+         "last_name":"Lewis"},
+        {"web_page":null,
+         "affiliation":"Syracuse University, Mentor",
+         "first_name":"Katharine ",
+         "last_name":"Lewis"}]}}
+</pre>

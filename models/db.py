@@ -18,7 +18,7 @@ db.define_table('symposium',
     Field('rooms', 'list:string', label=T("Rooms"), comment=T("Room Names for scheduling, press enter to get another room.")),
     format='%(name)s: %(event_date)s'
 )
-API_SAFE[db.symposium._tablename] = ['id','name','sid','reg_start','reg_end','event_date','extra_info']
+API_SAFE[db.symposium._tablename] = ['id','name','sid','reg_start','reg_end','event_date','extra_info','rooms']
 
 #Add after created so we don't override the unique test
 db.symposium.sid.requires.insert(0,IS_SLUG())
