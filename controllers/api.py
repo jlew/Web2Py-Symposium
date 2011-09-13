@@ -80,7 +80,12 @@ def _do_query(query, filters, response_flags, response_fields):
     """
     result = db(query).select(*response_fields, **filters)
     response_flags['result_info']['records'] = db(query).count()
-    response_flags['result_info']['total_pages'] = response_flags['result_info']['records'] / response_flags['result_info']['per_page']
+    if response_flags['result_info'].has_key('per_page'):
+        response_flags['result_info']['total_pages'] = response_flags['result_info']['records'] / response_flags['result_info']['per_page']
+    else:
+        response_flags['result_info']['total_pages'] = 1
+        response_flags['result_info']['per_page'] = 'all'
+    
     
     # Helpful for debugging
     #response_flags['result_info']['sql'] = {
