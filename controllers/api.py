@@ -16,7 +16,7 @@ def _setup_api_request( db_type ):
             'vars': request.vars,
             'args': request.args,
             'url': request.url,
-            'full-url': XML("%s://%s%s" % (request.env.wsgi_url_scheme, request.env.http_host, URL(args=request.args, vars=request.vars))),
+            'full-url': str(XML("%s://%s%s" % (request.env.wsgi_url_scheme, request.env.http_host, URL(args=request.args, vars=request.vars)))),
             'user': {
                     "name": db.auth_user._format % auth.user,
                     "id": auth.user.id,
