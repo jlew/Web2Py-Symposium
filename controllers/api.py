@@ -31,7 +31,7 @@ def _setup_api_request( db_type ):
     # Set page and limit
     if request.vars.perpage != "all":
         page = int(request.vars.page) if (request.vars.page or "").isdigit() else 1
-        perpage = int(request.vars.perpage) if ((request.vars.perpage or "").isdigit() and request.vars.perpage > 0) else 25
+        perpage = int(request.vars.perpage) if ((request.vars.perpage or "").isdigit() and int(request.vars.perpage) > 0) else 25
         response_flags['result_info']['page'] = page
         response_flags['result_info']['per_page'] = perpage
         query_filters['limitby'] = ((page-1)*perpage,page*perpage)
