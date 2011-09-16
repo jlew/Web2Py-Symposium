@@ -29,7 +29,7 @@ json, xml, load (html debug render)
     </tr>
     <tr>
         <td>fields</td>
-        <td>The fields to be returned by the api.  Separate fileds with a pipe "|".
+        <td>The fields to be returned by the api.  Separate fileds with a pipe "|".  Note, some fields are reference fields, like in paper there is the symposium field.  Fields like these link to the other tables.  To specifiy values from those tables you may use the "." notation.  For example, in paper you can pass a field <b>symposium.event_date</b></td>
         <td>All fields (see below list)</td>
     </tr>
 </table>

@@ -44,33 +44,63 @@ def _setup_api_request( db_type ):
             else:
                 query_filters['orderby'] = db_type[request.vars.sort]
     
-    # Automatically Filter fields
+    # Filter fields returned
     response_fields = []
+
     allowed_fields = API_SAFE[db_type._tablename]
     if request.vars.fields:
         field_list = request.vars.fields.split("|")
         
         for field in field_list:
-            if db_type.has_key(field):
-                # Make sure non-admins can't ask for protected values
-                if field in allowed_fields or auth.has_membership("Symposium Admin"):
-                    response_fields.append( db_type[field] )
+        
+            if "." in field:
+                # Handle subquery field
+                db_table, db_field = field.split(".")
+
+                if db.has_key(db_table):
+                    db_table_obj = db.get(db_table)
+                    if db_field in API_SAFE[db_table_obj._tablename] or auth.has_membership("Symposium Admin"):
+                        response_fields.append(db_table_obj[db_field])
+                    else:
+                        response_flags['result_info']['errors'] = \
+                            response_flags['result_info'].get('errors', []) + ["Protected Field: %s" % field]
                 else:
-                    response_flags['result_info']['errors'] = response_flags['result_info'].get('errors', []) + ["Protected Field: %s" % field]
+                    response_flags['result_info']['errors'] = \
+                        response_flags['result_info'].get('errors', []) + ["Unknown Field: %s" % field]
             else:
-                response_flags['result_info']['errors'] = response_flags['result_info'].get('errors', []) + ["Unknown Field: %s" % field]
+                # Handle just field
+                if db_type.has_key(field):
+                    # Make sure non-admins can't ask for protected values
+                    if field in allowed_fields or auth.has_membership("Symposium Admin"):
+                        response_fields.append( db_type[field] )
+                    else:
+                        response_flags['result_info']['errors'] = \
+                            response_flags['result_info'].get('errors', []) + ["Protected Field: %s" % field]
+                else:
+                    response_flags['result_info']['errors'] = \
+                        response_flags['result_info'].get('errors', []) + ["Unknown Field: %s" % field]
         
     # If no fields requested and not admin, use API_SAFE fields
     # Otherwise leave response_fields empty which will publish all fields
     if len( response_fields ) == 0 and not auth.has_membership("Symposium Admin"):
         for field in allowed_fields:
-            response_fields.append( db_type[field] )        
-    response_flags['result_info']['fields'] = [x.name for x in response_fields]
-
-    # Filter out fields
+            response_fields.append( db_type[field] )   
+    response_flags['result_info']['fields'] = ["%s.%s" % (x.tablename, x.name) for x in response_fields]
+    
     for field in allowed_fields:
+        db_item = db_type[field]
+        # Filter out fields
         if request.vars.has_key(field):
-            query &= db_type[field].contains(request.vars.get(field))
+            query &= db_item.contains(request.vars.get(field))
+        
+        # Expand reference Fields
+
+        if db_item.type.startswith("reference"):
+            ingore, thetype = db_item.type.split(" ")
+            query &= (db_item == db.get(thetype).id)
+            
+        elif db_item.type.startswith("list:reference"):
+            pass #query &= db.auth_user.id.belongs(db.paper.authors)
 
     return query, response_flags, query_filters, response_fields
 
