@@ -14,7 +14,25 @@ def index():
     example action using the internationalization operator T and flash
     rendered by views/default/index.html or views/generic.html
     """
-    return dict(symposiums=db(db.symposium.id>0).select(orderby=~db.symposium.event_date))
+    return dict(symposiums=db(db.symposium.id>0).select(
+        db.symposium.name,
+        db.symposium.sid,
+        db.symposium.reg_start,
+        db.symposium.reg_end,
+        db.symposium.event_date,
+        orderby=~db.symposium.event_date))
+    
+def view():
+    symp = db(db.symposium.sid == request.args(0)).select().first()
+    
+    if symp:
+        session['filter'] = symp.sid
+        #Flush menus
+        build_menu()
+        return dict(symposium = symp)
+    
+    else:
+        redirect( URL('default','index') )
 
 def user():
     """

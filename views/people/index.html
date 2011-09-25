@@ -75,12 +75,10 @@ width: 100%;
         }
     }
 </script>
-<h1>{{=T("Participants")}}</h1>
+<h1>{{=T("Participants")}}{{=": %s" % symp.name if symp else ""}}</h1>
 <div style="font-size: 70%;">
 {{if symp:}}
     {{=T("Showing only participants from %s.", symp.name)}} {{=A(T("View All Participants"), _href=URL())}}
-{{else:}}
-    {{=T("Showing all participants")}}
 {{pass}}
 </div>
 <table id="dataTable" width="100%">

@@ -46,11 +46,9 @@ width: 100%;
     } );
 </script>
 
-{{=H1(T("Agenda"))}}
+<h1>{{=T("Agenda")}}{{=": %s" % symp.name if symp else ""}}</h1>
 {{if symp:}}
     {{=T("Showing agenda from %s.", symp.name)}} {{=A(T("View All Agendas"), _href=URL())}}
-{{else:}}
-    {{=T("Showing all Agendas")}}
 {{pass}}
 <table id="agenda_dataTable">
     <thead>

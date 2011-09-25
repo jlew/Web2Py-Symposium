@@ -56,12 +56,10 @@ width: 100%;
     } );
 </script>
 
-<h1>{{=T("Papers")}}</h1>
+<h1>{{=T("Papers")}}{{=": %s" % symp.name if symp else ""}}</h1>
 <div style="font-size: 70%;">
 {{if symp:}}
     {{=T("Showing only papers from %s.", symp.name)}} {{=A(T("View All Papers"), _href=URL())}}
-{{else:}}
-    {{=T("Showing all papers")}}
 {{pass}}
 </div>
 {{if auth.has_membership("Symposium Admin"):}}
