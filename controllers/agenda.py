@@ -1,19 +1,38 @@
 # coding: utf8
 # try something like
 def index():
-    symp = db(db.symposium.sid==request.args(0)).select().first()
-    if symp:
-        #response.files.append(URL('static','week-cal/libs/css/smoothness/jquery-ui-1.8.11.custom.css'))
-        #response.files.append(URL('static','week-cal/jquery.weekcalendar.css'))
-        #response.files.append(URL('static','week-cal/skins/default.css'))
-        #response.files.append(URL('static','week-cal/skins/gcalendar.css'))
-        #response.files.append(URL('static','week-cal/jquery.weekcalendar.js'))
-        papers = get_symposium_visable_papers(symp)
-        import datetime
-        papers.sort(key=lambda x: x.schedule_start if (x.schedule_start and x.scheduled) else datetime.time())
-        return dict(symposium=symp, papers=papers)
+    if request.args(0):
+        symposiums = db(db.symposium.sid==request.args(0)).select()
+        symp = symposiums.first()
+
+        if not symp:
+            raise HTTP(404)
+        session['filter'] = symp.sid
+        #Flush menus
+        build_menu()
+
     else:
-        raise HTTP(404)
+        symposiums = db(db.symposium.sid>0).select()
+        symp = False
+        session['filter'] = ""
+        #Flush menus
+        build_menu()
+
+    ret_list = []
+    import datetime
+    for symp_itm in symposiums:
+        papers = get_symposium_visable_papers(symp_itm)
+
+        papers.sort(key=lambda x: x.schedule_start if (x.schedule_start and x.scheduled) else datetime.time())
+        ret_list += papers
+
+    room_list = []
+    symp_list = []
+    for symp_item in db(db.symposium.id>0).select():
+        room_list += symp_item.rooms
+        symp_list.append( symp_item.name )
+
+    return dict(papers=ret_list, symp=symp, room_list=room_list, symp_list=symp_list)
 
 @auth.requires_membership("Symposium Admin")
 def edit():

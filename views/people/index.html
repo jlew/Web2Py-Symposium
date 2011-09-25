@@ -23,11 +23,13 @@ width: 100%;
                 "sDom": 'C<"clear">lfrtip',
                 "bAutoWidth": true,
                 "sPaginationType": "full_numbers",
+                "iDisplayLength": 25,
                 "aoColumnDefs": [
                         { "bSortable": false, "aTargets": [ 0 ] }
                 ],
                 "aaSorting": [[1, 'asc']],
-                "bAutoWidth": true
+                "bAutoWidth": true,
+                "aLengthMenu": [[10, 25, 50, 100, 250, -1], [10, 25, 50, 100, 250, "All"]]
             }).columnFilter({
                     aoColumns: [null,
                                 null,
@@ -73,7 +75,12 @@ width: 100%;
         }
     }
 </script>
-<h1>{{=T("Participants")}}</h1>
+<h1>{{=T("Participants")}}{{=": %s" % symp.name if symp else ""}}</h1>
+<div style="font-size: 70%;">
+{{if symp:}}
+    {{=T("Showing only participants from %s.", symp.name)}} {{=A(T("View All Participants"), _href=URL())}}
+{{pass}}
+</div>
 <table id="dataTable" width="100%">
     <thead>
         <tr>

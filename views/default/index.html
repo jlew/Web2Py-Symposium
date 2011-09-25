@@ -2,36 +2,21 @@
 {{=plugin_wiki.embed_page('home') or ""}}
 <br style="clear: both;" />
 {{for symposium in symposiums:}}
-    {{
-    authors = set()
-    mentors = set()
-    paper_count = public_paper_count = 0
-    for papers in symposium.paper.select():
-        paper_count+=1
-        if papers.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
-            public_paper_count+=1
-            pass
-        authors = authors.union(papers.authors)
-        mentors = mentors.union(papers.mentors)
-    pass
-    }}
 
-<div>
-<h2>{{=symposium.name}}</h2>
+<div style="padding-bottom: 20px;">
+<h2 style="font-size: 130%;">{{=symposium.name}}</h2>
+{{=T("Event Date")}}: {{=symposium.event_date.strftime(DATE_FORMAT)}}
+{{if symposium.reg_start < request.now and request.now < symposium.reg_end:}}
+    {{=B(T("Accepting Submissions"), _style="color: #f00;")}}
+    {{=B(A(T("Submit to this symposium"), _href=URL("papers","submit", vars={"symp":symposium.sid})))}}
+{{pass}}
 {{=DIV(
-    A(SPAN(_class="icon book"), T("Papers"), _href=URL("papers","index",args=symposium.sid), _class="pill button left"),
+    A(SPAN(_class="icon magnifier"), T("Symposium Details"), _href=URL("view",args=symposium.sid), _class="pill button left"),
+    A(SPAN(_class="icon book"), T("Papers"), _href=URL("papers","index",args=symposium.sid), _class="pill button middle"),
     A(SPAN(_class="icon user"), T("Participants"), _href=URL("people","index",args=symposium.sid), _class="pill button middle"),
     A(SPAN(_class="icon clock"), T("Agenda"), _href=URL("agenda","index",args=symposium.sid), _class="pill button right"),
 )}}
-{{=MARKMIN(symposium.extra_info)}}
-<table>
-  <tr><td>{{=T("Registration")}}</td><td>{{=symposium.reg_start.strftime(DATE_TIME_FORMAT)}} {{=T("to")}} {{=symposium.reg_end.strftime(DATE_TIME_FORMAT)}}</td></tr>
-  <tr><td>{{=T("Event Date")}}</td><td>{{=symposium.event_date.strftime(DATE_FORMAT)}}</td></tr>
-  <tr><td>{{=T("Published Papers")}}</td><td>{{=public_paper_count}}</td></tr>
-  <tr><td>{{=T("Submitted Papers")}}</td><td>{{=paper_count}}</td></tr>
-  <tr><td>{{=T("Authors")}}</td><td>{{=len(authors)}}</td></tr>
-  <tr><td>{{=T("Mentors")}}</td><td>{{=len(mentors)}}</td></tr>
-</table>
+
 </div>
 {{pass}}
 <br style="clear: both;" />

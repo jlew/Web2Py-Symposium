@@ -1,8 +1,10 @@
 {{right_sidebar_enabled=False}}
 {{response.files.insert(2,URL('static','js/jquery.dataTables.min.js'))}}
 {{response.files.insert(3,URL('static','js/ColVis.min.js'))}}
+{{response.files.insert(4,URL('static','js/jquery.dataTables.rowGrouping.js'))}}
 {{response.files.insert(4,URL('static','js/jquery.dataTables.columnFilter.js'))}}
 {{response.files.insert(5,URL('static','data_table.css'))}}
+
 {{extend 'layout.html'}}
 <style>
 table tfoot input, table tfoot select{
@@ -13,7 +15,7 @@ width: 100%;
     var oTable;
 
     $(document).ready(function() {
-           oTable = $('#dataTable').dataTable( {
+           oTable = $('#agenda_dataTable').dataTable( {
                 //"bPaginate": false,
                 //"bLengthChange": false,
                 "bFilter": true,
@@ -22,50 +24,33 @@ width: 100%;
                 "sDom": 'C<"clear">lfrtip',
                 "bAutoWidth": true,
                 "sPaginationType": "full_numbers",
+                "iDisplayLength": 25,
                 "aoColumnDefs": [
                         { "bSortable": false, "aTargets": [ 0 ] }
                 ],
-                "bAutoWidth": true
+                "bAutoWidth": true,
+                "aLengthMenu": [[10, 25, 50, 100, 250, -1], [10, 25, 50, 100, 250, "All"]]
             }).columnFilter({
                     aoColumns: [null,
-                                { type: "select", 
-                                  values: ['{{=XML("','".join(symposium.rooms))}}','{{=T("NOT AVAILABLE")}}'] },
+                                { type: "select", values: ['{{=XML("','".join([ x for x in room_list]))}}'] },
                                 null,
                                 { type: "select", values: ['{{=XML("','".join([ x.xml() for x in PAPER_CATEGORY]))}}'] },
                                 { type: "select", values: ['{{=XML("','".join([ x.xml() for x in PRESENTATION_FORMAT]))}}'] },
                                 { type: "text" },
                                 null,
-                                null
+                                null,
+                                { type: "select", values: ['{{=XML("','".join([ x for x in symp_list]))}}'] },
                                 ]
                 });
+            oTable.rowGrouping({"iGroupingColumnIndex":8});
     } );
-    
-    function toggle_details(img, url) {
-        var nTr = img.parentNode.parentNode;
-        if ( img.src.match('details_close') ){
-            /* This row is already open - close it */
-            img.src = "{{=URL('static','images/details_open.png')}}";
-            oTable.fnClose( nTr );
-
-        }else{
-            /* Open this row */
-            img.src = "{{=URL('static','images/details_close.png')}}";
-            $.ajax({
-                url: url,
-                success: function(data){
-                    r = Math.floor(Math.random()*10000000);
-                    d = $('<div />').html($('<div />', {id: "d_" + r}).html(data));
-                    oTable.fnOpen( nTr, d.html(), 'details' );
-                    web2py_trap_form(url,"d_"+r);
-                    web2py_ajax_init();
-                }
-            });
-        }
-    }
 </script>
 
-{{=H1(T("Agenda for %s", symposium.name))}}
-<table id="dataTable">
+<h1>{{=T("Agenda")}}{{=": %s" % symp.name if symp else ""}}</h1>
+{{if symp:}}
+    {{=T("Showing agenda from %s.", symp.name)}} {{=A(T("View All Agendas"), _href=URL())}}
+{{pass}}
+<table id="agenda_dataTable">
     <thead>
         <tr>
             <th width="25px;"></th>
@@ -76,6 +61,7 @@ width: 100%;
             <th>{{=db.paper.title.label}}</th>
             <th>{{=db.paper.authors.label}}</th>
             <th>{{=db.paper.mentors.label}}</th>
+            <th>{{=db.symposium.name.label}}</th>
         </tr>
     </thead>
     <tbody>
@@ -124,6 +110,9 @@ width: 100%;
                {{pass}}
                </ul>
            </td>
+           <td>
+               {{=paper.symposium.name}}
+           </td>
         </tr>
         {{pass}}
     </tbody>
@@ -137,6 +126,7 @@ width: 100%;
             <th>{{=db.paper.title.label}}</th>
             <th>{{=db.paper.authors.label}}</th>
             <th>{{=db.paper.mentors.label}}</th>
+            <th>{{=db.symposium.name.label}}</th>
         </tr>
     </tfoot>
 </table>

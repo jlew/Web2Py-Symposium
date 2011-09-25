@@ -3,10 +3,21 @@
 def index(): 
     if request.args(0):
         symposiums = db(db.symposium.sid == request.args(0)).select()
-        all = False
+        if symposiums.first():
+            symp = symposiums.first()
+            session['filter'] = symp.sid
+            #Flush menus
+            build_menu()
+            all = False
+        else:
+            raise HTTP(404)
     else:
+        symp = False
         symposiums = db(db.symposium.id > 0).select(orderby=~db.symposium.event_date)
         all = True
+        session['filter'] = ""
+        #Flush menus
+        build_menu()
     
     # Build Dict of all symposiums containing the symposium,
     # its papers, and the number of pending/non-approved papers
@@ -16,7 +27,7 @@ def index():
                    "mentors": [db.auth_user(x) for x in get_symposium_mentors_id(symposium)],
                    "authors": [db.auth_user(x) for x in get_symposium_authors_id(symposium)]})
 
-    return dict(ret=ret, all=all)
+    return dict(ret=ret, all=all, symp=symp)
 
 def profile():
     if request.vars.has_key("minview"):

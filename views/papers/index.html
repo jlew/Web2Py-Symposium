@@ -15,7 +15,7 @@ width: 100%;
     var oTable;
 
     $(document).ready(function() {
-           oTable = $('#dataTable').dataTable( {
+           oTable = $('#papers_dataTable').dataTable( {
                 //"bPaginate": false,
                 //"bLengthChange": false,
                 "bFilter": true,
@@ -24,9 +24,11 @@ width: 100%;
                 "sDom": 'C<"clear">lfrtip',
                 "bAutoWidth": true,
                 "sPaginationType": "full_numbers",
+                "iDisplayLength": 25,
                 "aoColumnDefs": [
                         { "bSortable": false, "aTargets": [ 0 ] }
                 ],
+                "aLengthMenu": [[10, 25, 50, 100, 250, -1], [10, 25, 50, 100, 250, "All"]]
 
             }).columnFilter({
                     aoColumns: [null,
@@ -52,32 +54,14 @@ width: 100%;
             {{pass}}
 
     } );
-
-    function toggle_details(img, url) {
-        var nTr = img.parentNode.parentNode;
-        if ( img.src.match('details_close') ){
-            /* This row is already open - close it */
-            img.src = "{{=URL('static','images/details_open.png')}}";
-            oTable.fnClose( nTr );
-
-        }else{
-            /* Open this row */
-            img.src = "{{=URL('static','images/details_close.png')}}";
-            $.ajax({
-                url: url,
-                success: function(data){
-                    r = Math.floor(Math.random()*10000000);
-                    d = $('<div />').html($('<div />', {id: "d_" + r}).html(data));
-                    oTable.fnOpen( nTr, d.html(), 'details' );
-                    web2py_trap_form(url,"d_"+r);
-                    web2py_ajax_init();
-                }
-            });
-        }
-    }
 </script>
 
-<h1>{{=T("Papers")}}</h1>
+<h1>{{=T("Papers")}}{{=": %s" % symp.name if symp else ""}}</h1>
+<div style="font-size: 70%;">
+{{if symp:}}
+    {{=T("Showing only papers from %s.", symp.name)}} {{=A(T("View All Papers"), _href=URL())}}
+{{pass}}
+</div>
 {{if auth.has_membership("Symposium Admin"):}}
     {{if not c_show_moderation:}}
         {{=A(T("Goto Admin Mode (View All Papers, including incomplete papers)"), _href=URL('admin_index', args=request.args))}}
@@ -87,7 +71,7 @@ width: 100%;
 {{pass}}
 
 
-<table id="dataTable" width="100%">
+<table id="papers_dataTable" width="100%">
     <thead>
         <tr>
             <th width="25px;"></th>

@@ -8,46 +8,26 @@
     var oTable;
 
     $(document).ready(function() {
-        oTable = $('#dataTable').dataTable( {
+        oTable = $('#review_dataTable').dataTable( {
                         "bFilter": true,
                         "bSort": true,
                         "bInfo": true,
                         "sDom": 'C<"clear">lfrtip',
+                        "iDisplayLength": 25,
                         "aoColumnDefs": [
                                 { "bSortable": false, "aTargets": [ 0 ] }
                         ],
-                        "aaSorting": [[1, 'asc']]
+                        "aaSorting": [[1, 'asc']],
+                        "aLengthMenu": [[10, 25, 50, 100, 250, -1], [10, 25, 50, 100, 250, "All"]]
                         } );
     } );
 
-    function toggle_details(img, url) {
-        var nTr = img.parentNode.parentNode;
-        if ( img.src.match('details_close') ){
-            /* This row is already open - close it */
-            img.src = "{{=URL('static','images/details_open.png')}}";
-            oTable.fnClose( nTr );
-
-        }else{
-            /* Open this row */
-            img.src = "{{=URL('static','images/details_close.png')}}";
-            $.ajax({
-                url: url,
-                success: function(data){
-                    r = Math.floor(Math.random()*10000000);
-                    d = $('<div />').html($('<div />', {id: "d_" + r}).html(data));
-                    oTable.fnOpen( nTr, d.html(), 'details' );
-                    web2py_trap_form(url,"d_"+r);
-                    web2py_ajax_init();
-                }
-            });
-        }
-    }
 </script>
 
 <h1>{{=T("Review Paper")}}</h1>
 {{=plugin_wiki.embed_page('review_paper_list') or ""}}
 {{if papers:}}
-<table id="dataTable" width="100%">
+<table id="review_dataTable" width="100%">
     <thead>
         <tr>
             <th width="25px;">Review</th>
