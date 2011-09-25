@@ -1,6 +1,17 @@
 {{extend 'layout.html'}}
 {{if auth.has_membership("Symposium Admin"):}}
-{{=A(SPAN(_class="icon pen"),"Edit Symposium", _href=URL("editsymp","edit",args=symposium.id), _style="float: right;", _class="button")}}
+{{=DIV(
+    A(SPAN(_class="icon pen"),"Edit Symposium",
+        _href=URL("editsymp","edit",args=symposium.id),
+        _class="button left"),
+    A(SPAN(_class="icon clock"),"Manage Agenda",
+        _href=URL("agenda","edit",args=symposium.id),
+        _class="button right"),
+    A(SPAN(_class="icon mail"),"Email Participants",
+        _href=URL("editsymp","email",args=symposium.id),
+        _class="button right"),
+    _style="float: right;"
+    )}}
 {{pass}}
 <h1>{{=symposium.name}}</h1>
 {{if symposium.reg_start < request.now and request.now < symposium.reg_end:}}
