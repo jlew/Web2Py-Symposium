@@ -1,0 +1,94 @@
+{{extend 'layout.html'}}
+{{=A("Back To Manage Sessions", _href=URL("manage_sessions", args=sess.timeblock.symposium))}}
+<style type="text/css">
+    .paper_member_img{
+        width: 75px; height: 75px; float: left; text-align: center; padding-right: 10px;
+    }
+
+    .paper_member_ctr{
+        clear: left; height: 75px;
+    }
+</style>
+
+
+<h1>{{=sess.name}}</h1>
+
+{{judge_ids = []}}
+
+{{=H2(T("Judges"))}}
+{{back="fff"}}
+{{for usr in [db.auth_user(x) for x in sess.judges]:}}
+{{judge_ids.append(usr.id)}}
+{{back = "fff" if back == "eee" else "eee"}}
+<div class="paper_member_ctr" style="background: #{{=back}};">
+    <div class="paper_member_img">
+        {{=IMG(_src=(URL('default','thumb',args=[75,75,usr.profile_picture]) if usr.profile_picture else URL('static','images/no-photo.png')))}}
+    </div>
+    <div>{{=usr.first_name}} {{=usr.last_name}}<br />{{=usr.affiliation}}</div>
+    {{=A(SPAN(_class="icon cross"), T("Remove as Judge"), _href=URL('editsymp','rem_judge_by_id', args=[sess.id, usr.id]), _class="button negative")}}
+</div>
+{{pass}}
+<hr>
+<h1>{{=T("Add Judge")}}</h1>
+<script type="text/javascript">
+var judges = {{=judge_ids}};
+
+pending_request = false;
+function pull_choices(){
+    if( pending_request ){
+        pending_request.abort();
+    }
+
+    request_url = "{{=URL('people','search_api', extension='json')}}?search=" + escape($('#search_name').val()) ;
+    $("#search_return").html("{{=T("Loading...")}}");
+    backgrd = "fff";
+    pending_request = $.getJSON(request_url, function(data){
+        if(data){
+            if( data.result.length > 0){
+                 $("#search_return").html("");
+                 $.each(data.result, function(key,val){
+                     if(val['profile_picture']){
+                         img_url = "{{=URL('default','thumb',args=[75,75])}}/" + val['profile_picture'];
+                     }else{
+                         img_url = "{{=URL('static','images/no-photo.png')}}";
+                     }
+
+                    backgrd = (backgrd == "fff")?"eee":"fff";
+                    if( judges.indexOf(val['id']) == -1 ){
+                        author_link = "<a class='button' href='{{=URL('editsymp','add_judge_by_id',args=sess.id)}}/" +
+                                    val['id'] + "?s=" + escape($("#search_name").val()) + "'>" +
+                                "<span class='icon plus'></span>{{=T("Add as Judge")}}</a>";
+                    }else{
+                        author_link = "<a class='button negative active'>" +
+                                "<span class='icon user'></span>{{=T("Is Judge")}}</a>";
+                    }
+
+                    $("#search_return").append("<div class='paper_member_ctr' style='background: #" + backgrd + ";'>" +
+                        "<div class='paper_member_img'><img src='"+img_url+"'></div>" +
+                        "<div>" +
+                            val['first_name'] + " " + val['last_name'] + "<br />" + val['affiliation'] +
+                        "</div>" + author_link + "</div>")
+                });
+
+            }else{
+                $("#search_return").html("{{=T("No users found.")}}");
+            }
+            $("#search_return").append('{{=DIV( T("They do not have an account? "),
+             A(SPAN(_class="icon user"), T("Create New Judge"), _class="button",
+                  _href="#", _onclick="popup('%s')" % URL("editsymp","register_judge", args=sess.id)))}}');
+        }else{
+            $("#search_return").html("{{=T("Search Failed")}}");
+        }
+    });
+}
+</script>
+
+<form onsubmit="return false;">
+Search: <input type="text" id="search_name" onkeyup="javascript:pull_choices();" value="{{=session.s_val or ""}}">
+</form>
+<div id="search_return">{{=T("Search for members above. If they are not in the system you will be given the option to add them.")}}</div>
+
+{{if session.s_val:}}
+<script type="text/javascript">$("#search_name").val(unescape("{{=session.s_val}}")); pull_choices();</script>
+{{del session.s_val}}
+{{pass}}

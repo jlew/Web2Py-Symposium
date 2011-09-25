@@ -40,7 +40,7 @@ db.define_table('session',
     Field('theme'),
     Field('timeblock', db.timeblock),
     Field('room', db.room),
-    Field('judges', 'list:reference auth_user'),
+    Hidden('judges', 'list:reference auth_user', default=[]),
     format = "%(timeblock)s %(name)s"
 )
 
@@ -91,11 +91,14 @@ db.define_table('paper',
     Hidden('created', 'datetime', default=request.now, writable=False),
     
     Hidden('modified', 'datetime', default=request.now, update=request.now, writable=False),
-    
+
+    #TO BE REMOVED    
     Hidden('scheduled', 'boolean', default=False),
     Hidden('schedule_room', 'integer', default=-1, label=T("Room")),
     Hidden('schedule_start', 'time'),
     Hidden('schedule_end', 'time'),
+
+    Hidden('session', db.session),
     
     format='%(title)s'
 )

@@ -1,0 +1,10 @@
+{{extend 'editsymp/layout.html'}}
+
+<h1>Manage Rooms</h1>
+<ul>
+{{for room in rooms:}}
+    <li id="room_{{=room.id}}">{{=B(A(room.name, _href=URL("edit_room", args=room.id), cid="room_%s" % room.id))}}: {{=room.location}}</li>
+{{pass}}
+</ul>
+<h1>Add Room</h1>
+{{=form}}

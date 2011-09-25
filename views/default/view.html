@@ -80,7 +80,7 @@
                     <td>Judges</td>
                     <td>
                         <ul>
-                            {{for x in row.session.judges:}}
+                            {{for x in row.session.judges or []:}}
                                 {{=LI(
                                     A( db.auth_user._format % db.auth_user(x),
                                         _href=URL("people","profile",args=x)))}}

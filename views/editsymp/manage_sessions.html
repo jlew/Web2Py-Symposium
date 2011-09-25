@@ -1,0 +1,42 @@
+{{extend 'editsymp/layout.html'}}
+
+<h1>Manage Sessions</h1>
+<ul>
+{{for row in sessions:}}
+<li id="session_{{=row.session.id}}">
+    {{=A("Edit Session", _href=URL("edit_session", args=row.session.id), cid="session_%s"%row.session.id)}}
+    {{=A("Edit Judges", _href=URL("edit_session_judges", args=row.session.id))}}
+<table width="100%">
+    <tr>
+        <th colspan=2 style="background: #ddd;">{{=row.session.name}}</th>
+    <tr>
+        <td>Theme</td>
+        <td>{{=row.session.theme}}</td>
+    </tr>
+    <tr>
+        <td>Time</td>
+        <td>{{=row.timeblock.start_time}}<br />{{=row.timeblock.desc}}</td>
+    </tr>
+    <tr>
+        <td>Room</td>
+        <td>{{=row.room.name}}<br />{{=row.room.location}}</td>
+    </tr>
+    <tr>
+        <td>Judges</td>
+        <td>
+            <ul>
+                {{for x in row.session.judges or []:}}
+                    {{=LI(
+                        A( db.auth_user._format % db.auth_user(x),
+                            _href=URL("people","profile",args=x)))}}
+                {{pass}}
+            </ul>
+        </td>
+    </tr>
+</table>
+</li>
+{{pass}}
+</ul>
+
+<h1>Create New Session</h1>
+{{=form}}
