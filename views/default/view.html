@@ -4,8 +4,6 @@
     {{=B(T("Accepting Submissions"), _style="color: #f00;")}}
     {{=B(A(T("Submit to this symposium"), _href=URL("papers","submit", vars={"symp":symposium.sid})))}}
 {{pass}}
-
-
     
     {{
     authors = set()
@@ -20,8 +18,6 @@
         mentors = mentors.union(papers.mentors)
     pass
     }}
-    
-    
     
     {{=MARKMIN(symposium.extra_info)}}
     <table>
@@ -48,6 +44,53 @@
         <tr>
             <td>{{=T("Mentors")}}</td>
             <td>{{=len(mentors)}}</td>
+        </tr>
+        <tr>
+            <td>Sessions</td>
+            <td>
+            {{for row in db(
+                    (db.timeblock.symposium == symposium.id) &
+                    (db.session.timeblock == db.timeblock.id) &
+                    (db.room.id == db.session.room)
+                 ).select(
+                     db.session.name,
+                     db.session.theme,
+                     db.session.judges,
+                     db.timeblock.start_time,
+                     db.timeblock.desc,
+                     db.room.name,
+                     db.room.location,
+                     orderby=db.timeblock.start_time):}}
+            <table width="100%">
+                <tr>
+                    <th colspan=2 style="background: #ddd;">{{=row.session.name}}</th>
+                <tr>
+                    <td>Theme</td>
+                    <td>{{=row.session.theme}}</td>
+                </tr>
+                <tr>
+                    <td>Time</td>
+                    <td>{{=row.timeblock.start_time}}<br />{{=row.timeblock.desc}}</td>
+                </tr>
+                <tr>
+                    <td>Room</td>
+                    <td>{{=row.room.name}}<br />{{=row.room.location}}</td>
+                </tr>
+                <tr>
+                    <td>Judges</td>
+                    <td>
+                        <ul>
+                            {{for x in row.session.judges:}}
+                                {{=LI(
+                                    A( db.auth_user._format % db.auth_user(x),
+                                        _href=URL("people","profile",args=x)))}}
+                            {{pass}}
+                        </ul>
+                    </td>
+                </tr>
+            </table>
+            {{pass}}
+            </td>
         </tr>
         </table>
 
