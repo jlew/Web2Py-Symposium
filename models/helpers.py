@@ -73,3 +73,12 @@ def batch_cell_view(cell, paper, td_class=""):
         
     elif cell=="format":
         return link_wrap(paper.format)
+
+def get_public_filter():
+    status_filter = False
+    for status_option in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
+        if status_filter:
+            status_filter = status_filter | (db.paper.status == status_option)
+        else:
+            status_filter = (db.paper.status == status_option)
+    return status_filter

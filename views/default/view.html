@@ -1,4 +1,7 @@
 {{extend 'layout.html'}}
+{{if auth.has_membership("Symposium Admin"):}}
+{{=A(SPAN(_class="icon pen"),"Edit Symposium", _href=URL("editsymp","edit",args=symposium.id), _style="float: right;", _class="button")}}
+{{pass}}
 <h1>{{=symposium.name}}</h1>
 {{if symposium.reg_start < request.now and request.now < symposium.reg_end:}}
     {{=B(T("Accepting Submissions"), _style="color: #f00;")}}
@@ -20,7 +23,9 @@
     }}
     
     {{=MARKMIN(symposium.extra_info)}}
-    <table>
+    <h2>Event Information</h2>
+    <h3>Important Dates</h3>
+    <table width="100%">
         <tr>
             <td>{{=T("Event Date")}}</td>
             <td>{{=symposium.event_date.strftime(DATE_FORMAT)}}</td>
@@ -29,6 +34,70 @@
             <td>{{=T("Registration")}}</td>
             <td>{{=symposium.reg_start.strftime(DATE_TIME_FORMAT)}} - {{=symposium.reg_end.strftime(DATE_TIME_FORMAT)}}</td>
         </tr>
+    </table>
+    <h3>Sessions</h3>
+    {{for row in db(
+            (db.timeblock.symposium == symposium.id) &
+            (db.session.timeblock == db.timeblock.id) &
+            (db.room.id == db.session.room)
+         ).select(
+             db.session.id,
+             db.session.name,
+             db.session.theme,
+             db.session.judges,
+             db.timeblock.start_time,
+             db.timeblock.desc,
+             db.room.name,
+             db.room.location,
+             orderby=db.timeblock.start_time):}}
+        <table width="100%" style="margin: 5px;">
+            <tr>
+                <th colspan=3 style="background: #ddd;">{{=row.session.name}}</th>
+            </tr>
+            <tr>
+                <td></td><td></td>
+                <td rowspan=4 width="40%;">
+                <b>Papers</b>
+                <ul>
+                {{for paper in db(
+                        (db.paper.session==row.session.id) &
+                        get_public_filter()
+                        ).select(db.paper.id,db.paper.title):}}
+                    {{=LI(A(paper.title, _href=URL("papers","view",args=paper.id)))}}
+                    
+                {{pass}}
+                </ul>
+                </td>
+            </tr>
+            <tr>
+                <td width="15%">Theme</td>
+                <td>{{=row.session.theme}}</td>
+            </tr>
+            <tr>
+                <td>Time</td>
+                <td>{{=row.timeblock.start_time}}<br />{{=row.timeblock.desc}}</td>
+            </tr>
+            <tr>
+                <td>Room</td>
+                <td>{{=row.room.name}}<br />{{=row.room.location}}</td>
+            </tr>
+            <tr>
+                <td>Judges</td>
+                <td>
+                    <ul>
+                        {{for x in row.session.judges or []:}}
+                            {{=LI(
+                                A( db.auth_user._format % db.auth_user(x),
+                                    _href=URL("people","profile",args=x)))}}
+                        {{pass}}
+                    </ul>
+                </td>
+            </tr>
+        </table>
+    {{pass}}
+    
+    <h2>Event Statistics</h2>
+    <table>
         <tr>
             <td>{{=T("Published Papers")}}</td>
             <td>{{=public_paper_count}}</td>
@@ -45,54 +114,7 @@
             <td>{{=T("Mentors")}}</td>
             <td>{{=len(mentors)}}</td>
         </tr>
-        <tr>
-            <td>Sessions</td>
-            <td>
-            {{for row in db(
-                    (db.timeblock.symposium == symposium.id) &
-                    (db.session.timeblock == db.timeblock.id) &
-                    (db.room.id == db.session.room)
-                 ).select(
-                     db.session.name,
-                     db.session.theme,
-                     db.session.judges,
-                     db.timeblock.start_time,
-                     db.timeblock.desc,
-                     db.room.name,
-                     db.room.location,
-                     orderby=db.timeblock.start_time):}}
-            <table width="100%">
-                <tr>
-                    <th colspan=2 style="background: #ddd;">{{=row.session.name}}</th>
-                <tr>
-                    <td>Theme</td>
-                    <td>{{=row.session.theme}}</td>
-                </tr>
-                <tr>
-                    <td>Time</td>
-                    <td>{{=row.timeblock.start_time}}<br />{{=row.timeblock.desc}}</td>
-                </tr>
-                <tr>
-                    <td>Room</td>
-                    <td>{{=row.room.name}}<br />{{=row.room.location}}</td>
-                </tr>
-                <tr>
-                    <td>Judges</td>
-                    <td>
-                        <ul>
-                            {{for x in row.session.judges or []:}}
-                                {{=LI(
-                                    A( db.auth_user._format % db.auth_user(x),
-                                        _href=URL("people","profile",args=x)))}}
-                            {{pass}}
-                        </ul>
-                    </td>
-                </tr>
-            </table>
-            {{pass}}
-            </td>
-        </tr>
-        </table>
+    </table>
 
 
 {{#=BEAUTIFY(response._vars)}}
