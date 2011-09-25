@@ -6,8 +6,6 @@ def index():
         if symposiums.first():
             symp = symposiums.first()
             session['filter'] = symp.sid
-            #Flush menus
-            build_menu()
             all = False
         else:
             raise HTTP(404)
@@ -16,8 +14,6 @@ def index():
         symposiums = db(db.symposium.id > 0).select(orderby=~db.symposium.event_date)
         all = True
         session['filter'] = ""
-        #Flush menus
-        build_menu()
     
     # Build Dict of all symposiums containing the symposium,
     # its papers, and the number of pending/non-approved papers

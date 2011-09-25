@@ -27,8 +27,7 @@ def view():
     
     if symp:
         session['filter'] = symp.sid
-        #Flush menus
-        build_menu()
+
         return dict(symposium = symp)
     
     else:

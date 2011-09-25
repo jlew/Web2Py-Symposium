@@ -24,23 +24,27 @@ if auth.user:
 if auth.has_membership("Reviewer"):
         paper_menu += [(T('Review Papers'), False, URL('papers','review'), [])]
 
-def build_menu():
-    response.menu = [
-        (T('Home'), False, URL('default','index'), []),
-        (T('Papers'), False, URL('papers','index', args=session.get('filter', "")), paper_menu),
-        (T('People'), False, URL('people','index', args=session.get('filter', "")), []),
-        (T('Agenda'), False, URL('agenda','index', args=session.get('filter', "")), []),
-    ]
-    
-    # Add an admin menu if in admin group
-    if auth.has_membership("Symposium Admin"):
-        response.menu += [
-            (T('Admin Actions'), False, "#", [
-                (T('Symposium Management'), False, URL('editsymp','index'), []),
-                (T('Manage System Users'), False, URL(request.application,'plugin_useradmin','index'), []),
-                (T('Batch Edit Papers'), False, URL('papers','batch'), []),
-                (T('Edit Pages'),False,URL('plugin_wiki','index'), []),
-            ])
-            ]
+class filter_link:
+    def __init__(self, control, func):
+        self.control = control
+        self.func = func
+    def __str__(self):
+        return str(URL(self.control, self.func, session.get('filter', "")))
 
-build_menu()
+response.menu = [
+    (T('Home'), False, URL('default','index'), []),
+    (T('Papers'), False, filter_link('papers','index'), paper_menu),
+    (T('People'), False, filter_link('people','index'), []),
+    (T('Agenda'), False, filter_link('agenda','index'), []),
+]
+
+# Add an admin menu if in admin group
+if auth.has_membership("Symposium Admin"):
+    response.menu += [
+        (T('Admin Actions'), False, "#", [
+            (T('Symposium Management'), False, URL('editsymp','index'), []),
+            (T('Manage System Users'), False, URL(request.application,'plugin_useradmin','index'), []),
+            (T('Batch Edit Papers'), False, URL('papers','batch'), []),
+            (T('Edit Pages'),False,URL('plugin_wiki','index'), []),
+        ])
+        ]
