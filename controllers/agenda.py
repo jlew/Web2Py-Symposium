@@ -12,27 +12,16 @@ def index():
         build_menu()
 
     else:
+        session.flash = "Please select a symposium to view the agenda"
+        redirect( URL("default", "index") )
         symposiums = db(db.symposium.sid>0).select()
         symp = False
         session['filter'] = ""
         #Flush menus
         build_menu()
 
-    ret_list = []
-    import datetime
-    for symp_itm in symposiums:
-        papers = get_symposium_visable_papers(symp_itm)
-
-        papers.sort(key=lambda x: x.schedule_start if (x.schedule_start and x.scheduled) else datetime.time())
-        ret_list += papers
-
-    room_list = []
-    symp_list = []
-    for symp_item in db(db.symposium.id>0).select():
-        room_list += symp_item.rooms
-        symp_list.append( symp_item.name )
-
-    return dict(papers=ret_list, symp=symp, room_list=room_list, symp_list=symp_list)
+    timeblocks = symp.timeblock.select(orderby=db.timeblock.start_time)
+    return dict(timeblocks=timeblocks,symp=symp)
 
 @auth.requires_membership("Symposium Admin")
 def edit():
