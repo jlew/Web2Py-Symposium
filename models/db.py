@@ -92,12 +92,6 @@ db.define_table('paper',
     
     Hidden('modified', 'datetime', default=request.now, update=request.now, writable=False),
 
-    #TO BE REMOVED    
-    Hidden('scheduled', 'boolean', default=False),
-    Hidden('schedule_room', 'integer', default=-1, label=T("Room")),
-    Hidden('schedule_start', 'time'),
-    Hidden('schedule_end', 'time'),
-
     Hidden('session', db.session),
     Hidden('session_pos', 'integer'),
     
