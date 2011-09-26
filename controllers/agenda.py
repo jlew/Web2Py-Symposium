@@ -38,24 +38,68 @@ def index():
 def edit():
     symp = db.symposium(request.args(0))
     if symp:
-        response.files.append(URL('static','week-cal/libs/css/smoothness/jquery-ui-1.8.11.custom.css'))
-        response.files.append(URL('static','week-cal/jquery.weekcalendar.css'))
-        response.files.append(URL('static','week-cal/skins/default.css'))
-        response.files.append(URL('static','week-cal/skins/gcalendar.css'))
-        response.files.append(URL('static','week-cal/jquery.weekcalendar.js'))
-        return dict(symposium=symp, papers=get_symposium_visable_papers(symp))
+        
+        sess = db(
+                    (db.timeblock.symposium == symp.id) &
+                    (db.session.timeblock == db.timeblock.id) &
+                    (db.room.id == db.session.room)
+                 ).select(
+                     db.session.id,
+                     db.session.name,
+                     db.session.theme,
+                     db.timeblock.start_time,
+                     db.timeblock.desc,
+                     db.room.name,
+                     orderby=db.timeblock.start_time)
+        papers = db(
+                    (db.paper.symposium == symp.id) &
+                    (db.paper.session == None)
+                   ).select(
+                       db.paper.id, db.paper.title, db.paper.description, db.paper.format, db.paper.category
+                   )
+        
+        return dict(sess=sess, unscheduled_papers=papers)
     else:
         raise HTTP(404)
+
+@auth.requires_membership("Symposium Admin")
+def update_order():
+    sess = db.session(request.vars.ses_id)
+    
+    if not sess:
+        raise HTTP(404)
+    
+    new_order = request.vars.order.split(",")
+    
+    for paper in sess.paper.select():
+        paper.update_record( session_pos=new_order.index(str(paper.id)) )
     
 @auth.requires_membership("Symposium Admin")
-def schedule_event():
-    from datetime import time
-    paper = db.paper(request.vars.id)
-    symposium = paper.symposium
-    paper.update_record(
-        scheduled= int(request.vars.room) != len(symposium.rooms),
-        schedule_start=time( int(request.vars.start_h), int(request.vars.start_m), 0),
-        schedule_end=time( int(request.vars.end_h), int(request.vars.end_m), 0),
-        schedule_room=int(request.vars.room)
-    )
-    return ""
+def add_to_session():
+    sess = db.session(request.vars.ses_id)
+    
+    if not sess:
+        raise HTTP(404)
+    
+    curr_paper = db.paper(request.vars.paper)
+    
+    if not curr_paper:
+        raise HTTP(404)
+        
+    papers = sess.paper.select(orderby=db.paper.session_pos)
+    
+    # Shift papers for placement
+    for paper in papers:
+        if paper.session_pos >= int(request.vars.position):
+            paper.update_record(session_pos = paper.session_pos + 1)
+    
+    curr_paper.update_record(session = sess)
+
+@auth.requires_membership("Symposium Admin")
+def del_from_session():
+    curr_paper = db.paper(request.vars.paper)
+    
+    if not curr_paper:
+        raise HTTP(404)
+        
+    curr_paper.update_record(session = None)

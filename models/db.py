@@ -99,6 +99,7 @@ db.define_table('paper',
     Hidden('schedule_end', 'time'),
 
     Hidden('session', db.session),
+    Hidden('session_pos', 'integer'),
     
     format='%(title)s'
 )

@@ -15,7 +15,7 @@
     </tr>
     <tr>
         <td>Time</td>
-        <td>{{=row.timeblock.start_time}}<br />{{=row.timeblock.desc}}</td>
+        <td>{{=row.timeblock.start_time.strftime(TIME_FORMAT)}}<br />{{=row.timeblock.desc}}</td>
     </tr>
     <tr>
         <td>Room</td>

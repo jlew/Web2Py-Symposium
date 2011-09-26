@@ -4,7 +4,7 @@
 <ul>
 {{for timeblock in timeblocks:}}
     <li id="timeblock_{{=timeblock.id}}">
-        {{=B(A(timeblock.start_time,
+        {{=B(A(timeblock.start_time.strftime(TIME_FORMAT),
             _href=URL("edit_timeblock", args=timeblock.id),
             cid="timeblock_%s" % timeblock.id))}}: {{=timeblock.desc}}</li>
 {{pass}}
