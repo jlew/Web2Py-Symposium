@@ -28,3 +28,17 @@
         {{pass}}
     {{pass}}
 {{pass}}
+
+{{judges = db(db.session.judges.contains(id)).select(db.session.id, db.session.name, db.session.theme, db.session.timeblock)}}
+{{if judges:}}
+    <h2 style="clear: bothl">{{=T("Sessions I Judged")}}</h2>
+    {{for sess in judges:}}
+        <div>
+            <div style="font-weight: bold; text-decoration: underline;">
+                {{=A(sess.name, _href=URL('agenda','session',args=sess.id))}}
+            </div>
+            <div>Symposium: {{=sess.timeblock.symposium.name}}</div>
+            <div>Sessoin Theme: {{=sess.theme}}</div>
+        </div>
+    {{pass}}
+{{pass}}

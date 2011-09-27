@@ -206,7 +206,7 @@ def email():
     form = SQLFORM.factory(
         Field('subject', 'string', label=T("Subject"), requires=IS_NOT_EMPTY()),
         Field('message', 'text', label=T("Message"), requires=IS_NOT_EMPTY()),
-        Field('who', default=[T("Authors")], requires=IS_IN_SET((T("Authors"),T("Mentors")),multiple=True)))
+        Field('who', default=[T("Authors")], requires=IS_IN_SET((T("Authors"),T("Mentors"),T("Judges")),multiple=True)))
         
     if form.accepts(request.vars, session):
         users = set()
@@ -215,6 +215,9 @@ def email():
         
         if T("Mentors") in form.vars.who:
             users = users.union(get_symposium_mentors_id(symposium, True))
+            
+        if T("Judges") in form.vars.who:
+            users = users.union(get_symposium_judges_id(symposium))
     
         emails = [db.auth_user(u).email for u in users]
         

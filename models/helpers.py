@@ -43,6 +43,15 @@ def get_symposium_mentors_id(symposium, all=False):
         if all or papers.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
             mentors = mentors.union(papers.mentors)
     return mentors
+    
+def get_symposium_judges_id(symposium):
+    judges = set()
+    for timeblock in db(db.timeblock.symposium == symposium.id).select(db.timeblock.id):
+        for sess in db(db.session.timeblock == timeblock.id).select(db.session.judges):
+            if sess.judges:
+                judges = judges.union(sess.judges)
+    return judges
+
 
 def batch_cell_view(cell, paper, td_class=""):
     def link_wrap(content):
