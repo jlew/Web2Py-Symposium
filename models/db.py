@@ -14,7 +14,6 @@ db.define_table('symposium',
     Field('reg_end', 'datetime', required=True, notnull=True, label=T("Registration End")),
     Field('event_date', 'date', required=True, notnull=True, label=T("Symposium Date")),
     Field('extra_info', 'text', label=T("Additional Information")),
-    Field('rooms', 'list:string', label=T("Rooms"), comment=T("Room Names for scheduling, press enter to get another room.")),
     format='%(name)s: %(event_date)s'
 )
 
