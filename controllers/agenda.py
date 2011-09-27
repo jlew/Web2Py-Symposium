@@ -92,3 +92,11 @@ def del_from_session():
         raise HTTP(404)
         
     curr_paper.update_record(session = None)
+
+def session():
+    sess = db.session(request.args(0))
+    
+    if not sess:
+        raise HTTP(404)
+        
+    return dict(sess=sess)
