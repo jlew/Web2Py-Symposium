@@ -11,36 +11,38 @@ tr:nth-child(even)    { background-color:#fff; }
 
 
 {{room_count = symp.room.count()}}
-
+{{room_ids = []}}
 <table border=1>
     <tr>
         <th width="10%">Time</th>
-        {{for room in symp.room.select(db.room.name, orderby=db.room.name):}}
+        {{for room in symp.room.select(db.room.name, db.room.id, orderby=db.room.name):}}
             <th width="{{=90/room_count}}%">{{=room.name}}</th> 
+            {{room_ids.append(room.id)}}
         {{pass}}
     </tr>
 {{for block in timeblocks:}}
+{{key = 0}}
     <tr>
         <td>{{=block.start_time.strftime(TIME_FORMAT)}}<br><span style="font-size: 80%">{{=block.desc}}</span></td>
         {{for session_lookup in db(
                             (db.session.timeblock == block.id) &
                             (db.room.id == db.session.room)
                          ).select(db.session.id, db.session.name, db.session.theme, orderby=db.room.name):}}
+                         {{key+=1}}
          <td id="session_{{=session_lookup.id}}">
          {{=A("Edit Session", _href=URL("edit_session", args=session_lookup.id))}}
         {{=A("Edit Judges", _href=URL("edit_session_judges", args=session_lookup.id))}}
              <div style="font-weight: bold; text-decoration: underline; text-align: center;">{{=session_lookup.name}}</div>
              {{=session_lookup.theme}}
-         </td>
-                         
+         </td>        
+        {{pass}}
+        {{while key < room_count:}}
+        <td align="center">
+            {{=A(SPAN(_class="icon plus"),"Add Session",
+                _href=URL('editsymp', 'create_session', args=[symp.id, room_ids[key], block.id]), _class="button")}}
+        </td>
+        {{key+=1}}
         {{pass}}
     </tr>
 {{pass}}
 </table>
-
-
-
-
-
-<h1>Create New Session</h1>
-{{=form}}

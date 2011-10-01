@@ -37,8 +37,8 @@ db.define_table('room',
 db.define_table('session',
     Field('name'),
     Field('theme'),
-    Field('timeblock', db.timeblock),
-    Field('room', db.room),
+    Field('timeblock', db.timeblock, writable=False),
+    Field('room', db.room, writable=False),
     Hidden('judges', 'list:reference auth_user', default=[]),
     format = "%(timeblock)s %(name)s"
 )
