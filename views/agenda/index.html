@@ -11,7 +11,7 @@ tr:nth-child(even)    { background-color:#fff; }
 </style>
 
 {{rooms = symp.room.select(db.room.name, db.room.id, orderby=db.room.name)}}
-{{timeblocks = symp.timeblock.select()}}
+{{timeblocks = symp.timeblock.select(orderby=db.timeblock.start_time)}}
 
 <table border=1>
     <tr>

@@ -72,7 +72,7 @@ tr:nth-child(even)    { background-color:#fff; }
 </style>
 
 {{rooms = symposium.room.select(db.room.name, db.room.id, db.room.location, orderby=db.room.name)}}
-{{timeblocks = symposium.timeblock.select()}}
+{{timeblocks = symposium.timeblock.select(orderby=db.timeblock.start_time)}}
 
 <table border=1 width="98%" style="margin:auto;">
     <tr>
