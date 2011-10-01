@@ -93,7 +93,7 @@ def del_from_session():
         
     curr_paper.update_record(session = None)
 
-def session():
+def view_session():
     sess = db.session(request.args(0))
     
     if not sess:

@@ -35,7 +35,7 @@
     {{for sess in judges:}}
         <div>
             <div style="font-weight: bold; text-decoration: underline;">
-                {{=A(sess.name, _href=URL('agenda','session',args=sess.id))}}
+                {{=A(sess.name, _href=URL('agenda','view_session',args=sess.id))}}
             </div>
             <div>Symposium: {{=sess.timeblock.symposium.name}}</div>
             <div>Sessoin Theme: {{=sess.theme}}</div>

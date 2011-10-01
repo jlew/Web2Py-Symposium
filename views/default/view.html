@@ -63,7 +63,7 @@
              orderby=db.timeblock.start_time):}}
         <table width="100%" style="margin: 5px;">
             <tr>
-                <th colspan=3 style="background: #ddd;">{{=A(row.session.name,_href=URL('agenda','session',args=row.session.id))}}</th>
+                <th colspan=3 style="background: #ddd;">{{=A(row.session.name,_href=URL('agenda','view_session',args=row.session.id))}}</th>
             </tr>
             <tr>
                 <td></td><td></td>
