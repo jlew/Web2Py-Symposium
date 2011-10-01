@@ -26,10 +26,11 @@ tr:nth-child(even)    { background-color:#fff; }
                 </th> 
             {{pass}}
         {{else:}}
-        <th>{{=A("ADD", _href=URL("create_room", args=symp.id) +"?KeepThis=true&TB_iframe=true&height=150&width=430", _class="thickbox")}}</th>
+        <th>{{=A(IMG(_src=URL('static','images/details_open.png')),"Add Your First Room", _href=URL("create_room", args=symp.id) +"?KeepThis=true&TB_iframe=true&height=150&width=430", _class="thickbox")}}</th>
         {{pass}}
     </tr>
 
+    {{if timeblocks:}}
     {{for timeblock in timeblocks:}}
     <tr>
         <td>{{=A(timeblock.start_time.strftime(TIME_FORMAT), _href=URL("edit_timeblock", args=timeblock.id) +"?KeepThis=true&TB_iframe=true&height=250&width=450", _class="thickbox")}}<br><span style="font-size: 80%">{{=timeblock.desc}}</span></td>
@@ -59,4 +60,12 @@ tr:nth-child(even)    { background-color:#fff; }
                 _href=URL('editsymp', 'create_timeblock', args=symp.id)+"?KeepThis=true&TB_iframe=true&height=275&width=450", _class="thickbox")}}
         </td>
     </tr>
+    {{else:}}
+        <tr>
+        <td align="center">
+            {{=A(IMG(_src=URL('static','images/details_open.png')), "Add Timeblock",
+                _href=URL('editsymp', 'create_timeblock', args=symp.id)+"?KeepThis=true&TB_iframe=true&height=275&width=450", _class="thickbox")}}
+        </td>
+    </tr>
+    {{pass}}
 </table>
