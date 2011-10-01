@@ -1,3 +1,4 @@
+{{extend "layout_min.html"}}
 <style>
 input[type="text"], input[type="password"], textarea, select {
 margin: 2px 15px 2px 5px;
@@ -11,6 +12,5 @@ border-radius: 2px;
 font-size: 12px;
 }
 </style>
-{{=B(response.flash) or ''}}
 {{=form}}
 <script type="text/javascript">window.opener.location.reload()</script>

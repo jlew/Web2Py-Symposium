@@ -15,21 +15,30 @@ tr:nth-child(even)    { background-color:#fff; }
 <table border=1>
     <tr>
         <th width="10%">Time</th>
-        {{for room in rooms:}}
-            <th width="{{=90/len(rooms)}}%">{{=room.name}}</th> 
+        {{if rooms:}}
+            {{for room in rooms:}}
+                <th width="{{=90/len(rooms)}}%">
+                    {{=A(room.name, _href=URL("edit_room", args=room.id) +"?KeepThis=true&TB_iframe=true&height=150&width=430", _class="thickbox", )}}
+                    {{if room == rooms[-1]:}}
+                        {{=A("ADD", _href=URL("create_room", args=symp.id) +"?KeepThis=true&TB_iframe=true&height=150&width=430", _class="thickbox", _style="float: right;")}}
+                    {{pass}}
+                </th> 
+            {{pass}}
+        {{else:}}
+        <th>{{=A("ADD", _href=URL("create_room", args=symp.id) +"?KeepThis=true&TB_iframe=true&height=150&width=430", _class="thickbox")}}</th>
         {{pass}}
     </tr>
 
     {{for timeblock in timeblocks:}}
     <tr>
-        <td>{{=timeblock.start_time.strftime(TIME_FORMAT)}}<br><span style="font-size: 80%">{{=timeblock.desc}}</span></td>
+        <td>{{=A(timeblock.start_time.strftime(TIME_FORMAT), _href=URL("edit_timeblock", args=timeblock.id) +"?KeepThis=true&TB_iframe=true&height=250&width=450", _class="thickbox")}}<br><span style="font-size: 80%">{{=timeblock.desc}}</span></td>
     {{for room in rooms:}}
         {{sess_block = db(
             (db.session.room == room.id) & (db.session.timeblock == timeblock.id) 
             ).select(db.session.id,db.session.name, db.session.judges).first()}}
         {{if sess_block:}}
             <td>
-                 {{=A("Edit Session", _href=URL("edit_session", args=sess_block.id))}}
+                 {{=A("Edit Session", _href=URL("edit_session", args=sess_block.id) +"?KeepThis=true&TB_iframe=true&height=150&width=450", _class="thickbox")}}
                     {{=A("Edit Judges", _href=URL("edit_session_judges", args=sess_block.id))}}
                      <div style="font-weight: bold; text-decoration: underline; text-align: center;">{{=sess_block.name}}</div>
                      {{=", ".join([db.auth_user._format % db.auth_user(x) for x in sess_block.judges])}}
@@ -37,10 +46,16 @@ tr:nth-child(even)    { background-color:#fff; }
         {{else:}}
             <td align="center">
             {{=A(SPAN(_class="icon plus"),"Add Session",
-                _href=URL('editsymp', 'create_session', args=[symp.id, room.id, timeblock.id]), _class="button")}}
+                _href=URL('editsymp', 'create_session', args=[symp.id, room.id, timeblock.id])+"?KeepThis=true&TB_iframe=true&height=255&width=420", _class="button thickbox")}}
             </td>
         {{pass}}
     {{pass}}
     </tr>
 {{pass}}
+    <tr>
+        <td align="center">
+            {{=A("Add",
+                _href=URL('editsymp', 'create_timeblock', args=symp.id)+"?KeepThis=true&TB_iframe=true&height=260&width=450", _class="thickbox")}}
+        </td>
+    </tr>
 </table>

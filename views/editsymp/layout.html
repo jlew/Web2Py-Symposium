@@ -1,8 +1,6 @@
 {{extend 'layout.html'}}
 
 {{=A("Settings", _href=URL("edit", args=request.args(0)))}} |
-{{=A("Rooms", _href=URL("manage_rooms", args=request.args(0)))}} |
-{{=A("Time Blocks", _href=URL("manage_timeblocks", args=request.args(0)))}} |
-{{=A("Sessions", _href=URL("manage_sessions", args=request.args(0)))}}
+{{=A("Scheduling Information", _href=URL("manage_sessions", args=request.args(0)))}}
 
 {{include}}

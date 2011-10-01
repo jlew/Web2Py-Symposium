@@ -13,17 +13,14 @@ def edit():
     return dict(form=crud.update(db.symposium, request.args(0), next=URL("editsymp","index")))
 
 @auth.requires_membership("Symposium Admin")
-def manage_timeblocks():
+def create_timeblock():
     symp = db.symposium( request.args(0) )
     
     if not symp:
         raise HTTP(404)
     
     db.timeblock.symposium.default = symp.id
-    return dict(
-        form=crud.create(db.timeblock),
-        timeblocks=db(db.timeblock.symposium == symp.id).select(orderby=db.timeblock.start_time)
-        )
+    return dict( form=crud.create(db.timeblock, next=URL("editsymp","close_parent")))
         
 @auth.requires_membership("Symposium Admin")
 def edit_timeblock():
@@ -32,20 +29,17 @@ def edit_timeblock():
     if not timeblock:
         raise HTTP(404) 
 
-    return dict(form=crud.update(db.timeblock, timeblock))
+    return dict(form=crud.update(db.timeblock, timeblock, next=URL("editsymp","close_parent")))
     
 @auth.requires_membership("Symposium Admin")
-def manage_rooms():
+def create_room():
     symp = db.symposium( request.args(0) )
     
     if not symp:
         raise HTTP(404)
         
     db.room.symposium.default = symp.id
-    return dict(
-        form=crud.create(db.room),
-        rooms=db(db.room.symposium == symp.id).select(orderby=db.room.name)
-        )
+    return dict(form=crud.create(db.room, next=URL("editsymp","close_parent")))
         
 @auth.requires_membership("Symposium Admin")
 def edit_room():
@@ -54,7 +48,7 @@ def edit_room():
     if not room:
         raise HTTP(404) 
 
-    return dict(form=crud.update(db.room, room))
+    return dict(form=crud.update(db.room, room, next=URL("editsymp","close_parent")))
     
 @auth.requires_membership("Symposium Admin")
 def manage_sessions():
@@ -77,7 +71,7 @@ def edit_session():
 
     db.session.room.requires = IS_IN_DB(db(db.room.symposium==symp.id),db.room.id,"%(name)s")
     db.session.timeblock.requires = IS_IN_DB(db(db.timeblock.symposium==symp.id),db.timeblock.id,"%(start_time)s")
-    return dict(form=crud.update(db.session, sess, next=URL("editsymp","manage_sessions",args=sess.timeblock.symposium.id)), symp=sess.timeblock.symposium)
+    return dict(form=crud.update(db.session, sess, next=URL("editsymp","close_parent")), symp=sess.timeblock.symposium)
     
 
 @auth.requires_membership("Symposium Admin")
@@ -93,7 +87,10 @@ def create_session():
     db.session.timeblock.requires = IS_IN_DB(db(db.timeblock.symposium==symp.id),db.timeblock.id,"%(start_time)s")
     db.session.room.default = room.id
     db.session.timeblock.default = timeb.id
-    return dict(form=crud.create(db.session, next=URL("editsymp","manage_sessions",args=symp.id)))
+    return dict(form=crud.create(db.session, next=URL("editsymp","close_parent")))
+    
+def close_parent():
+    return dict()
 
 @auth.requires_membership("Symposium Admin")
 def edit_session_judges():
