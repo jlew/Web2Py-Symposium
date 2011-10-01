@@ -9,40 +9,38 @@ tr:nth-child(odd)    { background-color:#eee; }
 tr:nth-child(even)    { background-color:#fff; }
 </style>
 
+{{rooms = symp.room.select(db.room.name, db.room.id, orderby=db.room.name)}}
+{{timeblocks = symp.timeblock.select()}}
 
-{{room_count = symp.room.count()}}
-{{room_ids = []}}
 <table border=1>
     <tr>
         <th width="10%">Time</th>
-        {{for room in symp.room.select(db.room.name, db.room.id, orderby=db.room.name):}}
-            <th width="{{=90/room_count}}%">{{=room.name}}</th> 
-            {{room_ids.append(room.id)}}
+        {{for room in rooms:}}
+            <th width="{{=90/len(rooms)}}%">{{=room.name}}</th> 
         {{pass}}
     </tr>
-{{for block in timeblocks:}}
-{{key = 0}}
+
+    {{for timeblock in timeblocks:}}
     <tr>
-        <td>{{=block.start_time.strftime(TIME_FORMAT)}}<br><span style="font-size: 80%">{{=block.desc}}</span></td>
-        {{for session_lookup in db(
-                            (db.session.timeblock == block.id) &
-                            (db.room.id == db.session.room)
-                         ).select(db.session.id, db.session.name, db.session.theme, orderby=db.room.name):}}
-                         {{key+=1}}
-         <td id="session_{{=session_lookup.id}}">
-         {{=A("Edit Session", _href=URL("edit_session", args=session_lookup.id))}}
-        {{=A("Edit Judges", _href=URL("edit_session_judges", args=session_lookup.id))}}
-             <div style="font-weight: bold; text-decoration: underline; text-align: center;">{{=session_lookup.name}}</div>
-             {{=session_lookup.theme}}
-         </td>        
-        {{pass}}
-        {{while key < room_count:}}
-        <td align="center">
+        <td>{{timeblock.start_time.strftime(TIME_FORMAT)}}<br><span style="font-size: 80%">{{=timeblock.desc}}</span></td>
+    {{for room in rooms:}}
+        {{sess_block = db(
+            (db.session.room == room.id) & (db.session.timeblock == timeblock.id) 
+            ).select(db.session.id,db.session.name, db.session.judges).first()}}
+        {{if sess_block:}}
+            <td>
+                 {{=A("Edit Session", _href=URL("edit_session", args=sess_block.id))}}
+                    {{=A("Edit Judges", _href=URL("edit_session_judges", args=sess_block.id))}}
+                     <div style="font-weight: bold; text-decoration: underline; text-align: center;">{{=sess_block.name}}</div>
+                     {{=", ".join([db.auth_user._format % db.auth_user(x) for x in sess_block.judges])}}
+            </td>
+        {{else:}}
+            <td align="center">
             {{=A(SPAN(_class="icon plus"),"Add Session",
-                _href=URL('editsymp', 'create_session', args=[symp.id, room_ids[key], block.id]), _class="button")}}
-        </td>
-        {{key+=1}}
+                _href=URL('editsymp', 'create_session', args=[symp.id, room.id, timeblock.id]), _class="button")}}
+            </td>
         {{pass}}
+    {{pass}}
     </tr>
 {{pass}}
 </table>
