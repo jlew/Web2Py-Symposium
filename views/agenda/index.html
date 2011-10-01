@@ -1,6 +1,7 @@
 {{right_sidebar_enabled=False}}
-{{extend 'layout.html'}}
+{{extend 'editsymp/layout.html'}}
 {{room_count = symp.room.count()}}
+<h1>Manage Sessions</h1>
 <style>
 table, tr, td, th{
     border: 1px solid black;
@@ -8,32 +9,41 @@ table, tr, td, th{
 tr:nth-child(odd)    { background-color:#eee; }
 tr:nth-child(even)    { background-color:#fff; }
 </style>
+
+{{rooms = symp.room.select(db.room.name, db.room.id, orderby=db.room.name)}}
+{{timeblocks = symp.timeblock.select()}}
+
 <table border=1>
     <tr>
         <th width="10%">Time</th>
-        {{for room in symp.room.select(db.room.name, orderby=db.room.name):}}
-            <th width="{{=90/room_count}}%">{{=room.name}}</th> 
+        {{for room in rooms:}}
+            <th width="{{=90/len(rooms)}}%">{{=room.name}}</th> 
         {{pass}}
     </tr>
-{{for block in timeblocks:}}
+
+    {{for timeblock in timeblocks:}}
     <tr>
-        <td>{{=block.start_time.strftime(TIME_FORMAT)}}<br><span style="font-size: 80%">{{=block.desc}}</span></td>
-        {{for session in db(
-                            (db.session.timeblock == block.id) &
-                            (db.room.id == db.session.room)
-                         ).select(db.session.id, db.session.name, db.session.theme, orderby=db.room.name):}}
-         <td>
-             <div style="font-weight: bold; text-decoration: underline; text-align: center;">{{=session.name}}</div>
-             {{=session.theme}}
-             <ul>
-             {{for paper in db(db.paper.session == session.id).select():}}
-             {{=LI(A(paper.title, _href=URL("papers","view",args=paper.id)))}}
-             {{pass}}
-             </ul>
-         </td>
-                         
+        <td>{{=timeblock.start_time.strftime(TIME_FORMAT)}}<br><span style="font-size: 80%">{{=timeblock.desc}}</span></td>
+    {{for room in rooms:}}
+        {{sess_block = db(
+            (db.session.room == room.id) & (db.session.timeblock == timeblock.id) 
+            ).select(db.session.id,db.session.name, db.session.judges).first()}}
+        {{if sess_block:}}
+            <td>
+                <div style="font-weight: bold; text-decoration: underline; text-align: center;">{{=A(sess_block.name, _href=URL('agenda','view_session', args=sess_block.id))}}</div>
+                <ul>
+                 {{for paper in db(db.paper.session == sess_block.id).select():}}
+                     {{=LI(A(paper.title, _href=URL("papers","view",args=paper.id)))}}
+                 {{pass}}
+                 </ul>
+            </td>
+        {{else:}}
+            <td></td>
         {{pass}}
+    {{pass}}
     </tr>
 {{pass}}
 </table>
+
+
 {{#=BEAUTIFY(response._vars)}}
