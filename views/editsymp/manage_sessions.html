@@ -1,6 +1,7 @@
 {{right_sidebar_enabled=False}}
-{{extend 'editsymp/layout.html'}}
+{{extend 'layout.html'}}
 <h1>Manage Sessions</h1>
+{{=A("Back to Symposium Detail Page", _href=URL("default","view",args=symp.sid))}}
 <style>
 table, tr, td, th{
     border: 1px solid black;

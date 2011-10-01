@@ -1,15 +1,15 @@
+{{right_sidebar_enabled=False}}
 {{extend 'layout.html'}}
 {{if auth.has_membership("Symposium Admin"):}}
+
+<div style="background: #eee; padding: 0 15;">
 {{=DIV(
     A(SPAN(_class="icon pen"),"Edit Symposium",
-        _href=URL("editsymp","edit",args=symposium.id),
-        _class="button left"),
-    A(SPAN(_class="icon clock"),"Manage Agenda",
-        _href=URL("agenda","edit",args=symposium.id),
-        _class="button right"),
+        _href=URL("editsymp","edit",args=symposium.id)+"?KeepThis=true&TB_iframe=true&height=450&width=600",
+        _class="button left thickbox"),
     A(SPAN(_class="icon mail"),"Email Participants",
-        _href=URL("editsymp","email",args=symposium.id),
-        _class="button right"),
+        _href=URL("editsymp","email",args=symposium.id)+"?KeepThis=true&TB_iframe=true&height=350&width=400",
+        _class="button right thickbox"),
     _style="float: right;"
     )}}
 {{pass}}
@@ -34,9 +34,7 @@
     }}
     
     {{=MARKMIN(symposium.extra_info)}}
-    <h2>Event Information</h2>
-    <h3>Important Dates</h3>
-    <table width="100%">
+    <table width="90%" style="margin:auto;">
         <tr>
             <td>{{=T("Event Date")}}</td>
             <td>{{=symposium.event_date.strftime(DATE_FORMAT)}}</td>
@@ -46,66 +44,70 @@
             <td>{{=symposium.reg_start.strftime(DATE_TIME_FORMAT)}} - {{=symposium.reg_end.strftime(DATE_TIME_FORMAT)}}</td>
         </tr>
     </table>
-    <h3>Sessions</h3>
-    {{for row in db(
-            (db.timeblock.symposium == symposium.id) &
-            (db.session.timeblock == db.timeblock.id) &
-            (db.room.id == db.session.room)
-         ).select(
-             db.session.id,
-             db.session.name,
-             db.session.theme,
-             db.session.judges,
-             db.timeblock.start_time,
-             db.timeblock.desc,
-             db.room.name,
-             db.room.location,
-             orderby=db.timeblock.start_time):}}
-        <table width="100%" style="margin: 5px;">
-            <tr>
-                <th colspan=3 style="background: #ddd;">{{=A(row.session.name,_href=URL('agenda','view_session',args=row.session.id))}}</th>
-            </tr>
-            <tr>
-                <td></td><td></td>
-                <td rowspan=4 width="40%;">
-                <b>Papers</b>
-                <ul>
-                {{for paper in db(
-                        (db.paper.session==row.session.id) &
-                        get_public_filter()
-                        ).select(db.paper.id,db.paper.title):}}
-                    {{=LI(A(paper.title, _href=URL("papers","view",args=paper.id)))}}
-                    
+    &nbsp;
+    </div>
+    
+<hr>
+
+<div style="background: #eee; padding: 0 15;">
+{{if auth.has_membership("Symposium Admin"):}}
+    {{=DIV(A(SPAN(_class="icon clock"),"Scheduling Information",
+        _href=URL("editsymp","manage_sessions",args=symposium.id), #+"?KeepThis=true&TB_iframe=true&height=450&width=600",
+        _class="button middle"),# thickbox"),
+    A(SPAN(_class="icon plus"),"Schedule Papers",
+        _href=URL("agenda","edit",args=symposium.id),
+        _class="button right"),
+    _style="float: right;")
+        }}
+{{pass}}  
+<h2>Sessions</h2>
+{{=A(T("View Agenda"), _href=URL('agenda','index',args=symposium.sid))}}
+{{room_count = symposium.room.count()}}
+<style>
+table, tr, td, th{
+    border: 1px solid black;
+}
+tr:nth-child(odd)    { background-color:#eee; }
+tr:nth-child(even)    { background-color:#fff; }
+</style>
+
+{{rooms = symposium.room.select(db.room.name, db.room.id, db.room.location, orderby=db.room.name)}}
+{{timeblocks = symposium.timeblock.select()}}
+
+<table border=1 width="98%" style="margin:auto;">
+    <tr>
+        <th width="10%">Time</th>
+        {{for room in rooms:}}
+            <th width="{{=90/len(rooms)}}%">{{=room.name}}<br><span style="font-size: 80%">{{=room.location}}</span></th> 
+        {{pass}}
+    </tr>
+
+    {{for timeblock in timeblocks:}}
+    <tr>
+        <td>{{=timeblock.start_time.strftime(TIME_FORMAT)}}<br><span style="font-size: 80%">{{=timeblock.desc}}</span></td>
+    {{for room in rooms:}}
+        {{sess_block = db(
+            (db.session.room == room.id) & (db.session.timeblock == timeblock.id) 
+            ).select(db.session.id,db.session.name, db.session.theme).first()}}
+        {{if sess_block:}}
+            <td>
+                <div style="font-weight: bold; text-decoration: underline; text-align: center;">{{=A(sess_block.name, _href=URL('agenda','view_session', args=sess_block.id))}}</div>
+                <div style="font-size: 80%; line-height: 100%;">
+                <b>Papers:</b> {{=sess_block.paper.count()}}<br />
+                {{if sess_block.theme:}}
+                <b>Theme:</b> {{=sess_block.theme}}<br />
                 {{pass}}
-                </ul>
-                </td>
-            </tr>
-            <tr>
-                <td width="15%">Theme</td>
-                <td>{{=row.session.theme}}</td>
-            </tr>
-            <tr>
-                <td>Time</td>
-                <td>{{=row.timeblock.start_time.strftime(TIME_FORMAT)}}<br />{{=row.timeblock.desc}}</td>
-            </tr>
-            <tr>
-                <td>Room</td>
-                <td>{{=row.room.name}}<br />{{=row.room.location}}</td>
-            </tr>
-            <tr>
-                <td>Judges</td>
-                <td>
-                    <ul>
-                        {{for x in row.session.judges or []:}}
-                            {{=LI(
-                                A( db.auth_user._format % db.auth_user(x),
-                                    _href=URL("people","profile",args=x)))}}
-                        {{pass}}
-                    </ul>
-                </td>
-            </tr>
-        </table>
+                </div>
+            </td>
+        {{else:}}
+            <td></td>
+        {{pass}}
     {{pass}}
+    </tr>
+{{pass}}
+</table>
+&nbsp;
+    </div>
     
     <h2>Event Statistics</h2>
     <table>

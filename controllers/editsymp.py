@@ -2,15 +2,15 @@
 # try something like
 @auth.requires_membership("Symposium Admin")
 def index():
-    return dict(symposiums=db(db.symposium.id>0).select(orderby=~db.symposium.event_date))
+    redirect( URL('default','index') )
 
 @auth.requires_membership("Symposium Admin")
 def new():
-    return dict(form=crud.create(db.symposium, next=URL("editsymp","index")))
+    return dict(form=crud.create(db.symposium, next=URL("editsymp","close_parent")))
     
 @auth.requires_membership("Symposium Admin")
 def edit():
-    return dict(form=crud.update(db.symposium, request.args(0), next=URL("editsymp","index")))
+    return dict(form=crud.update(db.symposium, request.args(0), next=URL("editsymp","close_parent")))
 
 @auth.requires_membership("Symposium Admin")
 def create_timeblock():
@@ -200,7 +200,10 @@ def email():
     form = SQLFORM.factory(
         Field('subject', 'string', label=T("Subject"), requires=IS_NOT_EMPTY()),
         Field('message', 'text', label=T("Message"), requires=IS_NOT_EMPTY()),
-        Field('who', default=[T("Authors")], requires=IS_IN_SET((T("Authors"),T("Mentors"),T("Judges")),multiple=True)))
+        Field('who', default=[T("Authors")],
+            requires=IS_IN_SET((T("Authors"),T("Mentors"),T("Judges")),multiple=True),
+            widget=SQLFORM.widgets.checkboxes.widget
+        ))
         
     if form.accepts(request.vars, session):
         users = set()

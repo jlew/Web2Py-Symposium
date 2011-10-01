@@ -36,7 +36,6 @@ def build_menu():
     if auth.has_membership("Symposium Admin"):
         response.menu += [
             (T('Admin Actions'), False, "#", [
-                (T('Symposium Management'), False, URL('editsymp','index'), []),
                 (T('Manage System Users'), False, URL(request.application,'plugin_useradmin','index'), []),
                 (T('Batch Edit Papers'), False, URL('papers','batch'), []),
                 (T('Edit Pages'),False,URL('plugin_wiki','index'), []),
