@@ -67,23 +67,9 @@ def manage_sessions():
     db.session.timeblock.requires = IS_IN_DB(db(db.timeblock.symposium==symp.id),db.timeblock.id,"%(start_time)s")
     
     curd_frm = crud.create(db.session)
-    
-    sessions = db(
-                    (db.timeblock.symposium == symp.id) &
-                    (db.session.timeblock == db.timeblock.id) &
-                    (db.room.id == db.session.room)
-                 ).select(
-                     db.session.id,
-                     db.session.name,
-                     db.session.theme,
-                     db.session.judges,
-                     db.timeblock.start_time,
-                     db.timeblock.desc,
-                     db.room.name,
-                     db.room.location,
-                     orderby=db.timeblock.start_time)
 
-    return dict(sessions=sessions, form=curd_frm)
+    timeblocks = symp.timeblock.select(orderby=db.timeblock.start_time)
+    return dict(timeblocks=timeblocks,form=curd_frm, symp=symp)
 
 @auth.requires_membership("Symposium Admin")
 def edit_session():
@@ -96,7 +82,7 @@ def edit_session():
 
     db.session.room.requires = IS_IN_DB(db(db.room.symposium==symp.id),db.room.id,"%(name)s")
     db.session.timeblock.requires = IS_IN_DB(db(db.timeblock.symposium==symp.id),db.timeblock.id,"%(start_time)s")
-    return dict(form=crud.update(db.session, sess))
+    return dict(form=crud.update(db.session, sess, next=URL("editsymp","manage_sessions",args=sess.timeblock.symposium.id)), symp=sess.timeblock.symposium)
     
 @auth.requires_membership("Symposium Admin")
 def edit_session_judges():

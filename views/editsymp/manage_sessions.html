@@ -1,42 +1,46 @@
+{{right_sidebar_enabled=False}}
 {{extend 'editsymp/layout.html'}}
-
 <h1>Manage Sessions</h1>
-<ul>
-{{for row in sessions:}}
-<li id="session_{{=row.session.id}}">
-    {{=A("Edit Session", _href=URL("edit_session", args=row.session.id), cid="session_%s"%row.session.id)}}
-    {{=A("Edit Judges", _href=URL("edit_session_judges", args=row.session.id))}}
-<table width="100%">
+<style>
+table, tr, td, th{
+    border: 1px solid black;
+}
+tr:nth-child(odd)    { background-color:#eee; }
+tr:nth-child(even)    { background-color:#fff; }
+</style>
+
+
+{{room_count = symp.room.count()}}
+
+<table border=1>
     <tr>
-        <th colspan=2 style="background: #ddd;">{{=row.session.name}}</th>
-    <tr>
-        <td width="15%">Theme</td>
-        <td>{{=row.session.theme}}</td>
+        <th width="10%">Time</th>
+        {{for room in symp.room.select(db.room.name, orderby=db.room.name):}}
+            <th width="{{=90/room_count}}%">{{=room.name}}</th> 
+        {{pass}}
     </tr>
+{{for block in timeblocks:}}
     <tr>
-        <td>Time</td>
-        <td>{{=row.timeblock.start_time.strftime(TIME_FORMAT)}}<br />{{=row.timeblock.desc}}</td>
+        <td>{{=block.start_time.strftime(TIME_FORMAT)}}<br><span style="font-size: 80%">{{=block.desc}}</span></td>
+        {{for session_lookup in db(
+                            (db.session.timeblock == block.id) &
+                            (db.room.id == db.session.room)
+                         ).select(db.session.id, db.session.name, db.session.theme, orderby=db.room.name):}}
+         <td id="session_{{=session_lookup.id}}">
+         {{=A("Edit Session", _href=URL("edit_session", args=session_lookup.id))}}
+        {{=A("Edit Judges", _href=URL("edit_session_judges", args=session_lookup.id))}}
+             <div style="font-weight: bold; text-decoration: underline; text-align: center;">{{=session_lookup.name}}</div>
+             {{=session_lookup.theme}}
+         </td>
+                         
+        {{pass}}
     </tr>
-    <tr>
-        <td>Room</td>
-        <td>{{=row.room.name}}<br />{{=row.room.location}}</td>
-    </tr>
-    <tr>
-        <td>Judges</td>
-        <td>
-            <ul>
-                {{for x in row.session.judges or []:}}
-                    {{=LI(
-                        A( db.auth_user._format % db.auth_user(x),
-                            _href=URL("people","profile",args=x)))}}
-                {{pass}}
-            </ul>
-        </td>
-    </tr>
-</table>
-</li>
 {{pass}}
-</ul>
+</table>
+
+
+
+
 
 <h1>Create New Session</h1>
 {{=form}}
