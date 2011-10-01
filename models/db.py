@@ -21,7 +21,7 @@ db.define_table('symposium',
 db.symposium.sid.requires.insert(0,IS_SLUG())
 
 db.define_table('timeblock',
-    Field('start_time', 'time'),
+    Field('start_time', 'time', required=True, notnull=True),
     Field('desc', 'text'),
     Field('symposium', db.symposium, writable=False),
     format = "%(start_time)s: %(desc)s",
@@ -29,16 +29,16 @@ db.define_table('timeblock',
 
 db.define_table('room',
     Field('symposium', db.symposium, writable=False),
-    Field('name'),
+    Field('name', required=True, notnull=True),
     Field('location'),
     format = "%(name)s: %(location)s"
 )
 
 db.define_table('session',
-    Field('name'),
+    Field('name', required=True, notnull=True),
     Field('theme'),
-    Field('timeblock', db.timeblock, writable=False),
-    Field('room', db.room, writable=False),
+    Field('timeblock', db.timeblock, writable=False, required=True, notnull=True),
+    Field('room', db.room, writable=False, required=True, notnull=True),
     Hidden('judges', 'list:reference auth_user', default=[]),
     format = "%(timeblock)s %(name)s"
 )
