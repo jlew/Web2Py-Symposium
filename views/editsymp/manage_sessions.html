@@ -18,9 +18,9 @@ tr:nth-child(even)    { background-color:#fff; }
         {{if rooms:}}
             {{for room in rooms:}}
                 <th width="{{=90/len(rooms)}}%">
-                    {{=A(room.name, _href=URL("edit_room", args=room.id) +"?KeepThis=true&TB_iframe=true&height=150&width=430", _class="thickbox", )}}
+                    {{=A(room.name, _href=URL("edit_room", args=room.id) +"?KeepThis=true&TB_iframe=true&height=175&width=450", _class="thickbox", )}}
                     {{if room == rooms[-1]:}}
-                        {{=A("ADD", _href=URL("create_room", args=symp.id) +"?KeepThis=true&TB_iframe=true&height=150&width=430", _class="thickbox", _style="float: right;")}}
+                        {{=A(IMG(_src=URL('static','images/details_open.png')), _href=URL("create_room", args=symp.id) +"?KeepThis=true&TB_iframe=true&height=175&width=450", _class="thickbox", _style="float: right;")}}
                     {{pass}}
                 </th> 
             {{pass}}
@@ -54,8 +54,8 @@ tr:nth-child(even)    { background-color:#fff; }
 {{pass}}
     <tr>
         <td align="center">
-            {{=A("Add",
-                _href=URL('editsymp', 'create_timeblock', args=symp.id)+"?KeepThis=true&TB_iframe=true&height=260&width=450", _class="thickbox")}}
+            {{=A(IMG(_src=URL('static','images/details_open.png')),
+                _href=URL('editsymp', 'create_timeblock', args=symp.id)+"?KeepThis=true&TB_iframe=true&height=275&width=450", _class="thickbox")}}
         </td>
     </tr>
 </table>
