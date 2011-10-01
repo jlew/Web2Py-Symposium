@@ -22,7 +22,7 @@ tr:nth-child(even)    { background-color:#fff; }
 
     {{for timeblock in timeblocks:}}
     <tr>
-        <td>{{timeblock.start_time.strftime(TIME_FORMAT)}}<br><span style="font-size: 80%">{{=timeblock.desc}}</span></td>
+        <td>{{=timeblock.start_time.strftime(TIME_FORMAT)}}<br><span style="font-size: 80%">{{=timeblock.desc}}</span></td>
     {{for room in rooms:}}
         {{sess_block = db(
             (db.session.room == room.id) & (db.session.timeblock == timeblock.id) 
