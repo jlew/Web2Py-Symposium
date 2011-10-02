@@ -1,8 +1,8 @@
 {{right_sidebar_enabled=False}}
 {{extend 'layout.html'}}
-{{if auth.has_membership("Symposium Admin"):}}
 
-<div style="background: #eee; padding: 0 15;">
+<div style="border: 1px solid #eee;">
+{{if auth.has_membership("Symposium Admin"):}}
 {{=DIV(
     A(SPAN(_class="icon pen"),"Edit Symposium",
         _href=URL("editsymp","edit",args=symposium.id)+"?KeepThis=true&TB_iframe=true&height=450&width=600",
@@ -13,7 +13,8 @@
     _style="float: right;"
     )}}
 {{pass}}
-<h1>{{=symposium.name}}</h1>
+<h1 style="padding-left: 10px;">{{=symposium.name}}</h1>
+<div style="padding-left: 10px;">
 {{if symposium.reg_start < request.now and request.now < symposium.reg_end:}}
     {{=B(T("Accepting Submissions"), _style="color: #f00;")}}
     {{=B(A(T("Submit to this symposium"), _href=URL("papers","submit", vars={"symp":symposium.sid})))}}
@@ -34,6 +35,7 @@
     }}
     
     {{=MARKMIN(symposium.extra_info)}}
+    </div>
     <table width="90%" style="margin:auto;">
         <tr>
             <td>{{=T("Event Date")}}</td>
@@ -47,9 +49,9 @@
     &nbsp;
     </div>
     
-<hr>
+<hr style="clear: both;">
 
-<div style="background: #eee; padding: 0 15;">
+<div style="background: #eee;">
 {{if auth.has_membership("Symposium Admin"):}}
     {{=DIV(A(SPAN(_class="icon clock"),"Scheduling Information",
         _href=URL("editsymp","manage_sessions",args=symposium.id), #+"?KeepThis=true&TB_iframe=true&height=450&width=600",
@@ -60,8 +62,8 @@
     _style="float: right;")
         }}
 {{pass}}  
-<h2>Sessions</h2>
-{{=A(T("View Agenda"), _href=URL('agenda','index',args=symposium.sid))}}
+<h2 style="padding-left: 10px;">Sessions</h2>
+{{=A(T("View Agenda"), _href=URL('agenda','index',args=symposium.sid), _style="padding-left: 10px;")}}
 {{room_count = symposium.room.count()}}
 <style>
 table, tr, td, th{
@@ -69,6 +71,7 @@ table, tr, td, th{
 }
 tr:nth-child(odd)    { background-color:#eee; }
 tr:nth-child(even)    { background-color:#fff; }
+
 </style>
 
 {{rooms = symposium.room.select(db.room.name, db.room.id, db.room.location, orderby=db.room.name)}}
@@ -93,10 +96,16 @@ tr:nth-child(even)    { background-color:#fff; }
             <td>
                 <div style="font-weight: bold; text-decoration: underline; text-align: center;">{{=A(sess_block.name, _href=URL('agenda','view_session', args=sess_block.id))}}</div>
                 <div style="font-size: 80%; line-height: 100%;">
+                {{if sess_block.theme:}}<b>Theme:</b> {{=sess_block.theme}}<br />{{pass}}
                 <b>Papers:</b> {{=sess_block.paper.count()}}<br />
-                {{if sess_block.theme:}}
-                <b>Theme:</b> {{=sess_block.theme}}<br />
+                <ul>
+                {{for paper in sess_block.paper.select(db.paper.title, db.paper.id, orderby=db.paper.session_pos):}}
+                {{=LI(
+                    A(paper.title[:20]+"..." if len(paper.title) > 20 else paper.title , _href=URL('papers','view',args=paper.id), _title=paper.title)
+                    )}}
                 {{pass}}
+                </ul>
+
                 </div>
             </td>
         {{else:}}
