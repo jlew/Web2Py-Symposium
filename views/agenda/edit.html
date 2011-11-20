@@ -6,11 +6,15 @@ $(function() {
                 connectWith: ['.connectedSortable'],
                 placeholder: "ui-state-highlight",
                 update: function(event, ui){
-                    if(ui.sender == null && $(this).attr("id").substring(0,5) == "sess_"){
-                        sess_id = $(this).attr("id").substring(5);
-                        order = $(this).sortable('toArray').toString().replace(/paper_/g,"")
-                    
-                        $.get('{{=URL('agenda','update_order')}}', {ses_id:sess_id, order:order});
+                    if (this === ui.item.parent()[0]) { // only fire for internal sorts
+                       if(ui.sender == null && event.target.id.substring(0,5) == "sess_"){
+                           sess_id = event.target.id.substring(5);
+                           order = $(this).sortable('toArray').toString().replace(/paper_/g,"");
+                            
+                           if( order != ""){
+                               $.get('{{=URL('agenda','update_order')}}', {ses_id:sess_id, order:order});
+                           }
+                       }
                     }
                 },
                 receive: function(event, ui) {
@@ -34,68 +38,167 @@ $(function() {
     });
 </script>
 
-<table width="100%">
+{{room_count = symposium.room.count()}}
+<style>
+    table, tr, td, th{
+        border: 1px solid black;
+    }
+    tr:nth-child(odd)    { background-color:#eee; }
+    tr:nth-child(even)    { background-color:#fff; }
+
+    div.paper_block{
+        width: 100%;
+        border: 1px solid black;
+        margin-bottom: 5px;
+    }
+
+    div.paper_block_title{
+        background: #eee;
+    }
+    
+    div.paper_block_format{
+        font-size: 75%; float: right;
+    }
+    
+    div.paper_block_category{
+        font-size: 75%;
+    }
+    
+    .session_block .paper_block{
+        border: none;
+    }
+    
+    .session_block .paper_block_title{
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        background: none;
+        
+    }
+    
+    .session_block ul {
+    list-style-type: disc;
+    list-style-position: inside;
+    }
+    
+    .session_block .paper_block_format,
+    .session_block .paper_block_category,
+    .session_block .paper_block_description{
+        display: none;
+    }
+    
+</style>
+
+{{rooms = symposium.room.select(db.room.name, db.room.id, db.room.location, orderby=db.room.name)}}
+{{timeblocks = symposium.timeblock.select(orderby=db.timeblock.start_time)}}
+
+<table border=1 width="98%" style="margin:auto; table-layout:fixed;">
     <tr>
-        <th width="50%">Sessions</th>
-        <th width="50%">Unscheduled Papers</th>
+        <th width="10%">Time</th>
+        {{for room in rooms:}}
+            <th width="{{=90/len(rooms)}}%">{{=room.name}}<br><span style="font-size: 80%">{{=room.location}}</span></th> 
+        {{pass}}
     </tr>
+
+    {{for timeblock in timeblocks:}}
     <tr>
-        <td>
-        <div style="height: 350px; overflow: auto; background: #fff;" class="list_holder">
-        {{for row in sess:}}
-            <div style="border: 1px solid black; margin: 10px;">
-                <div style="border-bottom: 1px solid black;">
-                    <div style="float: right;" title="{{=row.timeblock.desc}}">
-                        {{=row.room.name}} - 
-                        {{=row.timeblock.start_time.strftime(TIME_FORMAT)}}
-                    </div>
-                    <div style="font-weight: bold;">{{=row.session.name}}</div>
+        <td>{{=timeblock.start_time.strftime(TIME_FORMAT)}}<br><span style="font-size: 80%">{{=timeblock.desc}}</span></td>
+    {{for room in rooms:}}
+        {{sess_block = db(
+            (db.session.room == room.id) & (db.session.timeblock == timeblock.id) 
+            ).select(db.session.id,db.session.name, db.session.theme).first()}}
+        {{if sess_block:}}
+            <td class="session_block">
+                <div style="font-weight: bold; text-decoration: underline; text-align: center;">{{=A(sess_block.name, _href=URL('agenda','view_session', args=sess_block.id))}}</div>
+                <div style="font-size: 80%; line-height: 100%;">
+                {{if sess_block.theme:}}<b>Theme:</b> {{=sess_block.theme}}<br />{{pass}}
+                <ul class="connectedSortable" style="padding: 5px;" id="sess_{{=sess_block.id}}">
+                {{for paper in sess_block.paper.select(db.paper.title, db.paper.id, db.paper.format, db.paper.category, db.paper.description, orderby=db.paper.session_pos):}}
+                    <li id="paper_{{=paper.id}}">
+                        <div class="paper_bock">
+                            <div class="paper_block_title">{{=A(paper.title, _title=paper.title, _href=URL('papers','view',args=paper.id))}}</div>
+                            <div class="paper_block_format">{{=paper.format}}</div>
+                            <div class="paper_block_category">{{=paper.category}}</div>
+                            <div class="paper_block_description">
+                                <a href="#" onclick="$('#desc_{{=paper.id}}').toggle('slow'); return false;"
+                                    style="font-size: 75%">Toggle Description</a>
+                                <div id="desc_{{=paper.id}}" style="display: none;">
+                                    {{=paper.description}}
+                                </div>
+                            </div>
+                        </div>
+                    </li>
+                {{pass}}
+                </ul>
+
                 </div>
-            <div>
-            {{=row.session.theme}}
-            </div>
-            <div>
-                <ul class="connectedSortable" style="padding: 5px;" id="sess_{{=row.session.id}}">
-                {{for paper in db(db.paper.session == row.session.id).select(db.paper.id, db.paper.title, db.paper.description, db.paper.format, db.paper.category, orderby=db.paper.session_pos):}}
-                    <li id="paper_{{=paper.id}}">
-                        <div style="width: 100%; border: 1px solid black; margin-bottom: 5px;">
-                            <div style="background: #eee;">{{=paper.title}}</div>
-                            <div style="font-size: 75%; float: right;">{{=paper.format}}</div>
-                            <div style="font-size: 75%">{{=paper.category}}</div>
-                            <div id="desc_{{=paper.id}}" style="display: none;">
-                                {{=paper.description}}
-                            </div>
-                            <a href="#" onclick="$('#desc_{{=paper.id}}').toggle('slow'); return false;"
-                                style="font-size: 75%">Toggle Description</a>
-                        </div>
-                    </li>
-                {{pass}}
-                </ul>
-            </div>
-        </div>
+            </td>
+        {{else:}}
+            <td></td>
+        {{pass}}
     {{pass}}
-    </div>
-        </td>
-        <td>
-            <div style="height: 350px; overflow: auto; background: #fff;" class="list_holder">
-                <ul class="connectedSortable" style="padding: 5px;" id="paper_holder">
-                {{for paper in unscheduled_papers:}}
-                    <li id="paper_{{=paper.id}}">
-                        <div style="width: 100%; border: 1px solid black; margin-bottom: 5px;">
-                            <div style="background: #eee;">{{=paper.title}}</div>
-                            <div style="font-size: 75%; float: right;">{{=paper.format}}</div>
-                            <div style="font-size: 75%">{{=paper.category}}</div>
-                            <a href="#" onclick="$('#desc_{{=paper.id}}').toggle('slow'); return false;"
-                                style="font-size: 75%">Toggle Description</a>
-                            <div id="desc_{{=paper.id}}" style="display: none;">
-                                {{=paper.description}}
-                            </div>
-                        </div>
-                    </li>
-                {{pass}}
-                </ul>
-            </div>
-        </td>
     </tr>
+{{pass}}
 </table>
+
+
+<h3 style="text-align: center;">Unscheduled Papers</h3>
+<div id="form" style="display: inline;"><b>Filter:</b></div>
+<div style="height: 600px; overflow: auto; background: #fff;" class="list_holder">
+    <ul class="connectedSortable" style="padding: 5px;" id="paper_holder">
+    {{for paper in unscheduled_papers:}}
+        <li id="paper_{{=paper.id}}">
+            <div class="paper_bock">
+                <div class="paper_block_title">{{=A(paper.title, _title=paper.title, _href=URL('papers','view',args=paper.id))}}</div>
+                <div class="paper_block_format">{{=paper.format}}</div>
+                <div class="paper_block_category">{{=paper.category}}</div>
+                <div class="paper_block_description">
+                    <a href="#" onclick="$('#desc_{{=paper.id}}').toggle('slow'); return false;"
+                        style="font-size: 75%">Toggle Description</a>
+                    <div id="desc_{{=paper.id}}" style="display: none;">
+                        {{=paper.description}}
+                    </div>
+                </div>
+            </div>
+        </li>
+    {{pass}}
+    </ul>
+</div>
+
+<script>
+// Script from http://papermashup.com/jquery-list-filtering/
+(function ($) {
+  jQuery.expr[':'].Contains = function(a,i,m){
+      return (a.textContent || a.innerText || "").toUpperCase().indexOf(m[3].toUpperCase())>=0;
+  };
+
+  function filterList(header, list) {
+    var form = $("<form>").attr({"class":"filterform","action":"#", "style":"display: inline;"}),
+        input = $("<input>").attr({"class":"filterinput","type":"text"});
+    $(form).append(input).appendTo(header);
+
+    $(input)
+      .change( function () {
+        var filter = $(this).val();
+        if(filter) {
+
+          $matches = $(list).find('.paper_bock:Contains(' + filter + ')').parent();
+          $('li', list).not($matches).slideUp();
+          $matches.slideDown();
+
+        } else {
+          $(list).find("li").slideDown();
+        }
+        return false;
+      })
+    .keyup( function () {
+        $(this).change();
+    });
+  }
+
+  $(function () {
+    filterList($("#form"), $("#paper_holder"));
+  });
+}(jQuery));
+</script>
 {{#=BEAUTIFY(response._vars)}}

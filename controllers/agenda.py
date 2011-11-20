@@ -28,18 +28,6 @@ def edit():
     symp = db.symposium(request.args(0))
     if symp:
         
-        sess = db(
-                    (db.timeblock.symposium == symp.id) &
-                    (db.session.timeblock == db.timeblock.id) &
-                    (db.room.id == db.session.room)
-                 ).select(
-                     db.session.id,
-                     db.session.name,
-                     db.session.theme,
-                     db.timeblock.start_time,
-                     db.timeblock.desc,
-                     db.room.name,
-                     orderby=db.timeblock.start_time)
         papers = db(
                     (db.paper.symposium == symp.id) &
                     (db.paper.session == None)
@@ -47,7 +35,7 @@ def edit():
                        db.paper.id, db.paper.title, db.paper.description, db.paper.format, db.paper.category
                    )
         
-        return dict(sess=sess, unscheduled_papers=papers)
+        return dict(symposium=symp, unscheduled_papers=papers)
     else:
         raise HTTP(404)
 
@@ -55,13 +43,17 @@ def edit():
 def update_order():
     sess = db.session(request.vars.ses_id)
     
-    if not sess:
+    if not sess or not request.vars.order:
         raise HTTP(404)
     
     new_order = request.vars.order.split(",")
     
-    for paper in sess.paper.select():
-        paper.update_record( session_pos=new_order.index(str(paper.id)) )
+    if len(new_order) > 0:
+        for paper in sess.paper.select(db.paper.id):
+            paperid = str(paper.id)
+            if paperid in new_order:
+                paper.update_record( session_pos=new_order.index(paperid) )
+
     
 @auth.requires_membership("Symposium Admin")
 def add_to_session():
@@ -75,14 +67,16 @@ def add_to_session():
     if not curr_paper:
         raise HTTP(404)
         
-    papers = sess.paper.select(orderby=db.paper.session_pos)
+    papers = sess.paper.select()
     
     # Shift papers for placement
+    paper_position = int(request.vars.position)
     for paper in papers:
-        if paper.session_pos >= int(request.vars.position):
+        if paper.session_pos >= paper_position:
             paper.update_record(session_pos = paper.session_pos + 1)
     
-    curr_paper.update_record(session = sess)
+    # Place paper by updating session and paper position
+    curr_paper.update_record(session = sess, session_pos = paper_position)
 
 @auth.requires_membership("Symposium Admin")
 def del_from_session():
