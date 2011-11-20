@@ -16,7 +16,7 @@
 <h1 style="padding-left: 10px;">{{=symposium.name}}</h1>
 <div style="padding-left: 10px;">
 {{if symposium.reg_start < request.now and request.now < symposium.reg_end:}}
-    {{=B(T("Accepting Submissions"), _style="color: #f00;")}}
+    {{=B(T("Accepting Submissions"), _style="color: #080;")}}
     {{=B(A(T("Submit to this symposium"), _href=URL("papers","submit", vars={"symp":symposium.sid})))}}
 {{pass}}
     
