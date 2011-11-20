@@ -7,7 +7,7 @@
 <h2 style="font-size: 130%;">{{=symposium.name}}</h2>
 {{=T("Event Date")}}: {{=symposium.event_date.strftime(DATE_FORMAT)}}
 {{if symposium.reg_start < request.now and request.now < symposium.reg_end:}}
-    {{=B(T("Accepting Submissions"), _style="color: #f00;")}}
+    {{=B(T("Accepting Submissions"), _style="color: #080;")}}
     {{=B(A(T("Submit to this symposium"), _href=URL("papers","submit", vars={"symp":symposium.sid})))}}
 {{pass}}
 {{=DIV(

@@ -133,6 +133,8 @@ Search: <input type="text" id="search_name" onkeyup="javascript:pull_choices();"
 <script type="text/javascript">$("#search_name").val(unescape("{{=session.s_val}}")); pull_choices();</script>
 {{del session.s_val}}
 {{pass}}
+<br/>
+{{=INPUT(_type="button", _value=T("Save and Continue"), _onClick="javascript:document.location = '" + URL('papers','submit_for_approval', args=paper.id) + "';")}}
 <br/><br/>
 {{=DIV(T("Steps: "),
     A(T("Create/Edit Paper"), _href=URL('papers','edit', args=paper.id)),
