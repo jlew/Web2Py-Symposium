@@ -1,5 +1,6 @@
 {{right_sidebar_enabled=False}}
 {{extend 'layout.html'}}
+{{=A("Back To Agenda", _href=URL("agenda","index", args=symposium.sid))}}
 <script>
 $(function() {
         $(".connectedSortable").sortable({
@@ -74,6 +75,11 @@ $(function() {
         white-space: nowrap;
         background: none;
         
+        
+    }
+    
+    .session_block .paper_block_title a{
+        color: #000;
     }
     
     .session_block ul {
@@ -95,49 +101,106 @@ $(function() {
 <table border=1 width="98%" style="margin:auto; table-layout:fixed;">
     <tr>
         <th width="10%">Time</th>
-        {{for room in rooms:}}
-            <th width="{{=90/len(rooms)}}%">{{=room.name}}<br><span style="font-size: 80%">{{=room.location}}</span></th> 
-        {{pass}}
-    </tr>
-
-    {{for timeblock in timeblocks:}}
-    <tr>
-        <td>{{=timeblock.start_time.strftime(TIME_FORMAT)}}<br><span style="font-size: 80%">{{=timeblock.desc}}</span></td>
-    {{for room in rooms:}}
-        {{sess_block = db(
-            (db.session.room == room.id) & (db.session.timeblock == timeblock.id) 
-            ).select(db.session.id,db.session.name, db.session.theme).first()}}
-        {{if sess_block:}}
-            <td class="session_block">
-                <div style="font-weight: bold; text-decoration: underline; text-align: center;">{{=A(sess_block.name, _href=URL('agenda','view_session', args=sess_block.id))}}</div>
-                <div style="font-size: 80%; line-height: 100%;">
-                {{if sess_block.theme:}}<b>Theme:</b> {{=sess_block.theme}}<br />{{pass}}
-                <ul class="connectedSortable" style="padding: 5px;" id="sess_{{=sess_block.id}}">
-                {{for paper in sess_block.paper.select(db.paper.title, db.paper.id, db.paper.format, db.paper.category, db.paper.description, orderby=db.paper.session_pos):}}
-                    <li id="paper_{{=paper.id}}">
-                        <div class="paper_bock">
-                            <div class="paper_block_title">{{=A(paper.title, _title=paper.title, _href=URL('papers','view',args=paper.id))}}</div>
-                            <div class="paper_block_format">{{=paper.format}}</div>
-                            <div class="paper_block_category">{{=paper.category}}</div>
-                            <div class="paper_block_description">
-                                <a href="#" onclick="$('#desc_{{=paper.id}}').toggle('slow'); return false;"
-                                    style="font-size: 75%">Toggle Description</a>
-                                <div id="desc_{{=paper.id}}" style="display: none;">
-                                    {{=paper.description}}
-                                </div>
-                            </div>
-                        </div>
-                    </li>
-                {{pass}}
-                </ul>
-
-                </div>
-            </td>
+        {{if rooms:}}
+            {{for room in rooms:}}
+                <th width="{{=90/len(rooms)}}%">
+                    {{if room == rooms[-1]:}}
+                        {{=A(
+                            IMG(_src=URL('static','images/details_open.png')),
+                                _href=URL("editsymp", "create_room", args=symposium.id) +"?KeepThis=true&TB_iframe=true&height=175&width=450",
+                                _class="thickbox", _style="float: right;")}}
+                   {{pass}}
+                    {{=A(room.name,
+                        _href=URL("editsymp", "edit_room", args=room.id) +"?KeepThis=true&TB_iframe=true&height=175&width=450",
+                        _class="thickbox")}}<br><span style="font-size: 80%">{{=room.location}}</span>
+                </th>
+            {{pass}}
         {{else:}}
-            <td></td>
+            <th>
+                {{=A(
+                    IMG(_src=URL('static','images/details_open.png')),
+                    "Add Your First Room",
+                    _href=URL("editsymp", "create_room", args=symposium.id) +"?KeepThis=true&TB_iframe=true&height=150&width=430",
+                    _class="thickbox")}}
+            </th>
         {{pass}}
-    {{pass}}
     </tr>
+
+    {{if timeblocks:}}
+        {{for timeblock in timeblocks:}}
+        <tr>
+            <td>
+                {{=A(
+                    timeblock.start_time.strftime(TIME_FORMAT),
+                    _href=URL("editsymp", "edit_timeblock", args=timeblock.id) +"?KeepThis=true&TB_iframe=true&height=250&width=450",
+                    _class="thickbox")}}<br>
+                <span style="font-size: 80%">{{=timeblock.desc}}</span>
+            </td>
+            {{for room in rooms:}}
+                {{sess_block = db(
+                    (db.session.room == room.id) & (db.session.timeblock == timeblock.id) 
+                    ).select(db.session.id,db.session.name, db.session.theme).first()}}
+                {{if sess_block:}}
+                    <td class="session_block">
+            
+                        <div style="font-weight: bold; text-align: center;">
+                            {{=A(sess_block.name,
+                                _href=URL("editsymp", "edit_session", args=sess_block.id) +"?KeepThis=true&TB_iframe=true&height=150&width=450",
+                                _class="thickbox",
+                                _style="font-weight: bold; text-decoration: underline; text-align: center;")}}
+                            {{=A("(Edit Judges)", _href=URL("editsymp","edit_session_judges", args=sess_block.id), _style="font-size: 50%")}}
+                        </div>
+
+                        <div style="font-size: 80%; line-height: 100%;">
+                            {{if sess_block.theme:}}<b>Theme:</b> {{=sess_block.theme}}<br />{{pass}}
+                            <ul class="connectedSortable" style="padding: 5px;" id="sess_{{=sess_block.id}}">
+                                {{for paper in sess_block.paper.select(
+                                    db.paper.title, db.paper.id, db.paper.format, db.paper.category,
+                                    db.paper.description, orderby=db.paper.session_pos):}}
+                                <li id="paper_{{=paper.id}}">
+                                    <div class="paper_bock">
+                                        <div class="paper_block_title">
+                                            {{=A(paper.title, _title=paper.title, _href=URL('papers','view',args=paper.id))}}
+                                        </div>
+                                        <div class="paper_block_format">{{=paper.format}}</div>
+                                        <div class="paper_block_category">{{=paper.category}}</div>
+                                        <div class="paper_block_description">
+                                            <a href="#" onclick="$('#desc_{{=paper.id}}').toggle('slow'); return false;"
+                                                style="font-size: 75%">Toggle Description</a>
+                                            <div id="desc_{{=paper.id}}" style="display: none;">
+                                                {{=paper.description}}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            {{pass}}
+                            </ul>
+                        </div>
+                    </td>
+                {{else:}}
+                    <td align="center">
+                        {{=A(
+                            SPAN(_class="icon plus"),
+                            "Add Session",
+                            _href=URL('editsymp', 'create_session',
+                            args=[symposium.id, room.id, timeblock.id])+"?KeepThis=true&TB_iframe=true&height=255&width=420",
+                            _class="button thickbox")}}
+                    </td>
+                {{pass}}
+            {{pass}}
+        </tr>
+        {{pass}}
+    {{else:}}
+        <tr>
+            <td align="center" style="font-size: 60%;">
+                {{=A(
+                    IMG(_src=URL('static','images/details_open.png')),
+                    "Add Timeblock",
+                    _href=URL('editsymp', 'create_timeblock', args=symposium.id)+"?KeepThis=true&TB_iframe=true&height=275&width=450",
+                    _class="thickbox")}}
+            </td>
+        </tr>
+    {{pass}}
 {{pass}}
 </table>
 

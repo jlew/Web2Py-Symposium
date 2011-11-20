@@ -49,16 +49,6 @@ def edit_room():
         raise HTTP(404) 
 
     return dict(form=crud.update(db.room, room, next=URL("editsymp","close_parent")))
-    
-@auth.requires_membership("Symposium Admin")
-def manage_sessions():
-    symp = db.symposium( request.args(0) )
-    
-    if not symp:
-        raise HTTP(404)
-
-    timeblocks = symp.timeblock.select(orderby=db.timeblock.start_time)
-    return dict(timeblocks=timeblocks, symp=symp)
 
 @auth.requires_membership("Symposium Admin")
 def edit_session():

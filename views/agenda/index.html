@@ -1,12 +1,9 @@
 {{right_sidebar_enabled=False}}
 {{extend 'layout.html'}}
 {{if auth.has_membership("Symposium Admin"):}}
-    {{=DIV(A(SPAN(_class="icon clock"),"Scheduling Information",
-        _href=URL("editsymp","manage_sessions",args=symp.id), #+"?KeepThis=true&TB_iframe=true&height=450&width=600",
-        _class="button middle"),# thickbox"),
-    A(SPAN(_class="icon plus"),"Schedule Papers",
-        _href=URL("agenda","edit",args=symp.id),
-        _class="button right"),
+    {{=DIV(A(SPAN(_class="icon clock"),"Manage Agenda",
+        _href=URL("agenda","edit",args=symp.id), #+"?KeepThis=true&TB_iframe=true&height=450&width=600",
+        _class="button"),# thickbox"),
     _style="float: right;")
         }}
 {{pass}}
