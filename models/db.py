@@ -91,7 +91,7 @@ db.define_table('paper',
     
     Hidden('modified', 'datetime', default=request.now, update=request.now, writable=False),
 
-    Hidden('session', db.session),
+    Hidden('session', db.session, ondelete="NO ACTION"),
     Hidden('session_pos', 'integer'),
     
     format='%(title)s'

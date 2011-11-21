@@ -28,8 +28,15 @@ def edit_timeblock():
     
     if not timeblock:
         raise HTTP(404) 
+    
+    # This allows us to clear links as the sessions will be deleted
+    sess_list = timeblock.session.select()
+    def clearLinks(t):
+        for sess in sess_list:
+            for paper in sess.paper.select():
+                paper.update_record(session=None)
 
-    return dict(form=crud.update(db.timeblock, timeblock, next=URL("editsymp","close_parent")))
+    return dict(form=crud.update(db.timeblock, timeblock, ondelete=clearLinks, next=URL("editsymp","close_parent")))
     
 @auth.requires_membership("Symposium Admin")
 def create_room():
@@ -47,8 +54,15 @@ def edit_room():
     
     if not room:
         raise HTTP(404) 
+        
+        # This allows us to clear links as the sessions will be deleted
+    sess_list = room.session.select()
+    def clearLinks(t):
+        for sess in sess_list:
+            for paper in sess.paper.select():
+                paper.update_record(session=None)
 
-    return dict(form=crud.update(db.room, room, next=URL("editsymp","close_parent")))
+    return dict(form=crud.update(db.room, room, ondelete=clearLinks, next=URL("editsymp","close_parent")))
 
 @auth.requires_membership("Symposium Admin")
 def edit_session():
@@ -58,10 +72,14 @@ def edit_session():
         raise HTTP(404)
         
     symp = sess.timeblock.symposium
+    
+    def clearLinks(form):
+        for paper in sess.paper.select():
+            paper.update_record(session=None)
 
     db.session.room.requires = IS_IN_DB(db(db.room.symposium==symp.id),db.room.id,"%(name)s")
     db.session.timeblock.requires = IS_IN_DB(db(db.timeblock.symposium==symp.id),db.timeblock.id,"%(start_time)s")
-    return dict(form=crud.update(db.session, sess, next=URL("editsymp","close_parent")), symp=sess.timeblock.symposium)
+    return dict(form=crud.update(db.session, sess, next=URL("editsymp","close_parent"), ondelete=clearLinks), symp=sess.timeblock.symposium)
     
 
 @auth.requires_membership("Symposium Admin")
