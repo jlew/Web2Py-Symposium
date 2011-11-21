@@ -52,7 +52,7 @@
 {{for paper in db(
         (db.paper.session==sess.id) &
         get_public_filter()
-        ).select(db.paper.ALL):}}
+        ).select(db.paper.ALL, orderby=db.paper.session_pos):}}
     {{paper_block()}}
 {{pass}}
 
