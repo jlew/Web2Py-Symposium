@@ -143,11 +143,15 @@ $(function() {
                 {{if sess_block:}}
                     <td class="session_block">
             
-                        <div style="font-weight: bold; text-align: center;">
+                        <div style="font-weight: bold; text-align: center; line-height: 80%;">
                             {{=A(sess_block.name,
-                                _href=URL("editsymp", "edit_session", args=sess_block.id) +"?KeepThis=true&TB_iframe=true&height=150&width=450",
+                                _href=URL("agenda","view_session", args=sess_block.id)+"?KeepThis=true&TB_iframe=true&height=150&width=450",
                                 _class="thickbox",
-                                _style="font-weight: bold; text-decoration: underline; text-align: center;")}}
+                                _style="font-weight: bold; text-decoration: underline; text-align: center; color: #000;")}}<br>
+                            {{=A("(Edit Session)",
+                                _href=URL("editsymp", "edit_session", args=sess_block.id),
+                                _style="font-size: 50%"
+                                )}}
                             {{=A("(Edit Judges)", _href=URL("editsymp","edit_session_judges", args=sess_block.id), _style="font-size: 50%")}}
                         </div>
 
