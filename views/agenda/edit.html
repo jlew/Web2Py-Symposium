@@ -156,7 +156,7 @@ $(function() {
                             <ul class="connectedSortable" style="padding: 5px;" id="sess_{{=sess_block.id}}">
                                 {{for paper in sess_block.paper.select(
                                     db.paper.title, db.paper.id, db.paper.format, db.paper.category,
-                                    db.paper.description, orderby=db.paper.session_pos):}}
+                                    db.paper.description, db.paper.authors, db.paper.mentors, orderby=db.paper.session_pos):}}
                                 <li id="paper_{{=paper.id}}">
                                     <div class="paper_bock">
                                         <div class="paper_block_title">
@@ -166,9 +166,30 @@ $(function() {
                                         <div class="paper_block_category">{{=paper.category}}</div>
                                         <div class="paper_block_description">
                                             <a href="#" onclick="$('#desc_{{=paper.id}}').toggle('slow'); return false;"
-                                                style="font-size: 75%">Toggle Description</a>
+                                                style="font-size: 75%">Toggle Details</a>
                                             <div id="desc_{{=paper.id}}" style="display: none;">
                                                 {{=paper.description}}
+                                                
+                                                 <div>
+                                                    <b>{{=T("Authors:")}}</b>
+                                                    <ul>
+                                                    {{for x in paper.authors:}}
+                                                        <li>{{=A(db.auth_user(x).search_name, _href=URL("people","profile",args=x))}}</li>
+                                                    {{pass}}
+                                                    </ul>
+                                                 </div>
+                                               
+                                               {{if len(paper.mentors) > 0:}}
+                                               <div>
+                                                   <b>{{=T("Mentors:")}}</b>
+                                                   <ul>
+                                                   {{for x in paper.mentors:}}
+                                                       <li>{{=A(db.auth_user(x).search_name, _href=URL("people","profile",args=x))}}</li>
+                                                   {{pass}}
+                                                   </ul>
+                                               </div>
+                                               {{pass}}
+                       
                                             </div>
                                         </div>
                                     </div>
@@ -216,9 +237,30 @@ $(function() {
                 <div class="paper_block_category">{{=paper.category}}</div>
                 <div class="paper_block_description">
                     <a href="#" onclick="$('#desc_{{=paper.id}}').toggle('slow'); return false;"
-                        style="font-size: 75%">Toggle Description</a>
+                        style="font-size: 75%">Toggle Details</a>
                     <div id="desc_{{=paper.id}}" style="display: none;">
                         {{=paper.description}}
+                        
+                        <div>
+                           <b>{{=T("Authors:")}}</b>
+                           <ul>
+                           {{for x in paper.authors:}}
+                               <li>{{=A(db.auth_user(x).search_name, _href=URL("people","profile",args=x))}}</li>
+                           {{pass}}
+                           </ul>
+                       </div>
+                       
+                       {{if len(paper.mentors) > 0:}}
+                       <div>
+                           <b>{{=T("Mentors:")}}</b>
+                           <ul>
+                           {{for x in paper.mentors:}}
+                               <li>{{=A(db.auth_user(x).search_name, _href=URL("people","profile",args=x))}}</li>
+                           {{pass}}
+                           </ul>
+                       </div>
+                       {{pass}}
+       
                     </div>
                 </div>
             </div>

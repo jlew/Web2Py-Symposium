@@ -32,7 +32,7 @@ def edit():
                     (db.paper.symposium == symp.id) &
                     (db.paper.session == None)
                    ).select(
-                       db.paper.id, db.paper.title, db.paper.description, db.paper.format, db.paper.category
+                       db.paper.id, db.paper.title, db.paper.description, db.paper.format, db.paper.category, db.paper.authors, db.paper.mentors
                    )
         
         return dict(symposium=symp, unscheduled_papers=papers)
