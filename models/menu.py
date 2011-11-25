@@ -29,7 +29,7 @@ class filter_link:
         self.control = control
         self.func = func
     def __str__(self):
-        return str(URL(self.control, self.func, session.get('filter', "")))
+        return str(URL(self.control, self.func, args=session.get('filter', "")))
 
 response.menu = [
     (T('Home'), False, URL('default','index'), []),
