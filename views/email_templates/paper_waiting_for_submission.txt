@@ -1,0 +1,18 @@
+This email is to inform you that you have a paper waiting for submission.
+
+Title:     {{=paper.title}}
+Status:    {{=paper.status}}
+Category:  {{=paper.category.name}}
+Format:    {{=paper.format.name}}
+Symposium: {{=paper.symposium.name}}
+
+You can find, edit, and submit your paper here:
+{{="http://%s%s" % (request.env.http_host, URL('papers','edit'))}}
+
+Thanks,
+
+Symposium Team
+
+---
+This is an automated email.
+Do not reply
