@@ -1,4 +1,5 @@
 {{right_sidebar_enabled=False}}
+{{from datetime import date, datetime, time, timedelta}}
 {{extend 'layout.html'}}
 {{if auth.has_membership("Symposium Admin"):}}
     {{=DIV(A(SPAN(_class="icon clock"),"Manage Agenda",
@@ -39,9 +40,13 @@ tr:nth-child(even)    { background-color:#fff; }
         {{if sess_block:}}
             <td>
                 <div style="font-weight: bold; text-decoration: underline; text-align: center;">{{=A(sess_block.name, _href=URL('agenda','view_session', args=sess_block.id))}}</div>
-                <ul>
+                <ul style="font-size: 80%">
+                {{the_time = timeblock.start_time}}
                  {{for paper in db(db.paper.session == sess_block.id).select():}}
-                     {{=LI(A(paper.title, _href=URL("papers","view",args=paper.id)))}}
+                     {{=LI(
+                         B(the_time.strftime(TIME_FORMAT), _style="font-size: 90%;"),
+                         A(paper.title, _href=URL("papers","view",args=paper.id)))}}
+                     {{the_time = (datetime.combine(date.today(), the_time) + timedelta(minutes=paper.format.duration)).time()}}
                  {{pass}}
                  </ul>
             </td>

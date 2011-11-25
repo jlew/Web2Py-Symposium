@@ -11,6 +11,14 @@ width: 100%;
 }
 </style>
 
+{{
+if symp:
+      query = (db.format.symposium == symp.id)
+  else:
+      query = (db.format.id > 0)
+  pass
+}}
+
 <script type="text/javascript" charset="utf-8">
     var oTable;
 
@@ -40,7 +48,8 @@ width: 100%;
                                   null,
                                   {{pass}}
                                 { type: "select", values: ['{{=XML("','".join([ x.xml() for x in PAPER_CATEGORY]))}}'] },
-                                { type: "select", values: ['{{=XML("','".join([ x.xml() for x in PRESENTATION_FORMAT]))}}'] },
+                                { type: "select", values: ['{{=XML("','".join(
+                                    set([db.format._format % x for x in db(query).select()])))}}'] },
                                 null,
                                 null,
                                 {{if c_show_moderation:}}
@@ -102,7 +111,7 @@ width: 100%;
                 {{=paper.category}}
             </td>
             <td>
-                {{=paper.format}}
+                {{=db.format._format % db.format[paper.format]}}
             </td>
             <td>
                 <ul>

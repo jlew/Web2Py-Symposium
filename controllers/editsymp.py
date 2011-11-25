@@ -7,12 +7,38 @@ def index():
 @auth.requires_membership("Symposium Admin")
 def new():
     response.view = "form_layout.html"
-    return dict(form=crud.create(db.symposium, next=URL("editsymp","close_parent")))
+    
+    def prepopulate(form):
+        db.format.insert(name=T("15 Minute Presentation"), symposium=form.vars.id, duration=15)
+        
+    return dict(form=crud.create(db.symposium, next=URL("editsymp","close_parent"), onaccept=prepopulate))
     
 @auth.requires_membership("Symposium Admin")
 def edit():
     response.view = "form_layout.html"
     return dict(form=crud.update(db.symposium, request.args(0), next=URL("editsymp","close_parent")))
+    
+@auth.requires_membership("Symposium Admin")
+def create_format():
+    response.view = "form_layout.html"
+    symp = db.symposium( request.args(0) )
+    
+    if not symp:
+        raise HTTP(404)
+        
+    db.format.symposium.default = symp.id
+    return dict( form=crud.create(db.format, next=URL("editsymp","close_parent")))
+    
+@auth.requires_membership("Symposium Admin")
+def edit_format():
+    response.view = "form_layout.html"
+    format = db.format( request.args(0) )
+    
+    if not format:
+        raise HTTP(404)
+        
+    return dict( form=crud.update(db.format, format, next=URL("editsymp","close_parent"),
+        deletable=(format.paper.count() == 0 and format.symposium.format.count() > 1)))
 
 @auth.requires_membership("Symposium Admin")
 def create_timeblock():

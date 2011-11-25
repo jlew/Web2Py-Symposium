@@ -43,6 +43,13 @@ db.define_table('session',
     format = "%(timeblock)s %(name)s"
 )
 
+db.define_table('format',
+    Field('name', required=True, notnull=True),
+    Field('duration', 'integer', required=True, notnull=True, default=15),
+    Field('symposium',db.symposium, writable=False),
+    format = "%(name)s"
+)
+
 def get_next_symposium():
     """
     Returns the next upcoming symposium.
@@ -82,7 +89,7 @@ db.define_table('paper',
     Field('category', 'string', requires=IS_IN_SET(PAPER_CATEGORY),
         comment=T("Pick the category that best matches your paper.  This will be used for scheduling purposes.")),
     
-    Field('format', label=T("Presentation Format"), requires=IS_IN_SET(PRESENTATION_FORMAT),
+    Field('format', db.format, label=T("Presentation Format"),
        comment=T("The method/format of the presentation you will give at the symposium.")),
     
     Field('symposium', 'reference symposium', writable=False),

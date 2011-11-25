@@ -1,7 +1,9 @@
 # coding: utf8
 DATE_FORMAT = "%m/%d/%y"
 DATE_TIME_FORMAT = "%m/%d/%y %I:%M:%S %p"
-TIME_FORMAT = "%I:%M:%S %p"
+TIME_FORMAT = "%I:%M %p"
+FULL_TIME_FORMAT = "%I:%M:%S %p"
+
 
 # The status the paper may take, the first one is the default status
 PAPER_STATUS = (
@@ -27,12 +29,4 @@ PAPER_CATEGORY = (
             T('Business'),
             T('Fine and Applied Arts'),
             T('Other'),
-        )
-
-PRESENTATION_FORMAT = (
-            T("Lecture Presentation"),
-            T("Poster Session"),
-            T("Discussion Group"),
-            T("Pannel Q/A"),
-            T("Remote Teleconference")
         )

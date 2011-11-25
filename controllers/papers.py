@@ -103,6 +103,8 @@ def submit():
 
     else:
         crud.messages.submit_button = T("Save and continue")
+        
+        db.paper.format.requires=IS_IN_DB(db(db.format.symposium == valid_sym.first().id), "format.name")
         db.paper.symposium.default = valid_sym.first().id
         def user_callback(form):
             session.supress_paper_warning = form.vars.id
@@ -122,6 +124,10 @@ def edit():
         
     if can_edit_paper(paper):
         db.paper.symposium.writable = False
+        
+        # Only allow edit of fromat if not scheduled
+        db.paper.format.writable = (paper.session == None) 
+        db.paper.format.requires=IS_IN_DB(db(db.format.symposium == paper.symposium.id), "format.name")
         
         crud.messages.submit_button = T("Save and continue")
 

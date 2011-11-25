@@ -45,6 +45,23 @@
             <td>{{=T("Registration")}}</td>
             <td>{{=symposium.reg_start.strftime(DATE_TIME_FORMAT)}} - {{=symposium.reg_end.strftime(DATE_TIME_FORMAT)}}</td>
         </tr>
+        <tr>
+            <td>{{=T("Presentation Formats")}}</td>
+            <td>
+                <ul>
+                    {{for format in symposium.format.select(orderby=db.format.name):}}
+                        <li>{{=A(format.name,
+                        _href=URL("editsymp","edit_format",args=format.id)+"?KeepThis=true&TB_iframe=true&height=125&width=425",
+                        _class="thickbox")}}</li>
+                    {{pass}}
+                    {{if auth.has_membership("Symposium Admin"):}}
+                        <li>{{=A(SPAN(_class="icon plus"), T("Add Format"),
+                        _href=URL("editsymp","create_format",args=symposium.id)+"?KeepThis=true&TB_iframe=true&height=125&width=425",
+                        _class="button thickbox")}}</li>
+                    {{pass}}
+                </ul>
+            </td>
+        </tr>
     </table>
     &nbsp;
     </div>

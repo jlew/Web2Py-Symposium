@@ -91,3 +91,13 @@ def get_public_filter():
         else:
             status_filter = (db.paper.status == status_option)
     return status_filter
+    
+def get_scheduled_time(paper):
+    from datetime import date, datetime, time, timedelta
+    the_time = paper.session.timeblock.start_time
+
+    papers = db( (db.paper.session==paper.session.id) & (db.paper.session_pos < paper.session_pos) ).select(orderby=db.paper.session_pos)
+    for paper_item in papers:
+        the_time = (datetime.combine(date.today(), the_time) + timedelta(minutes=paper_item.format.duration)).time()
+
+    return the_time.strftime(TIME_FORMAT)
