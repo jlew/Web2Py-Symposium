@@ -6,14 +6,17 @@ def index():
 
 @auth.requires_membership("Symposium Admin")
 def new():
+    response.view = "form_layout.html"
     return dict(form=crud.create(db.symposium, next=URL("editsymp","close_parent")))
     
 @auth.requires_membership("Symposium Admin")
 def edit():
+    response.view = "form_layout.html"
     return dict(form=crud.update(db.symposium, request.args(0), next=URL("editsymp","close_parent")))
 
 @auth.requires_membership("Symposium Admin")
 def create_timeblock():
+    response.view = "form_layout.html"
     symp = db.symposium( request.args(0) )
     
     if not symp:
@@ -24,6 +27,7 @@ def create_timeblock():
         
 @auth.requires_membership("Symposium Admin")
 def edit_timeblock():
+    response.view = "form_layout.html"
     timeblock = db.timeblock(request.args(0))
     
     if not timeblock:
@@ -40,6 +44,7 @@ def edit_timeblock():
     
 @auth.requires_membership("Symposium Admin")
 def create_room():
+    response.view = "form_layout.html"
     symp = db.symposium( request.args(0) )
     
     if not symp:
@@ -50,6 +55,7 @@ def create_room():
         
 @auth.requires_membership("Symposium Admin")
 def edit_room():
+    response.view = "form_layout.html"
     room = db.room(request.args(0))
     
     if not room:
@@ -66,6 +72,7 @@ def edit_room():
 
 @auth.requires_membership("Symposium Admin")
 def edit_session():
+    response.view = "form_layout.html"
     sess = db.session(request.args(0))
     
     if not sess:
@@ -84,6 +91,7 @@ def edit_session():
 
 @auth.requires_membership("Symposium Admin")
 def create_session():
+    response.view = "form_layout.html"
     symp = db.symposium(request.args(0))
     room = db.room(request.args(1))
     timeb = db.timeblock(request.args(2))
@@ -201,6 +209,7 @@ You may view and update your account profile here: %(url)s
 
 @auth.requires_membership("Symposium Admin")
 def email():
+    response.view = "form_layout.html"
     symposium = db.symposium(request.args(0))
     if not symposium:
         raise HTTP404(T("Symposium Not Found"))
