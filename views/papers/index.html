@@ -11,6 +11,16 @@ width: 100%;
 }
 </style>
 
+{{
+if symp:
+      format_query = (db.format.symposium == symp.id)
+      category_query= (db.category.symposium == symp.id)
+  else:
+      format_query = (db.format.id > 0)
+      category_query = (db.category.id > 0)
+  pass
+}}
+
 <script type="text/javascript" charset="utf-8">
     var oTable;
 
@@ -39,8 +49,10 @@ width: 100%;
                                   {{else:}}
                                   null,
                                   {{pass}}
-                                { type: "select", values: ['{{=XML("','".join([ x.xml() for x in PAPER_CATEGORY]))}}'] },
-                                { type: "select", values: ['{{=XML("','".join([ x.xml() for x in PRESENTATION_FORMAT]))}}'] },
+                                { type: "select", values: ['{{=XML("','".join(
+                                    set([db.category._format % x for x in db(category_query).select()])))}}'] },
+                                { type: "select", values: ['{{=XML("','".join(
+                                    set([db.format._format % x for x in db(format_query).select()])))}}'] },
                                 null,
                                 null,
                                 {{if c_show_moderation:}}
@@ -99,10 +111,10 @@ width: 100%;
                 {{=db.symposium._format % paper.symposium}}
             </td>
             <td>
-                {{=paper.category}}
+                {{=db.category._format % db.category[paper.category]}}
             </td>
             <td>
-                {{=paper.format}}
+                {{=db.format._format % db.format[paper.format]}}
             </td>
             <td>
                 <ul>

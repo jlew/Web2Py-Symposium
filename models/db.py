@@ -14,12 +14,47 @@ db.define_table('symposium',
     Field('reg_end', 'datetime', required=True, notnull=True, label=T("Registration End")),
     Field('event_date', 'date', required=True, notnull=True, label=T("Symposium Date")),
     Field('extra_info', 'text', label=T("Additional Information")),
-    Field('rooms', 'list:string', label=T("Rooms"), comment=T("Room Names for scheduling, press enter to get another room.")),
     format='%(name)s: %(event_date)s'
 )
 
 #Add after created so we don't override the unique test
 db.symposium.sid.requires.insert(0,IS_SLUG())
+
+db.define_table('timeblock',
+    Field('start_time', 'time', required=True, notnull=True),
+    Field('desc', 'text'),
+    Field('symposium', db.symposium, writable=False),
+    format = "%(start_time)s: %(desc)s",
+)
+
+db.define_table('room',
+    Field('symposium', db.symposium, writable=False),
+    Field('name', required=True, notnull=True),
+    Field('location'),
+    format = "%(name)s: %(location)s"
+)
+
+db.define_table('session',
+    Field('name', required=True, notnull=True),
+    Field('theme'),
+    Field('timeblock', db.timeblock, writable=False),
+    Field('room', db.room, writable=False),
+    Hidden('judges', 'list:reference auth_user', default=[]),
+    format = "%(timeblock)s %(name)s"
+)
+
+db.define_table('format',
+    Field('name', required=True, notnull=True),
+    Field('duration', 'integer', required=True, notnull=True, default=15),
+    Field('symposium',db.symposium, writable=False),
+    format = "%(name)s"
+)
+
+db.define_table('category',
+    Field('name'),
+    Field('symposium', db.symposium, writable=False),
+    format = "%(name)s"
+)
 
 def get_next_symposium():
     """
@@ -57,10 +92,10 @@ db.define_table('paper',
     Field('status', 'string', requires=IS_IN_SET(PAPER_STATUS), default=PAPER_STATUS[0],
           label=T("Paper Status"), writable=False),
           
-    Field('category', 'string', requires=IS_IN_SET(PAPER_CATEGORY),
+    Field('category', db.category,
         comment=T("Pick the category that best matches your paper.  This will be used for scheduling purposes.")),
     
-    Field('format', label=T("Presentation Format"), requires=IS_IN_SET(PRESENTATION_FORMAT),
+    Field('format', db.format, label=T("Presentation Format"),
        comment=T("The method/format of the presentation you will give at the symposium.")),
     
     Field('symposium', 'reference symposium', writable=False),
@@ -68,11 +103,9 @@ db.define_table('paper',
     Hidden('created', 'datetime', default=request.now, writable=False),
     
     Hidden('modified', 'datetime', default=request.now, update=request.now, writable=False),
-    
-    Hidden('scheduled', 'boolean', default=False),
-    Hidden('schedule_room', 'integer', default=-1, label=T("Room")),
-    Hidden('schedule_start', 'time'),
-    Hidden('schedule_end', 'time'),
+
+    Hidden('session', db.session, ondelete="NO ACTION"),
+    Hidden('session_pos', 'integer'),
     
     format='%(title)s'
 )

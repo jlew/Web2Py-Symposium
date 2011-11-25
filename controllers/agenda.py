@@ -10,48 +10,83 @@ def index():
         session['filter'] = symp.sid
 
     else:
+        session.flash = "Please select a symposium to view the agenda"
+        redirect( URL("default", "index") )
         symposiums = db(db.symposium.sid>0).select()
         symp = False
         session['filter'] = ""
 
-    ret_list = []
-    import datetime
-    for symp_itm in symposiums:
-        papers = get_symposium_visable_papers(symp_itm)
-
-        papers.sort(key=lambda x: x.schedule_start if (x.schedule_start and x.scheduled) else datetime.time())
-        ret_list += papers
-
-    room_list = []
-    symp_list = []
-    for symp_item in db(db.symposium.id>0).select():
-        room_list += symp_item.rooms
-        symp_list.append( symp_item.name )
-
-    return dict(papers=ret_list, symp=symp, room_list=room_list, symp_list=symp_list)
+    timeblocks = symp.timeblock.select(orderby=db.timeblock.start_time)
+    return dict(timeblocks=timeblocks,symp=symp)
 
 @auth.requires_membership("Symposium Admin")
 def edit():
     symp = db.symposium(request.args(0))
     if symp:
-        response.files.append(URL('static','week-cal/libs/css/smoothness/jquery-ui-1.8.11.custom.css'))
-        response.files.append(URL('static','week-cal/jquery.weekcalendar.css'))
-        response.files.append(URL('static','week-cal/skins/default.css'))
-        response.files.append(URL('static','week-cal/skins/gcalendar.css'))
-        response.files.append(URL('static','week-cal/jquery.weekcalendar.js'))
-        return dict(symposium=symp, papers=get_symposium_visable_papers(symp))
+        
+        papers = db(
+                    (db.paper.symposium == symp.id) &
+                    (db.paper.session == None)
+                   ).select(
+                       db.paper.id, db.paper.title, db.paper.description, db.paper.format, db.paper.category, db.paper.authors, db.paper.mentors
+                   )
+        
+        return dict(symposium=symp, unscheduled_papers=papers)
     else:
         raise HTTP(404)
+
+@auth.requires_membership("Symposium Admin")
+def update_order():
+    sess = db.session(request.vars.ses_id)
+    
+    if not sess or not request.vars.order:
+        raise HTTP(404)
+    
+    new_order = request.vars.order.split(",")
+    
+    if len(new_order) > 0:
+        for paper in sess.paper.select(db.paper.id):
+            paperid = str(paper.id)
+            if paperid in new_order:
+                paper.update_record( session_pos=new_order.index(paperid) )
+
     
 @auth.requires_membership("Symposium Admin")
-def schedule_event():
-    from datetime import time
-    paper = db.paper(request.vars.id)
-    symposium = paper.symposium
-    paper.update_record(
-        scheduled= int(request.vars.room) != len(symposium.rooms),
-        schedule_start=time( int(request.vars.start_h), int(request.vars.start_m), 0),
-        schedule_end=time( int(request.vars.end_h), int(request.vars.end_m), 0),
-        schedule_room=int(request.vars.room)
-    )
-    return ""
+def add_to_session():
+    sess = db.session(request.vars.ses_id)
+    
+    if not sess:
+        raise HTTP(404)
+    
+    curr_paper = db.paper(request.vars.paper)
+    
+    if not curr_paper:
+        raise HTTP(404)
+        
+    papers = sess.paper.select()
+    
+    # Shift papers for placement
+    paper_position = int(request.vars.position)
+    for paper in papers:
+        if paper.session_pos >= paper_position:
+            paper.update_record(session_pos = paper.session_pos + 1)
+    
+    # Place paper by updating session and paper position
+    curr_paper.update_record(session = sess, session_pos = paper_position)
+
+@auth.requires_membership("Symposium Admin")
+def del_from_session():
+    curr_paper = db.paper(request.vars.paper)
+    
+    if not curr_paper:
+        raise HTTP(404)
+        
+    curr_paper.update_record(session = None)
+
+def view_session():
+    sess = db.session(request.args(0))
+    
+    if not sess:
+        raise HTTP(404)
+        
+    return dict(sess=sess)

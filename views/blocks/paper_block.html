@@ -4,7 +4,7 @@
 <div style="border: 1px solid #000000; background: #EAEAEA; padding: 5px; margin: 10px;">
    <div style="width: 100%; background: #DADADA;">
        <div style="float: right; font-weight: bold;">
-           {{=paper.status if show_moderation else ""}} {{=paper.format if paper.format else ""}}
+           {{=paper.status if show_moderation else ""}} {{=db.format._format%db.format[paper.format] if paper.format else ""}}
            
        </div>
        <div style="font-weight: bold;">
@@ -15,13 +15,20 @@
                {{=paper.title}}
            {{pass}}
        </div>
-       <div style="float: right; clear: both;">{{=paper.category}}</div>
+       <div style="float: right; clear: both;">{{=db.category._format%db.category[paper.category]}}</div>
        <div>
            {{=paper.symposium.name}}
        </div>
-       {{if paper.scheduled and paper.schedule_start and paper.schedule_end:}}
+       {{if paper.session:}}
        <div>
-           <b>{{=T("Scheduled:")}} {{=paper.symposium.rooms[paper.schedule_room]}} {{=paper.schedule_start.strftime(TIME_FORMAT)}} - {{=paper.schedule_end.strftime(TIME_FORMAT)}}</b>
+           <b>
+               {{=T("Scheduled Session:")}} {{=A(paper.session.name, _href=URL("agenda","view_session",args=paper.session.id))}}
+               {{if 'scheduled_time' in globals():}}
+                   ({{=B(scheduled_time)}})
+               {{else:}}
+                   ({{=B(get_scheduled_time(paper))}})
+               {{pass}}
+           </b>
        </div>
        {{pass}}
    </div>

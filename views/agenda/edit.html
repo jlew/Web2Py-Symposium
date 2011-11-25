@@ -1,75 +1,312 @@
+{{right_sidebar_enabled=False}}
 {{extend 'layout.html'}}
-<script type="text/javascript">
+{{=A("Back To Agenda", _href=URL("agenda","index", args=symposium.sid))}}
+<script>
+$(function() {
+        $(".connectedSortable").sortable({
+                connectWith: ['.connectedSortable'],
+                placeholder: "ui-state-highlight",
+                update: function(event, ui){
+                    if (this === ui.item.parent()[0]) { // only fire for internal sorts
+                       if(ui.sender == null && event.target.id.substring(0,5) == "sess_"){
+                           sess_id = event.target.id.substring(5);
+                           order = $(this).sortable('toArray').toString().replace(/paper_/g,"");
+                            
+                           if( order != ""){
+                               $.get('{{=URL('agenda','update_order')}}', {ses_id:sess_id, order:order});
+                           }
+                       }
+                    }
+                },
+                receive: function(event, ui) {
+                    if($(this).attr("id").substring(0,5) == "sess_"){
+                        paper_id = ui.item.attr("id").substr(6);
+                        paper_index = ui.item.index();
+                        sess_id = $(this).attr("id").substring(5);
+                        
+                        $.get('{{=URL('agenda','add_to_session')}}', {ses_id:sess_id, paper:paper_id, position:paper_index});
+                    }else{
+                        $.get('{{=URL('agenda','del_from_session')}}', {paper:paper_id = ui.item.attr("id").substr(6)});
+                    }
 
-$(document).ready(function() {
-    d = new Date("{{=symposium.event_date}}");
-    year = d.getFullYear();
-    month = d.getMonth();
-    day = d.getDate();
-    var my_data = [
-    {{offseth, offsetm = 0,0}}
-    {{for paper in papers:}}
-        {{if paper.scheduled and paper.schedule_room < len(symposium.rooms):}}
-        {"id":{{=paper.id}},
-         "start": new Date(year, month, day, {{=paper.schedule_start.hour}}, {{=paper.schedule_start.minute}}),
-         "end": new Date(year, month, day, {{=paper.schedule_end.hour}}, {{=paper.schedule_end.minute}}),
-         "title": "{{=paper.title}}",
-         "userId": {{=paper.schedule_room}}
-         },
-        {{else:}}
-        {"id":{{=paper.id}}, 
-            "start": new Date(year,month,day,{{=offseth}},{{=offsetm}}),
-            "end": new Date(year,month,day,{{=offseth}},{{=offsetm+15}}), "title": "{{=paper.title}}", "userId": {{=len(symposium.rooms)}}},
-            {{
-            offsetm+=15
-            if offsetm >= 60:
-                offseth +=1
-                offsetm = 0
-                pass
-            }}
-        {{pass}}
-    {{pass}}
-       
-            ];
-            
-            
-    update_function = function(newCalEvent){
-        $("#cal_msg").html("Sending " + newCalEvent.title + " change").show();
-        $.ajax({
-            url: "{{=URL("agenda","schedule_event")}}?id=" + newCalEvent.id +
-                 "&start_h=" + newCalEvent.start.getHours() + 
-                 "&start_m=" + newCalEvent.start.getMinutes() + 
-                 "&end_h=" + newCalEvent.end.getHours() + 
-                 "&end_m=" + newCalEvent.end.getMinutes() + 
-                 "&room=" + newCalEvent.userId,
-            
-          success: function(){
-            $("#cal_msg").html(newCalEvent.title + " Updated").delay(400).hide("slow");
-          }
-          });
-    }
-            
-    var $calendar = $('#calendar').weekCalendar({
-        date: new Date("{{=symposium.event_date}}"),
-        allowEventCreation: false,
-        timeslotsPerHour: 4,
-        timeslotHeight: 80,
-        scrollToHourMillis: 0,
-        defaultEventLength: 1,
-        height: function($calendar){ return 500; },
-        eventDrop: function(newCalEvent, oldCalEvent, element){  update_function(newCalEvent)  },
-        eventResize: function(newCalEvent, oldCalEvent, element){  update_function(newCalEvent)  },
-        data: function(start, end, callback) { callback({events: my_data}); },
-        users: {{=XML(symposium.rooms+[T("Not Yet Scheduled").xml()],False)}},
-        showAsSeparateUser: true,
-        displayOddEven: true,
-        daysToShow: 1,
-        headerSeparator: ' ',
-        buttons: false,
+            }
+        });
     });
-});
+    
+    $().ready(function() {
+        $(".list_holder").css("height", $(window).height()-40 + "px");
 
+    });
 </script>
 
-<div id="cal_msg"></div>
-<div id="calendar"></div>
+{{room_count = symposium.room.count()}}
+<style>
+    table, tr, td, th{
+        border: 1px solid black;
+    }
+    tr:nth-child(odd)    { background-color:#eee; }
+    tr:nth-child(even)    { background-color:#fff; }
+
+    div.paper_block{
+        width: 100%;
+        border: 1px solid black;
+        margin-bottom: 5px;
+    }
+
+    div.paper_block_title{
+        background: #eee;
+    }
+    
+    div.paper_block_format{
+        font-size: 75%; float: right;
+    }
+    
+    div.paper_block_category{
+        font-size: 75%;
+    }
+    
+    .session_block .paper_block{
+        border: none;
+    }
+    
+    .session_block .paper_block_title{
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        background: none;
+        
+        
+    }
+    
+    .session_block .paper_block_title a{
+        color: #000;
+    }
+    
+    .session_block ul {
+    list-style-type: disc;
+    list-style-position: inside;
+    }
+    
+    .session_block .paper_block_format,
+    .session_block .paper_block_category,
+    .session_block .paper_block_description{
+        display: none;
+    }
+    
+</style>
+
+{{rooms = symposium.room.select(db.room.name, db.room.id, db.room.location, orderby=db.room.name)}}
+{{timeblocks = symposium.timeblock.select(orderby=db.timeblock.start_time)}}
+
+<table border=1 width="98%" style="margin:auto; table-layout:fixed;">
+    <tr>
+        <th width="10%">Time</th>
+        {{if rooms:}}
+            {{for room in rooms:}}
+                <th width="{{=90/len(rooms)}}%">
+                    {{if room == rooms[-1]:}}
+                        {{=A(
+                            IMG(_src=URL('static','images/details_open.png')),
+                                _href=URL("editsymp", "create_room", args=symposium.id) +"?KeepThis=true&TB_iframe=true&height=175&width=450",
+                                _class="thickbox", _style="float: right;")}}
+                   {{pass}}
+                    {{=A(room.name,
+                        _href=URL("editsymp", "edit_room", args=room.id) +"?KeepThis=true&TB_iframe=true&height=175&width=450",
+                        _class="thickbox")}}<br><span style="font-size: 80%">{{=room.location}}</span>
+                </th>
+            {{pass}}
+        {{else:}}
+            <th>
+                {{=A(
+                    IMG(_src=URL('static','images/details_open.png')),
+                    "Add Your First Room",
+                    _href=URL("editsymp", "create_room", args=symposium.id) +"?KeepThis=true&TB_iframe=true&height=150&width=430",
+                    _class="thickbox")}}
+            </th>
+        {{pass}}
+    </tr>
+
+    {{if timeblocks:}}
+        {{for timeblock in timeblocks:}}
+        <tr>
+            <td>
+                {{=A(
+                    timeblock.start_time.strftime(TIME_FORMAT),
+                    _href=URL("editsymp", "edit_timeblock", args=timeblock.id) +"?KeepThis=true&TB_iframe=true&height=250&width=450",
+                    _class="thickbox")}}<br>
+                <span style="font-size: 80%">{{=timeblock.desc}}</span>
+            </td>
+            {{for room in rooms:}}
+                {{sess_block = db(
+                    (db.session.room == room.id) & (db.session.timeblock == timeblock.id) 
+                    ).select(db.session.id,db.session.name, db.session.theme).first()}}
+                {{if sess_block:}}
+                    <td class="session_block">
+            
+                        <div style="font-weight: bold; text-align: center; line-height: 80%;">
+                            {{=A(sess_block.name,
+                                _href=URL("agenda","view_session", args=sess_block.id),
+                                _style="font-weight: bold; text-decoration: underline; text-align: center; color: #000;")}}<br>
+                            {{=A("(Edit Session)",
+                                _href=URL("editsymp", "edit_session", args=sess_block.id) +"?KeepThis=true&TB_iframe=true&height=150&width=450",
+                                _class="thickbox",
+                                _style="font-size: 50%"
+                                )}}
+                            {{=A("(Edit Judges)", _href=URL("editsymp","edit_session_judges", args=sess_block.id), _style="font-size: 50%")}}
+                        </div>
+
+                        <div style="font-size: 80%; line-height: 100%;">
+                            {{if sess_block.theme:}}<b>Theme:</b> {{=sess_block.theme}}<br />{{pass}}
+                            <ul class="connectedSortable" style="padding: 5px;" id="sess_{{=sess_block.id}}">
+                                {{for paper in sess_block.paper.select(
+                                    db.paper.title, db.paper.id, db.paper.format, db.paper.category,
+                                    db.paper.description, db.paper.authors, db.paper.mentors, orderby=db.paper.session_pos):}}
+                                <li id="paper_{{=paper.id}}">
+                                    <div class="paper_bock">
+                                        <div class="paper_block_title">
+                                            {{=A(paper.title, _title=paper.title, _href=URL('papers','view',args=paper.id))}}
+                                        </div>
+                                        <div class="paper_block_format">{{=paper.format}}</div>
+                                        <div class="paper_block_category">{{=paper.category}}</div>
+                                        <div class="paper_block_description">
+                                            <a href="#" onclick="$('#desc_{{=paper.id}}').toggle('slow'); return false;"
+                                                style="font-size: 75%">Toggle Details</a>
+                                            <div id="desc_{{=paper.id}}" style="display: none;">
+                                                {{=paper.description}}
+                                                
+                                                 <div>
+                                                    <b>{{=T("Authors:")}}</b>
+                                                    <ul>
+                                                    {{for x in paper.authors:}}
+                                                        <li>{{=A(db.auth_user(x).search_name, _href=URL("people","profile",args=x))}}</li>
+                                                    {{pass}}
+                                                    </ul>
+                                                 </div>
+                                               
+                                               {{if len(paper.mentors) > 0:}}
+                                               <div>
+                                                   <b>{{=T("Mentors:")}}</b>
+                                                   <ul>
+                                                   {{for x in paper.mentors:}}
+                                                       <li>{{=A(db.auth_user(x).search_name, _href=URL("people","profile",args=x))}}</li>
+                                                   {{pass}}
+                                                   </ul>
+                                               </div>
+                                               {{pass}}
+                       
+                                            </div>
+                                        </div>
+                                    </div>
+                                </li>
+                            {{pass}}
+                            </ul>
+                        </div>
+                    </td>
+                {{else:}}
+                    <td align="center">
+                        {{=A(
+                            SPAN(_class="icon plus"),
+                            "Add Session",
+                            _href=URL('editsymp', 'create_session',
+                            args=[symposium.id, room.id, timeblock.id])+"?KeepThis=true&TB_iframe=true&height=255&width=420",
+                            _class="button thickbox")}}
+                    </td>
+                {{pass}}
+            {{pass}}
+        </tr>
+        {{pass}}
+    {{pass}}
+        <tr>
+            <td align="center" style="font-size: 60%;">
+                {{=A(
+                    IMG(_src=URL('static','images/details_open.png')),
+                    "Add Timeblock",
+                    _href=URL('editsymp', 'create_timeblock', args=symposium.id)+"?KeepThis=true&TB_iframe=true&height=275&width=450",
+                    _class="thickbox")}}
+            </td>
+        </tr>
+{{pass}}
+</table>
+
+
+<h3 style="text-align: center;">Unscheduled Papers</h3>
+<div id="form" style="display: inline;"><b>Filter:</b></div>
+<div style="height: 600px; overflow: auto; background: #fff;" class="list_holder">
+    <ul class="connectedSortable" style="padding: 5px;" id="paper_holder">
+    {{for paper in unscheduled_papers:}}
+        <li id="paper_{{=paper.id}}">
+            <div class="paper_bock">
+                <div class="paper_block_title">{{=A(paper.title, _title=paper.title, _href=URL('papers','view',args=paper.id))}}</div>
+                <div class="paper_block_format">{{=paper.format}}</div>
+                <div class="paper_block_category">{{=paper.category}}</div>
+                <div class="paper_block_description">
+                    <a href="#" onclick="$('#desc_{{=paper.id}}').toggle('slow'); return false;"
+                        style="font-size: 75%">Toggle Details</a>
+                    <div id="desc_{{=paper.id}}" style="display: none;">
+                        {{=paper.description}}
+                        
+                        <div>
+                           <b>{{=T("Authors:")}}</b>
+                           <ul>
+                           {{for x in paper.authors:}}
+                               <li>{{=A(db.auth_user(x).search_name, _href=URL("people","profile",args=x))}}</li>
+                           {{pass}}
+                           </ul>
+                       </div>
+                       
+                       {{if len(paper.mentors) > 0:}}
+                       <div>
+                           <b>{{=T("Mentors:")}}</b>
+                           <ul>
+                           {{for x in paper.mentors:}}
+                               <li>{{=A(db.auth_user(x).search_name, _href=URL("people","profile",args=x))}}</li>
+                           {{pass}}
+                           </ul>
+                       </div>
+                       {{pass}}
+       
+                    </div>
+                </div>
+            </div>
+        </li>
+    {{pass}}
+    </ul>
+</div>
+
+<script>
+// Script from http://papermashup.com/jquery-list-filtering/
+(function ($) {
+  jQuery.expr[':'].Contains = function(a,i,m){
+      return (a.textContent || a.innerText || "").toUpperCase().indexOf(m[3].toUpperCase())>=0;
+  };
+
+  function filterList(header, list) {
+    var form = $("<form>").attr({"class":"filterform","action":"#", "style":"display: inline;"}),
+        input = $("<input>").attr({"class":"filterinput","type":"text"});
+    $(form).append(input).appendTo(header);
+
+    $(input)
+      .change( function () {
+        var filter = $(this).val();
+        if(filter) {
+
+          $matches = $(list).find('.paper_bock:Contains(' + filter + ')').parent();
+          $('li', list).not($matches).slideUp();
+          $matches.slideDown();
+
+        } else {
+          $(list).find("li").slideDown();
+        }
+        return false;
+      })
+    .keyup( function () {
+        $(this).change();
+    });
+  }
+
+  $(function () {
+    filterList($("#form"), $("#paper_holder"));
+  });
+}(jQuery));
+</script>
+{{#=BEAUTIFY(response._vars)}}

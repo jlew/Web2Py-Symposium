@@ -1,0 +1,64 @@
+{{include 'blocks/paper_block.html'}}
+{{from datetime import date, datetime, time, timedelta}}
+{{extend 'layout.html'}}
+
+{{show_moderation=show_discription=show_action_buttons=False}}
+<style type="text/css">
+    .paper_member_img{
+        width: 75px; height: 75px; float: left; text-align: center; padding-right: 10px;
+    }
+
+    .paper_member_ctr{
+        clear: left; height: 75px;
+    }
+</style>
+
+<h1>{{=sess.name}}</h1>
+<h2>Session Information</h2>
+<table>
+    <tr>
+        <th>Theme</th>
+        <td>{{=sess.theme}}</td>
+    </tr>
+    <tr>
+        <th>Time</th>
+        <td>{{=sess.timeblock.start_time.strftime(TIME_FORMAT)}}<br />{{=sess.timeblock.desc}}</td>
+    </tr>
+    <tr>
+        <th>Room</th>
+        <td>{{=sess.room.name}}<br />{{=sess.room.location}}</td>
+    </tr>
+    <tr>
+        <th>Symposium</th>
+        <td>{{=A(sess.timeblock.symposium.name, _href=URL('default','view',args=sess.timeblock.symposium.sid))}}</td>
+    </tr>
+</table>
+
+
+<h2>Judges</h2>
+{{back = "fff"}}
+{{for usr in [db.auth_user(x) for x in sess.judges]:}}
+{{back = "fff" if back == "eee" else "eee"}}
+<div class="paper_member_ctr" style="background: #{{=back}};">
+    <div class="paper_member_img">
+        {{=IMG(_src=(URL('default','thumb',args=[75,75,usr.profile_picture]) if usr.profile_picture else URL('static','images/no-photo.png')))}}
+    </div>
+    <div>{{=A("%s %s" % (usr.first_name, usr.last_name), _href=URL("people","profile",args=usr.id))}} <i>{{=usr.affiliation}}</i></div>
+    {{if usr.web_page:}}<div>{{=A(usr.web_page, _href=usr.web_page)}}</div>{{pass}}
+    <div>{{=usr.short_profile}}</div>
+</div>
+{{pass}}
+
+<h2>Papers</h2>
+{{the_time = sess.timeblock.start_time}}
+{{for paper in db(
+        (db.paper.session==sess.id) &
+        get_public_filter()
+        ).select(db.paper.ALL, orderby=db.paper.session_pos):}}
+        {{scheduled_time=the_time.strftime(TIME_FORMAT)}}
+    {{paper_block()}}
+    {{the_time = (datetime.combine(date.today(), the_time) + timedelta(minutes=paper.format.duration)).time()}}
+{{pass}}
+
+
+{{#=BEAUTIFY(response._vars)}}

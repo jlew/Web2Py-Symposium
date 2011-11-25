@@ -43,6 +43,15 @@ def get_symposium_mentors_id(symposium, all=False):
         if all or papers.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
             mentors = mentors.union(papers.mentors)
     return mentors
+    
+def get_symposium_judges_id(symposium):
+    judges = set()
+    for timeblock in db(db.timeblock.symposium == symposium.id).select(db.timeblock.id):
+        for sess in db(db.session.timeblock == timeblock.id).select(db.session.judges):
+            if sess.judges:
+                judges = judges.union(sess.judges)
+    return judges
+
 
 def batch_cell_view(cell, paper, td_class=""):
     def link_wrap(content):
@@ -73,3 +82,22 @@ def batch_cell_view(cell, paper, td_class=""):
         
     elif cell=="format":
         return link_wrap(paper.format)
+
+def get_public_filter():
+    status_filter = False
+    for status_option in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
+        if status_filter:
+            status_filter = status_filter | (db.paper.status == status_option)
+        else:
+            status_filter = (db.paper.status == status_option)
+    return status_filter
+    
+def get_scheduled_time(paper):
+    from datetime import date, datetime, time, timedelta
+    the_time = paper.session.timeblock.start_time
+
+    papers = db( (db.paper.session==paper.session.id) & (db.paper.session_pos < paper.session_pos) ).select(orderby=db.paper.session_pos)
+    for paper_item in papers:
+        the_time = (datetime.combine(date.today(), the_time) + timedelta(minutes=paper_item.format.duration)).time()
+
+    return the_time.strftime(TIME_FORMAT)
