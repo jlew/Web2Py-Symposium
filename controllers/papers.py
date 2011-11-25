@@ -304,30 +304,17 @@ def register_user():
             paper.update_record(mentors=paper.mentors)
 
         mail.send(to=user.email, subject=T("Symposium Registration System: You have been registered"),
-              message=T("""
-Dear %(name)s,
-
-%(user)s <%(user_email)s> has registered an account for you so that
-they may add you as an %(type)s for the paper titled %(title)s.
-
-Your Account Details:
-Email: %(email)s
-Random Generated Password: %(password)s
-
-You may view and update your account profile here: %(url)s
-
-Your papers can be viewed and managed here: %(manage_paper_url)s
-""") % {
-        "name": db.auth_user._format % user,
-        "user": db.auth_user._format % auth.user,
-        "user_email": auth.user.email,
-        "email": user.email,
-        "password": the_pass,
-        "url":"http://%s%s" % (request.env.http_host, URL("default","user",args="profile")),
-        "manage_paper_url":"http://%s%s" % (request.env.http_host, URL("papers","edit")),
-        "type": T("Author") if request.args(1) == "A" else T("Mentor"),
-        "title": paper.title,
-        })
+            message = response.render('email_templates/registration_for_paper.txt', {
+                "name": db.auth_user._format % user,
+                "user": db.auth_user._format % auth.user,
+                "user_email": auth.user.email,
+                "email": user.email,
+                "password": the_pass,
+                "url":"http://%s%s" % (request.env.http_host, URL("default","user",args="profile")),
+                "manage_paper_url":"http://%s%s" % (request.env.http_host, URL("papers","edit")),
+                "type": T("Author") if request.args(1) == "A" else T("Mentor"),
+                "title": paper.title,
+        }))
     
     crud.settings.create_onaccept.auth_user.insert(0, user_callback)
     return dict(title=T("Author") if request.args(1) == "A" else T("Mentor"),

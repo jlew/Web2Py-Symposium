@@ -1,0 +1,16 @@
+The Paper titled {{=title}} has just been updated.
+
+{{=author}} has just modified your paper's status.
+
+Status: {{=status}}
+{{=comment}}
+
+You may manage your submissions here: {{=url}}
+
+Thanks,
+
+Symposium Team
+
+---
+This is an automated email.
+Do not reply

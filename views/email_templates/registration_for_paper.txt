@@ -1,0 +1,20 @@
+Dear {{=name}},
+
+{{=user}} <{{=user_email}}> has registered an account for you so that
+they may add you as a(n) {{=type}} for the paper titled {{=title}}.
+
+Your Account Details:
+Email: {{=email}}
+Random Generated Password: {{=password}}
+
+You may view and update your account profile here: {{=url}}
+
+Your papers can be viewed and managed here: {{=manage_paper_url}}
+
+Thanks,
+
+Symposium Team
+
+---
+This is an automated email.
+Do not reply

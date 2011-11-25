@@ -234,26 +234,14 @@ def register_judge():
         sess.judges.append( user.id )
 
         mail.send(to=user.email, subject=T("Symposium Registration System: You have been registered"),
-              message=T("""
-Dear %(name)s,
-
-%(user)s <%(user_email)s> has registered an account for you so that
-they may add you as a judge.
-
-Your Account Details:
-Email: %(email)s
-Random Generated Password: %(password)s
-
-You may view and update your account profile here: %(url)s
-
-""") % {
-        "name": db.auth_user._format % user,
-        "user": db.auth_user._format % auth.user,
-        "user_email": auth.user.email,
-        "email": user.email,
-        "password": the_pass,
-        "url":"http://%s%s" % (request.env.http_host, URL("default","user",args="profile")),
-        })
+              message=response.render('email_templates/registered_for_judge.txt', {
+                "name": db.auth_user._format % user,
+                "user": db.auth_user._format % auth.user,
+                "user_email": auth.user.email,
+                "email": user.email,
+                "password": the_pass,
+                "url":"http://%s%s" % (request.env.http_host, URL("default","user",args="profile")),
+                }))
     
     crud.settings.create_onaccept.auth_user.insert(0, user_callback)
     return dict(form=crud.create(db.auth_user, message=T("Account created and linked to session")))
@@ -290,7 +278,7 @@ def email():
                   to=auth.user.email,
                   bcc=emails,
                   subject=form.vars.subject,
-                  message=form.vars.message + "\n\n\n" +
+                  message=form.vars.message + "\n\n\n---\n" +
                           T("This message was sent on behalf of %(name)s for your involvment in %(symp_name)s: %(symp_date)s") %
                               {
                               "name": db.auth_user._format % auth.user,

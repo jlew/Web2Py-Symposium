@@ -144,24 +144,13 @@ def paper_comment(form):
     author_list = [db.auth_user(author).email for author in paper.authors]
     mentor_list = [db.auth_user(mentor).email for mentor in paper.mentors]
     mail.send(to=author_list, cc=mentor_list, subject=T("Symposium Paper Status Update"),
-    message=T("""
-The Paper titled "%(title)s" has just been updated.
-
-%(author)s has just modified your paper's status.
-
-Status: %(status)s
-%(comment)s
-
-You may manage your submissions here: %(url)s
-
--- Symposium Team
-""") % {
-    "title":paper.title,
-    "author":db.auth_user._format % db.auth_user(comment.author),
-    "status":comment.status,
-    "comment":comment.comment,
-    "url":"http://%s%s" % (request.env.http_host, URL("papers","edit"))
-    })
+    message=response.render('email_templates/paper_updated.txt', {
+        "title":paper.title,
+        "author":db.auth_user._format % db.auth_user(comment.author),
+        "status":comment.status,
+        "comment":comment.comment,
+        "url":"http://%s%s" % (request.env.http_host, URL("papers","edit"))
+        }))
 
 crud.settings.create_onaccept.paper_comment.append(paper_comment)
 
