@@ -15,7 +15,7 @@
                {{=paper.title}}
            {{pass}}
        </div>
-       <div style="float: right; clear: both;">{{=paper.category}}</div>
+       <div style="float: right; clear: both;">{{=db.category._format%db.category[paper.category]}}</div>
        <div>
            {{=paper.symposium.name}}
        </div>
