@@ -50,6 +50,12 @@ db.define_table('format',
     format = "%(name)s"
 )
 
+db.define_table('category',
+    Field('name'),
+    Field('symposium', db.symposium, writable=False),
+    format = "%(name)s"
+)
+
 def get_next_symposium():
     """
     Returns the next upcoming symposium.
@@ -86,7 +92,7 @@ db.define_table('paper',
     Field('status', 'string', requires=IS_IN_SET(PAPER_STATUS), default=PAPER_STATUS[0],
           label=T("Paper Status"), writable=False),
           
-    Field('category', 'string', requires=IS_IN_SET(PAPER_CATEGORY),
+    Field('category', db.category,
         comment=T("Pick the category that best matches your paper.  This will be used for scheduling purposes.")),
     
     Field('format', db.format, label=T("Presentation Format"),

@@ -46,17 +46,46 @@
             <td>{{=symposium.reg_start.strftime(DATE_TIME_FORMAT)}} - {{=symposium.reg_end.strftime(DATE_TIME_FORMAT)}}</td>
         </tr>
         <tr>
-            <td>{{=T("Presentation Formats")}}</td>
+            <td>{{=T("Available Presentation Formats")}}</td>
             <td>
                 <ul>
                     {{for format in symposium.format.select(orderby=db.format.name):}}
-                        <li>{{=A(format.name,
-                        _href=URL("editsymp","edit_format",args=format.id)+"?KeepThis=true&TB_iframe=true&height=125&width=425",
-                        _class="thickbox")}}</li>
+                        <li>
+                            {{if auth.has_membership("Symposium Admin"):}}
+                                {{=A(format.name,
+                                _href=URL("editsymp","edit_format",args=format.id)+"?KeepThis=true&TB_iframe=true&height=125&width=425",
+                                _class="thickbox")}}
+                             {{else:}}
+                                 {{=format.name}}
+                             {{pass}}
+                        </li>
                     {{pass}}
                     {{if auth.has_membership("Symposium Admin"):}}
                         <li>{{=A(SPAN(_class="icon plus"), T("Add Format"),
                         _href=URL("editsymp","create_format",args=symposium.id)+"?KeepThis=true&TB_iframe=true&height=125&width=425",
+                        _class="button thickbox")}}</li>
+                    {{pass}}
+                </ul>
+            </td>
+        </tr>
+        <tr>
+            <td>{{=T("Available Presentation Categories")}}</td>
+                        <td>
+                <ul>
+                    {{for category in symposium.category.select(orderby=db.category.name):}}
+                        <li>
+                            {{if auth.has_membership("Symposium Admin"):}}
+                                {{=A(category.name,
+                                _href=URL("editsymp","edit_category",args=category.id)+"?KeepThis=true&TB_iframe=true&height=125&width=425",
+                                _class="thickbox")}}
+                             {{else:}}
+                                 {{=category.name}}
+                             {{pass}}
+                        </li>
+                    {{pass}}
+                    {{if auth.has_membership("Symposium Admin"):}}
+                        <li>{{=A(SPAN(_class="icon plus"), T("Add Category"),
+                        _href=URL("editsymp","create_category",args=symposium.id)+"?KeepThis=true&TB_iframe=true&height=125&width=425",
                         _class="button thickbox")}}</li>
                     {{pass}}
                 </ul>

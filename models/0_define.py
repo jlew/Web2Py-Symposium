@@ -19,7 +19,7 @@ NEED_SUBMIT =     [0, 4]       # When the user can to sumbit paper
 VISIBLE_STATUS =  [2]          # When the paper is visible to public
 PEND_APPROVAL =   1            # The waiting for approval state
 
-PAPER_CATEGORY = (
+DEFAULT_PAPER_CATEGORIES = (
             T('Biological and Environmental Sciences'),
             T('Chemistry and Material Science'),
             T('Physics and Astronomy'),
