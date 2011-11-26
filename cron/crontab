@@ -1,2 +1,2 @@
 #crontab
-@daily web2py *applications/symposium/cron/email_incomplete_papers.py
+@daily web2py *cron/email_incomplete_papers
