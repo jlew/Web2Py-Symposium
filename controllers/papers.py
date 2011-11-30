@@ -96,8 +96,8 @@ def submit():
     else:
         crud.messages.submit_button = T("Save and continue")
         
-        db.paper.format.requires=IS_IN_DB(db(db.format.symposium == valid_sym.first().id), "format.name")
-        db.paper.category.requires=IS_IN_DB(db(db.category.symposium == valid_sym.first().id), "category.name")
+        db.paper.format.requires=IS_IN_DB(db(db.format.symposium == valid_sym.first().id), db.format, label=db.format._format)
+        db.paper.category.requires=IS_IN_DB(db(db.category.symposium == valid_sym.first().id), db.category, label=db.category._format)
         db.paper.symposium.default = valid_sym.first().id
         def user_callback(form):
             session.supress_paper_warning = form.vars.id
@@ -120,8 +120,8 @@ def edit():
         
         # Only allow edit of fromat if not scheduled
         db.paper.format.writable = (paper.session == None) 
-        db.paper.format.requires=IS_IN_DB(db(db.format.symposium == paper.symposium.id), "format.name")
-        db.paper.category.requires=IS_IN_DB(db(db.category.symposium == valid_sym.first().id), "category.name")
+        db.paper.format.requires=IS_IN_DB(db(db.format.symposium == paper.symposium.id), db.format, label=db.format._format)
+        db.paper.category.requires=IS_IN_DB(db(db.category.symposium == paper.symposium.id), db.category, label=db.category._format)
         
         crud.messages.submit_button = T("Save and continue")
 
