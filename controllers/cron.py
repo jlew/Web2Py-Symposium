@@ -14,11 +14,18 @@ def email_incomplete_papers():
             status_filter = (db.paper.status == status_option)
     
     papers = db(status_filter).select()
+    count = 0
     for paper in papers:
         email_list = []
         for author in paper.authors:
             email_list.append(db.auth_user[author].email)
+        
+        # Unlock database by running a commit
+        db.commit()
+        
         message = response.render('email_templates/paper_waiting_for_submission.txt', {'paper':paper})
         mail.send(to=email_list,
             subject=T("Symposium Paper Submission, Action Required"),
             message=message)
+        count += 1
+    return "Sent %d email(s)" % count
