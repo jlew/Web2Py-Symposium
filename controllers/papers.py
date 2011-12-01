@@ -112,7 +112,7 @@ def edit():
     paper = db.paper(request.args(0))
     if not paper:
         response.view = "papers/managelist.html"
-        papers = db(db.paper.authors.contains(auth.user.id) | db.paper.mentors.contains(auth.user.id)).select()
+        papers = db(db.paper.authors.contains(auth.user.id) | db.paper.mentors.contains(auth.user.id)).select(orderby=~db.paper.id)
         return dict(papers = papers)
         
     if can_edit_paper(paper):
