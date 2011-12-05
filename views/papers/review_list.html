@@ -1,9 +1,17 @@
 {{right_sidebar_enabled=False}}
 {{response.files.insert(2,URL('static','js/jquery.dataTables.min.js'))}}
 {{response.files.insert(3,URL('static','js/ColVis.min.js'))}}
-{{response.files.insert(3,URL('static','data_table.css'))}}
+{{response.files.insert(4,URL('static','js/jquery.dataTables.columnFilter.js'))}}
+{{response.files.insert(5,URL('static','data_table.css'))}}
 {{extend 'layout.html'}}
-
+<style>
+table tfoot input, table tfoot select{
+width: 100%;
+}
+table thead, table tfoot{
+font-size:70%;
+}
+</style>
 <script type="text/javascript" charset="utf-8">
     var oTable;
 
@@ -19,7 +27,23 @@
                         ],
                         "aaSorting": [[1, 'asc']],
                         "aLengthMenu": [[10, 25, 50, 100, 250, -1], [10, 25, 50, 100, 250, "All"]]
-                        } );
+                        } ).columnFilter({
+                    aoColumns: [null,
+                                { type: "text" },
+                                {{if all:}}
+                                { type: "select", 
+                                  values: ['{{=XML("','".join([ db.symposium._format % x for x in db(db.symposium.id>0).select()]))}}'] },
+                                  {{else:}}
+                                  null,
+                                  {{pass}}
+                                { type: "select", values: ['{{=XML("','".join(
+                                    set([db.category._format % x for x in db(db.category.id > 0).select()])))}}'] },
+                                { type: "select", values: ['{{=XML("','".join(
+                                    set([db.format._format % x for x in db(db.format.id > 0).select()])))}}'] },
+                                null,
+                                null,
+                                ]
+                });;
     } );
 
 </script>
@@ -31,12 +55,12 @@
     <thead>
         <tr>
             <th width="25px;">Review</th>
-            <th>Title</th>
-            <th>Symposium</th>
-            <th>Category</th>
-            <th>Format</th>
-            <th>Author(s)</th>
-            <th>Mentor(s)</th>
+            <th>{{=db.paper.title.label}}</th>
+            <th>{{=db.paper.symposium.label}}</th>
+            <th>{{=db.paper.category.label}}</th>
+            <th>{{=db.paper.format.label}}</th>
+            <th>{{=db.paper.authors.label}}</th>
+            <th>{{=db.paper.mentors.label}}</th>
         </tr>
     </thead>
     <tbody>
@@ -76,6 +100,17 @@
         </tr>
         {{pass}}
     </tbody>
+    <tfoot>
+        <tr>
+            <th width="25px;"></th>
+            <th>{{=db.paper.title.label}}</th>
+            <th>{{=db.paper.symposium.label}}</th>
+            <th>{{=db.paper.category.label}}</th>
+            <th>{{=db.paper.format.label}}</th>
+            <th>{{=db.paper.authors.label}}</th>
+            <th>{{=db.paper.mentors.label}}</th>
+        </tr>
+    </tfoot>
 </table>
 </table>
 {{else:}}
