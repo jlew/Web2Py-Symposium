@@ -185,6 +185,10 @@ def attach_file():
 def review():
     paper = db.paper(request.args(0))
     if paper:
+        if paper.status != PAPER_STATUS[PEND_APPROVAL]:
+            response.view = "papers/view_min.html"
+            return dict(paper=paper)
+            
         db.paper_comment.paper.default = paper.id
         db.paper_comment.status.default = paper.status
         db.paper_comment.status.label = T("Next Status")

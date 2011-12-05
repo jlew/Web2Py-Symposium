@@ -54,10 +54,10 @@
                 {{=db.symposium._format % paper.symposium}}
             </td>
             <td>
-                {{=paper.category}}
+                {{=db.category._format % db.category[paper.category]}}
             </td>
             <td>
-                {{=paper.format}}
+                {{=db.format._format % db.format[paper.format]}}
             </td>
             <td>
                 <ul>
