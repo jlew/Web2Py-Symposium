@@ -7,6 +7,22 @@ def can_edit_paper(paper):
             auth.user.id in paper.authors or\
             auth.user.id in paper.mentors or\
             len(paper.authors) == 0
+            
+def can_review_paper(paper):
+    if auth.has_membership("Symposium Admin"):
+        return True
+        
+    reviewer_rules = db(
+        (db.reviewer.reviewer == auth.user_id) &
+        (db.reviewer.symposium == paper.symposium)).select()
+    
+    for rule in reviewer_rules:
+        if rule.global_reviewer:
+            return True
+        elif paper.category in rule.categories:
+            return True
+    return False
+        
     
 def get_symposium_visable_papers(symposium):
     """
@@ -51,6 +67,12 @@ def get_symposium_judges_id(symposium):
             if sess.judges:
                 judges = judges.union(sess.judges)
     return judges
+    
+def get_symposium_reviewers_id(symposium):
+    reviewers = []
+    for reviewer in db(db.reviewer.symposium == symposium.id).select():
+        reviewers.append(reviewer.reviewer)
+    return reviewers
 
 
 def batch_cell_view(cell, paper, td_class=""):
@@ -101,3 +123,25 @@ def get_scheduled_time(paper):
         the_time = (datetime.combine(date.today(), the_time) + timedelta(minutes=paper_item.format.duration)).time()
 
     return the_time.strftime(TIME_FORMAT)
+    
+def get_reviewer_filter(reviewer=False):
+    if auth.has_membership("Symposium Admin"):
+        return (db.paper.status==PAPER_STATUS[PEND_APPROVAL])
+        
+    if not reviewer:
+        reviewer = db(db.reviewer.reviewer == auth.user_id).select()
+    
+    reviewer_filter = False
+    for reviewer_rule in reviewer:
+        if reviewer_rule.global_reviewer:
+            if reviewer_filter:
+                reviewer_filter = reviewer_filter | (db.paper.symposium == reviewer_rule.symposium)
+            else:
+                reviewer_filter = (db.paper.symposium == reviewer_rule.symposium)
+        else:
+            if reviewer_filter:
+                reviewer_filter = reviewer_filter | (
+                    (db.paper.symposium == reviewer_rule.symposium) & (db.paper.category.belongs(reviewer_rule.categories)))
+            else:
+                reviewer_filter = ((db.paper.symposium == reviewer_rule.symposium) & (db.paper.category.belongs(reviewer_rule.categories)))
+    return (db.paper.status==PAPER_STATUS[PEND_APPROVAL]) & reviewer_filter

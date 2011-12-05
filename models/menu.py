@@ -20,10 +20,6 @@ if auth.user:
     paper_menu.append( (T('Submit Paper'), False, URL('papers', 'submit'), []) )
     paper_menu.append( (T('Manage My Papers'), False, URL('papers', 'edit'), []) )
 
-# Only want to show review option to members who can review papers
-if auth.has_membership("Reviewer"):
-        paper_menu += [(T('Review Papers'), False, URL('papers','review'), [])]
-
 class filter_link:
     def __init__(self, control, func):
         self.control = control

@@ -1,0 +1,18 @@
+Dear {{=name}},
+
+{{=user}} <{{=user_email}}> has registered an account for you so that
+they may add you as a submission reviewer.
+
+Your Account Details:
+Email: {{=email}}
+Random Generated Password: {{=password}}
+
+You may view and update your account profile here: {{=url}}
+
+Thanks,
+
+Symposium Team
+
+---
+This is an automated email.
+Do not reply

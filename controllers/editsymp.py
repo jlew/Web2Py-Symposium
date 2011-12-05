@@ -42,6 +42,71 @@ def edit_format():
         
     return dict( form=crud.update(db.format, format, next=URL("editsymp","close_parent"),
         deletable=(format.paper.count() == 0 and format.symposium.format.count() > 1)))
+
+@auth.requires_membership("Symposium Admin")
+def add_reviewer():
+    symp = db.symposium( request.args(0) )
+    
+    if not symp:
+        raise HTTP(404)
+        
+    db.reviewer.symposium.default = symp.id
+    db.reviewer.categories.requires=IS_IN_DB(db(db.category.symposium==symp.id),db.category.id,"%(name)s", multiple=True)
+    return dict( form=crud.create(db.reviewer, next=URL("editsymp","close_parent")), symp=symp)
+    
+@auth.requires_membership("Symposium Admin")
+def edit_reviewer():
+    response.view = "form_layout.html"
+    reviewer = db.reviewer( request.args(0) )
+    
+    if not reviewer:
+        raise HTTP(404)
+
+    db.reviewer.categories.requires=IS_IN_DB(db(db.category.symposium==reviewer.symposium),db.category.id,"%(name)s", multiple=True)
+    return dict( form=crud.update(db.reviewer, reviewer, next=URL("editsymp","close_parent")))
+    
+@auth.requires_membership("Symposium Admin")       
+def register_reviewer():
+    response.view = "form_layout.html"
+    symp = db.symposium(request.args(0))
+    
+    if not symp:
+        raise HTTP(404)
+
+    # Generate a password for the new user
+    from hashlib import sha1
+    the_pass = sha1(str(request.now)).hexdigest()[10:20]
+    db.auth_user.password.default,throw_away=db.auth_user.password.validate(the_pass)
+    db.auth_user.password.writable=db.auth_user.password.readable=False
+    
+    # Lets keep track of who added the user
+    db.auth_user.registered_by.default=auth.user.id
+    
+    # Hide profile info to allow user to fill in at a later time
+    db.auth_user.profile_picture.writable=db.auth_user.profile_picture.readable=False
+    db.auth_user.mobile_number.writable=db.auth_user.mobile_number.readable=False
+    db.auth_user.web_page.writable=db.auth_user.web_page.readable=False
+    db.auth_user.short_profile.readable=db.auth_user.short_profile.writable=False
+
+    # Lets handle the new user
+    def user_callback(form):
+        user = db.auth_user(form.vars.id)
+
+        revid = db.reviewer.insert(reviewer=user.id, symposium=symp, global_reviewer=False, categories=[])
+
+        mail.send(to=user.email, subject=T("Symposium Registration System: You have been registered"),
+              message=response.render('email_templates/registered_for_reviewer.txt', {
+                "name": db.auth_user._format % user,
+                "user": db.auth_user._format % auth.user,
+                "user_email": auth.user.email,
+                "email": user.email,
+                "password": the_pass,
+                "url":"http://%s%s" % (request.env.http_host, URL("default","user",args="profile")),
+                }))
+        redirect(URL("editsymp","edit_reviewer",args=revid))
+    
+    crud.settings.create_onaccept.auth_user.insert(0, user_callback)
+    return dict(form=crud.create(db.auth_user, message=T("Account created")))
         
 @auth.requires_membership("Symposium Admin")
 def create_category():
@@ -259,7 +324,7 @@ def email():
         Field('subject', 'string', label=T("Subject"), requires=IS_NOT_EMPTY()),
         Field('message', 'text', label=T("Message"), requires=IS_NOT_EMPTY()),
         Field('who', default=[T("Authors")],
-            requires=IS_IN_SET((T("Authors"),T("Mentors"),T("Judges")),multiple=True),
+            requires=IS_IN_SET((T("Authors"),T("Mentors"),T("Judges"),T("Reviewers")),multiple=True),
             widget=SQLFORM.widgets.checkboxes.widget
         ))
         
@@ -273,6 +338,9 @@ def email():
             
         if T("Judges") in form.vars.who:
             users = users.union(get_symposium_judges_id(symposium))
+            
+        if T("Reviewers") in form.vars.who:
+            users = users.union(get_symposium_reviewers_id(symposium))
     
         emails = [db.auth_user(u).email for u in users]
         

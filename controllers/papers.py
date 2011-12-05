@@ -55,7 +55,7 @@ def view():
         response.view = "papers/view_min.html"
 
     if paper:
-        if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS] or can_edit_paper(paper) or auth.has_membership("Reviewer"):
+        if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS] or can_edit_paper(paper) or can_review_paper(paper):
             return dict(paper=paper)
         else:
             raise HTTP(401, T("Paper is not public yet"))
@@ -181,21 +181,31 @@ def attach_file():
     else:
         raise HTTP(401)
 
-@auth.requires_membership("Reviewer")
 def review():
     paper = db.paper(request.args(0))
+    
+    reviewer = db(db.reviewer.reviewer == auth.user_id).select()
+
+    if not reviewer:
+        raise HTTP(403)
+    
     if paper:
         if paper.status != PAPER_STATUS[PEND_APPROVAL]:
             response.view = "papers/view_min.html"
             return dict(paper=paper)
+        
+        # Error if not global category reviewer for this symposium/paper
+        if reviewer.find(lambda row: (row.global_reviewer and row.symposium == paper.symposium) or paper.category in row.categories):
+            db.paper_comment.paper.default = paper.id
+            db.paper_comment.status.default = paper.status
+            db.paper_comment.status.label = T("Next Status")
+            return dict(paper=paper, form=crud.create(db.paper_comment, next=URL('abstract',args=paper.id), message=T("Paper status updated")))
             
-        db.paper_comment.paper.default = paper.id
-        db.paper_comment.status.default = paper.status
-        db.paper_comment.status.label = T("Next Status")
-        return dict(paper=paper, form=crud.create(db.paper_comment, next=URL('abstract',args=paper.id), message=T("Paper status updated")))
+        else:
+            raise HTTP(403)
     else:
         response.view = "papers/review_list.html"
-        return dict(papers=db(db.paper.status==PAPER_STATUS[PEND_APPROVAL]).select())
+        return dict(papers=db(get_reviewer_filter(reviewer)).select() )
 
 @auth.requires_login()      
 def edit_members():

@@ -56,6 +56,17 @@ db.define_table('category',
     format = "%(name)s"
 )
 
+db.define_table('reviewer',
+    Field('reviewer', db.auth_user,
+        widget=SQLFORM.widgets.autocomplete(request, db.auth_user.search_name,
+                   limitby=(0,10), min_length=2, id_field=db.auth_user.id)),
+    Field('symposium', db.symposium, writable=False),
+    Field('global_reviewer', 'boolean', label=T("Global Reviewer"), comment=T("Check to make Global Reviewer")),
+    Field('categories', 'list:reference category',widget=SQLFORM.widgets.checkboxes.widget,
+        comment=T("Check all categories you wish to give to this reviewer (Not Needed for global reviewers).")),
+    format = "%(reviewer)s (%(symposium)s"
+)
+
 def get_next_symposium():
     """
     Returns the next upcoming symposium.
@@ -181,9 +192,7 @@ def ensure_admin(form):
     """
     if form.vars.id==1:
         auth.add_group(role = 'Symposium Admin')
-        auth.add_group(role = 'Reviewer')
         auth.add_membership('Symposium Admin', 1)
-        auth.add_membership('Reviewer', 1)
         
         # Request that plugin_wiki pre-populate pages
         session['pre-populate'] = True

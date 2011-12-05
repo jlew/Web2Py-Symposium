@@ -23,13 +23,19 @@ if auth.user:
             warn_papers.append( user_paper )
     
     if warn_papers:
-        response.notice_msg = T("The following papers are incomplete and need to be submitted for approval.")
-        response.notice_msg += UL([LI(A(x.title, _href=URL('papers','edit',anchor=x.id)), " (%s)" % x.status) for x in warn_papers])
+        response.notice_msg = DIV(
+            T("The following papers are incomplete and need to be submitted for approval."),
+            UL([LI(A(x.title, _href=URL('papers','edit',anchor=x.id)), " (%s)" % x.status) for x in warn_papers]))
     
     # Nag reviewers that there are papers waiting for their action.
-    if auth.has_membership("Reviewer"):
-        review_count = db(db.paper.status == PAPER_STATUS[PEND_APPROVAL]).count()
-        if review_count:
-            if not response.has_key("notice_msg"):
-                response.notice_msg = ""
-            response.notice_msg += T("There are %d papers waiting review.") % review_count
+    rfilter = get_reviewer_filter()
+    if rfilter:
+        review_count = db(rfilter).count()
+    
+    if review_count:
+        msg = B(T("There are %d papers waiting review.") % review_count, " ", 
+                A(T("Click Here To Review"), _href=URL('papers','review')))
+        if not response.has_key("notice_msg"):
+            response.notice_msg = msg
+        else:
+             response.notice_msg = DIV(response.notice_msg, msg)

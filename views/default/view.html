@@ -91,6 +91,32 @@
                 </ul>
             </td>
         </tr>
+        <tr>
+            <td>{{=T("Reviewers")}}</td>
+                <td>
+                <ul>
+                    {{for reviewer in db(db.reviewer.symposium== symposium.id).select().sort(
+            lambda row: row.reviewer.search_name):}}
+                        <li>
+                            <b>{{if auth.has_membership("Symposium Admin"):}}
+                                {{=A(db.auth_user._format % reviewer.reviewer,
+                                _href=URL("editsymp","edit_reviewer",args=reviewer.id)+"?KeepThis=true&TB_iframe=true&height=325&width=575",
+                                _class="thickbox")}}
+                             {{else:}}
+                                 {{=A(db.auth_user._format % reviewer.reviewer, _href=URL('people', 'profile',args=reviewer.reviewer.id))}}
+                             {{pass}}
+                             </b>
+                             {{=T("Global Reviewer") if reviewer.global_reviewer else ", ".join([db.category(x).name for x in reviewer.categories])}}
+                        </li>
+                    {{pass}}
+                    {{if auth.has_membership("Symposium Admin"):}}
+                        <li>{{=A(SPAN(_class="icon plus"), T("Add Reviewer"),
+                        _href=URL("editsymp","add_reviewer",args=symposium.id)+"?KeepThis=true&TB_iframe=true&height=325&width=575",
+                        _class="button thickbox")}}</li>
+                    {{pass}}
+                </ul>
+            </td>
+        </tr>
     </table>
     &nbsp;
     </div>

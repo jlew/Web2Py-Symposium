@@ -42,3 +42,18 @@
         </div>
     {{pass}}
 {{pass}}
+
+{{reviewers = db(db.reviewer.reviewer==id).select()}}
+{{if reviewers:}}
+<h2 style="clear: bothl">{{=T("Categories I Reviewed")}}</h2>
+    {{for reviewer in reviewers:}}
+        <div>
+            <div style="font-weight: bold; text-decoration: underline;">
+                {{=A(reviewer.symposium.name, _href=URL('default','view',args=reviewer.symposium.sid))}}
+            </div>
+            <div style="padding-left:15px;">
+                {{=T("Global Reviewer") if reviewer.global_reviewer else ", ".join([db.category(x).name for x in reviewer.categories])}}
+            </div>
+        </div>
+    {{pass}}
+{{pass}}
