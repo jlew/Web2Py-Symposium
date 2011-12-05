@@ -207,6 +207,7 @@ def rem_judge_by_id():
         
 @auth.requires_membership("Symposium Admin")       
 def register_judge():
+    response.view = "form_layout.html"
     sess = db.session(request.args(0))
     
     if not sess:
@@ -232,6 +233,7 @@ def register_judge():
         user = db.auth_user(form.vars.id)
 
         sess.judges.append( user.id )
+        sess.update_record(judges=sess.judges)
 
         mail.send(to=user.email, subject=T("Symposium Registration System: You have been registered"),
               message=response.render('email_templates/registered_for_judge.txt', {
@@ -244,7 +246,7 @@ def register_judge():
                 }))
     
     crud.settings.create_onaccept.auth_user.insert(0, user_callback)
-    return dict(form=crud.create(db.auth_user, message=T("Account created and linked to session")))
+    return dict(form=crud.create(db.auth_user, message=T("Account created and linked to session"), next=URL("editsymp","close_parent")))
 
 @auth.requires_membership("Symposium Admin")
 def email():

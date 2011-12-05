@@ -74,8 +74,9 @@ function pull_choices(){
                 $("#search_return").html("{{=T("No users found.")}}");
             }
             $("#search_return").append('{{=DIV( T("They do not have an account? "),
-             A(SPAN(_class="icon user"), T("Create New Judge"), _class="button",
-                  _href="#", _onclick="popup('%s')" % URL("editsymp","register_judge", args=sess.id)))}}');
+             A(SPAN(_class="icon user"), T("Create New Judge"), _class="button thickbox",
+                  _href=URL("editsymp","register_judge", args=sess.id)+"?KeepThis=true&TB_iframe=true&height=200&width=450"))}}');
+            tb_init("#search_return a.thickbox");
         }else{
             $("#search_return").html("{{=T("Search Failed")}}");
         }

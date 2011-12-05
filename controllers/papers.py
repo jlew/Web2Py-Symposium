@@ -267,6 +267,7 @@ def rem_by_id():
 
 @auth.requires_login()     
 def register_user():
+    response.view = "form_layout.html"
     paper = db.paper(request.args(0))
     if not can_edit_paper(paper):
         raise HTTP(401)
@@ -318,7 +319,7 @@ def register_user():
     
     crud.settings.create_onaccept.auth_user.insert(0, user_callback)
     return dict(title=T("Author") if request.args(1) == "A" else T("Mentor"),
-                form=crud.create(db.auth_user, message=T("Account created and linked to paper")))
+                form=crud.create(db.auth_user, message=T("Account created and linked to paper"), next=URL("editsymp","close_parent")))
                 
 @auth.requires_membership("Symposium Admin")
 def batch():
