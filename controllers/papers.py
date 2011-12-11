@@ -184,28 +184,22 @@ def attach_file():
 def review():
     paper = db.paper(request.args(0))
     
-    reviewer = db(db.reviewer.reviewer == auth.user_id).select()
-
-    if not reviewer:
-        raise HTTP(403)
-    
     if paper:
         if paper.status != PAPER_STATUS[PEND_APPROVAL]:
             response.view = "papers/view_min.html"
             return dict(paper=paper)
-        
-        # Error if not global category reviewer for this symposium/paper
-        if reviewer.find(lambda row: (row.global_reviewer and row.symposium == paper.symposium) or paper.category in row.categories):
-            db.paper_comment.paper.default = paper.id
-            db.paper_comment.status.default = paper.status
-            db.paper_comment.status.label = T("Next Status")
-            return dict(paper=paper, form=crud.create(db.paper_comment, next=URL('abstract',args=paper.id), message=T("Paper status updated")))
             
-        else:
+        if not can_review_paper(paper):
             raise HTTP(403)
+
+        db.paper_comment.paper.default = paper.id
+        db.paper_comment.status.default = paper.status
+        db.paper_comment.status.label = T("Next Status")
+        return dict(paper=paper, form=crud.create(db.paper_comment, next=URL('abstract',args=paper.id), message=T("Paper status updated")))
+            
     else:
         response.view = "papers/review_list.html"
-        return dict(papers=db(get_reviewer_filter(reviewer)).select() )
+        return dict(papers=db(get_reviewer_filter()).select() )
 
 @auth.requires_login()      
 def edit_members():
