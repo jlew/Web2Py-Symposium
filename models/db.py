@@ -67,12 +67,6 @@ db.define_table('reviewer',
     format = "%(reviewer)s (%(symposium)s"
 )
 
-def get_next_symposium():
-    """
-    Returns the next upcoming symposium.
-    """
-    return db(db.symposium.reg_end > request.now).select(orderby=db.symposium.event_date).first()
-
 #########################################################################
 # Paper Table
 #########################################################################
@@ -111,9 +105,11 @@ db.define_table('paper',
     
     Field('symposium', 'reference symposium', writable=False),
     
-    Hidden('created', 'datetime', default=request.now, writable=False),
+    Hidden('created', 'datetime', default=request.now),
+    Hidden('created_by', db.auth_user, default=auth.user_id),
     
-    Hidden('modified', 'datetime', default=request.now, update=request.now, writable=False),
+    Hidden('modified', 'datetime', default=request.now, update=request.now),
+    Hidden('modified_by', db.auth_user, default=auth.user_id, update=auth.user_id),
 
     Hidden('session', db.session, ondelete="NO ACTION"),
     Hidden('session_pos', 'integer'),
