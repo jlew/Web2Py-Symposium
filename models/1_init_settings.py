@@ -38,8 +38,8 @@ def Hidden(*a,**b):
 fields=[
     Field('first_name', length=512,default='',comment='*'),
     Field('last_name', length=512,default='',comment='*'),
-    Field('affiliation', length=512, label='Affiliation/Title',
-           default="Rochester Institute of Technology, Student", required=True),
+    Field('affiliation', length=512, label='Current Affiliation/Title',
+           default="Rochester Institute of Technology, Student", required=True, comment=T("This is the affiliation that will be shown on your profile.  You may override this for specific papers.")),
     Field('email', length=512,default='',comment='*',
           requires=(IS_EMAIL(),IS_NOT_IN_DB(db,'auth_user.email'))),
     Field('password', 'password', readable=False, label='Password',
@@ -57,7 +57,7 @@ fields=[
     ]
 
 db.define_table('auth_user',
-                format='%(first_name)s %(last_name)s',
+                format='%(first_name)s %(last_name)s (%(affiliation)s)',
                 *fields
                 )
 

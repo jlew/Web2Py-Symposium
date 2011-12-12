@@ -94,7 +94,8 @@ width: 100%;
     </thead>
     <tbody>
     {{for data in ret:}}
-        {{for participant in data['authors']:}}
+        {{for key, participants in data['people'].items():}}
+        {{for participant in participants:}}
             <tr>
                 <td align="center">
                     <img
@@ -105,24 +106,10 @@ width: 100%;
                 <td>{{=A(participant.last_name, _href=URL('people','profile', args=participant.id))}}</td>
                 <td>{{=participant.affiliation}}</td>
                 <td>{{=db.symposium._format % data['symposium']}}</td>
-                <td>{{=T("Author")}}</td>
+                <td>{{=key}}</td>
             </tr>
         {{pass}}
-
-        {{for participant in data['mentors']:}}
-            <tr>
-                <td align="center">
-                    <img
-                        src="{{=URL('static','images/details_open.png')}}"
-                        onclick="toggle_details(this,'{{=URL('people','profile',args=participant.id, vars={'minview':True})}}')">
-                </td>
-                <td>{{=A(participant.first_name, _href=URL('people','profile', args=participant.id))}}</td>
-                <td>{{=A(participant.last_name, _href=URL('people','profile', args=participant.id))}}</td>
-                <td>{{=participant.affiliation}}</td>
-                <td>{{=db.symposium._format % data['symposium']}}</td>
-                <td>{{=T("Mentor")}}</td>
-            </tr>
-        {{pass}}
+    {{pass}}
     {{pass}}
     </tbody>
     <tfoot>

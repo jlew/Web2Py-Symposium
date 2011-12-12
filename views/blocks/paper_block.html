@@ -60,23 +60,20 @@
            {{=MARKMIN(paper.description)}}
        {{pass}}
        
-       <div>
-           {{=T("Authors:")}}<ul>
-           {{for x in paper.authors:}}
-               <li>{{=A(db.auth_user(x).search_name, _href=URL("people","profile",args=x))}}</li>
-           {{pass}}
-           </ul>
-       </div>
        
-       {{if len(paper.mentors) > 0:}}
-       <div>
-           {{=T("Mentors:")}}<ul>
-           {{for x in paper.mentors:}}
-               <li>{{=A(db.auth_user(x).search_name, _href=URL("people","profile",args=x))}}</li>
+       
+       {{for t,s in zip(PAPER_ASSOCIATIONS, PAPER_ASSOCIATIONS_PL):}}
+           <div>
+                {{=B(s)}}
+                <ul>
+                {{for y in db((db.paper_associations.type==t) & (db.paper_associations.paper == paper)).select():}}
+                    {{x = db.auth_user(y.person)}}
+                    {{x.affiliation = y.person_association}}
+                    <li>{{=A( db.auth_user._format % x, _href=URL("people","profile",args=x.id))}}</li>
+               {{pass}}
+               </ul>
+               </div>
            {{pass}}
-           </ul>
-       </div>
-       {{pass}}
        
         {{if paper.paper_attachment.count() > 0:}}
        <div>

@@ -54,7 +54,6 @@ if symp:
                                 { type: "select", values: ['{{=XML("','".join(
                                     set([db.format._format % x for x in db(format_query).select()])))}}'] },
                                 null,
-                                null,
                                 {{if c_show_moderation:}}
                                 { type: "select", values: ['{{=XML("','".join([ x.xml() for x in PAPER_STATUS]))}}'] },
                                 {{pass}}
@@ -91,8 +90,7 @@ if symp:
             <th>{{=db.paper.symposium.label}}</th>
             <th>{{=db.paper.category.label}}</th>
             <th>{{=db.paper.format.label}}</th>
-            <th>{{=db.paper.authors.label}}</th>
-            <th>{{=db.paper.mentors.label}}</th>
+            <th>{{=T("People")}}</th>
             {{if c_show_moderation:}}<th>{{=db.paper.status.label}}</th>{{pass}}
         </tr>
     </thead>
@@ -117,16 +115,15 @@ if symp:
                 {{=db.format._format % db.format[paper.format]}}
             </td>
             <td>
+{{for t,s in zip(PAPER_ASSOCIATIONS, PAPER_ASSOCIATIONS_PL):}}
+                {{=B(s)}}
                 <ul>
-                {{for x in [db.auth_user(y) for y in paper.authors]:}}
-                    <li>{{=A( db.auth_user._format % x, _href=URL("people","profile",args=x.id), _title=x.search_name)}}</li>
+                {{for y in db((db.paper_associations.type==t) & (db.paper_associations.paper == paper)).select():}}
+                {{x = db.auth_user(y.person)}}
+                {{x.affiliation = y.person_association}}
+                    <li>{{=A( db.auth_user._format % x, _href=URL("people","profile",args=x.id))}}</li>
                {{pass}}
                </ul>
-           </td>
-           <td>
-                <ul>
-                {{for x in [db.auth_user(y) for y in paper.mentors]:}}
-                    <li>{{=A( db.auth_user._format % x, _href=URL("people","profile",args=x.id), _title=x.search_name)}}</li>
                {{pass}}
                </ul>
            </td>
@@ -141,8 +138,7 @@ if symp:
             <th>{{=db.paper.symposium.label}}</th>
             <th>{{=db.paper.category.label}}</th>
             <th>{{=db.paper.format.label}}</th>
-            <th>{{=db.paper.authors.label}}</th>
-            <th>{{=db.paper.mentors.label}}</th>
+            <th>{{=T("People")}}</th>
             {{if c_show_moderation:}}<th></th>{{pass}}
         </tr>
     </tfoot>

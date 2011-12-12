@@ -19,9 +19,25 @@ def index():
     # its papers, and the number of pending/non-approved papers
     ret = []
     for symposium in symposiums:
+        symp_papers = symposium.paper.select()
+        people = {}
+        for paper in symp_papers:
+            if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
+                for t,p in zip(PAPER_ASSOCIATIONS,PAPER_ASSOCIATIONS_PL):
+                    for person,asoc in [(x.person,x.person_association) for x in db(
+                            (db.paper_associations.paper == paper) &
+                            (db.paper_associations.type==t)
+                        ).select(db.paper_associations.person,db.paper_associations.person_association)]:
+                        if not people.has_key(p):
+                            people[p] = []
+                        person.affiliation = asoc
+                        print person.first_name, asoc
+                        people[p].append(person)
+    
+        people[T("Judges")] = [db.auth_user(x) for x in get_symposium_judges_id(symposium)]
+        people[T("Reviewers")] = [db.auth_user(x) for x in get_symposium_reviewers_id(symposium)]
         ret.append( {"symposium": symposium,
-                   "mentors": [db.auth_user(x) for x in get_symposium_mentors_id(symposium)],
-                   "authors": [db.auth_user(x) for x in get_symposium_authors_id(symposium)]})
+                   "people": people,})
 
     return dict(ret=ret, all=all, symp=symp)
 

@@ -20,20 +20,6 @@
     {{=B(A(T("Submit to this symposium"), _href=URL("papers","submit", vars={"symp":symposium.sid})))}}
 {{pass}}
     
-    {{
-    authors = set()
-    mentors = set()
-    paper_count = public_paper_count = 0
-    for papers in symposium.paper.select():
-        paper_count+=1
-        if papers.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
-            public_paper_count+=1
-            pass
-        authors = authors.union(papers.authors)
-        mentors = mentors.union(papers.mentors)
-    pass
-    }}
-    
     {{=MARKMIN(symposium.extra_info)}}
     </div>
     <table width="90%" style="margin:auto;">
@@ -191,19 +177,11 @@ tr:nth-child(even)    { background-color:#fff; }
     <table>
         <tr>
             <td>{{=T("Published Papers")}}</td>
-            <td>{{=public_paper_count}}</td>
+            <td>{{=db((db.paper.symposium==symposium) & get_public_filter()).count()}}</td>
         </tr>
         <tr>
             <td>{{=T("Submitted Papers")}}</td>
-            <td>{{=paper_count}}</td>
-        </tr>
-        <tr>
-            <td>{{=T("Authors")}}</td>
-            <td>{{=len(authors)}}</td>
-        </tr>
-        <tr>
-            <td>{{=T("Mentors")}}</td>
-            <td>{{=len(mentors)}}</td>
+            <td>{{=symposium.paper.count()}}</td>
         </tr>
     </table>
 

@@ -30,3 +30,7 @@ DEFAULT_PAPER_CATEGORIES = (
             T('Fine and Applied Arts'),
             T('Other'),
         )
+        
+PAPER_ASSOCIATIONS = ( T('Author'), T('Mentor') )
+PAPER_ASSOCIATIONS_PL = ( T('Authors'), T('Mentors') )
+PAPER_ASSOCIATIONS_PT = ( T('Authored'), T('Mentored') )

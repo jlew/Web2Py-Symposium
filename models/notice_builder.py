@@ -12,7 +12,8 @@ if auth.user:
 
     # Show warnings for incomplete papers that is not the one being created
     user_papers = db(
-                    (db.paper.authors.contains(auth.user.id) | db.paper.mentors.contains(auth.user.id)) &
+                    (db.paper_associations.person==auth.user.id) &
+                    (db.paper_associations.paper==db.paper.id) &
                     (db.paper.id != session.get("supress_paper_warning", 0))
                    ).select(db.paper.id, db.paper.title, db.paper.status)
                    

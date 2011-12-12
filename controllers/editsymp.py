@@ -319,22 +319,29 @@ def email():
     symposium = db.symposium(request.args(0))
     if not symposium:
         raise HTTP404(T("Symposium Not Found"))
-        
+    
+    
+    email_opts = [x for x in PAPER_ASSOCIATIONS_PL]
+    email_opts.append(T("Judges"))
+    email_opts.append(T("Reviewers"))
     form = SQLFORM.factory(
         Field('subject', 'string', label=T("Subject"), requires=IS_NOT_EMPTY()),
         Field('message', 'text', label=T("Message"), requires=IS_NOT_EMPTY()),
-        Field('who', default=[T("Authors")],
-            requires=IS_IN_SET((T("Authors"),T("Mentors"),T("Judges"),T("Reviewers")),multiple=True),
+        Field('who', default=[PAPER_ASSOCIATIONS_PL[0]],
+            requires=IS_IN_SET( email_opts ,multiple=True),
             widget=SQLFORM.widgets.checkboxes.widget
         ))
         
     if form.accepts(request.vars, session):
         users = set()
-        if T("Authors") in form.vars.who:
-            users = users.union(get_symposium_authors_id(symposium, True))
-        
-        if T("Mentors") in form.vars.who:
-            users = users.union(get_symposium_mentors_id(symposium, True))
+        for t,p in zip(PAPER_ASSOCIATIONS, PAPER_ASSOCIATIONS_PL):
+            if p in form.vars.who:
+                q = db(
+                        (db.paper_associations.type==t) &
+                        (db.paper_associations.paper == db.paper.id) &
+                        (db.paper.symposium == symposium)
+                      ).select(db.paper_associations.person)
+                users = users.union(set([x.person for x in q]))
             
         if T("Judges") in form.vars.who:
             users = users.union(get_symposium_judges_id(symposium))
