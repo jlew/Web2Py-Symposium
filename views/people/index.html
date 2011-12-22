@@ -35,20 +35,11 @@ width: 100%;
                                 null,
                                 null,
                                 { type: "text" },
-                                {{if all:}}
-                                { type: "select", 
-                                  values: ['{{=XML("','".join([ db.symposium._format % x for x in db(db.symposium.id>0).select()]))}}'] },
-                                  {{else:}}
                                   null,
-                                  {{pass}}
                                 { type: "select", values: ['{{=T("Author")}}','{{=T("Mentor")}}'] },
                                 ]
                 });
-            {{if all:}}
-            oTable.rowGrouping({"iGroupingColumnIndex":4, "iGroupingColumnIndex2": 5});
-            {{else:}}
             oTable.rowGrouping({"iGroupingColumnIndex":5});
-            {{pass}}
 
     } );
     
@@ -76,11 +67,6 @@ width: 100%;
     }
 </script>
 <h1>{{=T("Participants")}}{{=": %s" % symp.name if symp else ""}}</h1>
-<div style="font-size: 70%;">
-{{if symp:}}
-    {{=T("Showing only participants from %s.", symp.name)}} {{=A(T("View All Participants"), _href=URL())}}
-{{pass}}
-</div>
 <table id="dataTable" width="100%">
     <thead>
         <tr>

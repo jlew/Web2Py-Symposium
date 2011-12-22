@@ -6,22 +6,18 @@ def index():
 
         if not symp:
             raise HTTP(404)
+        response.active_symp = symp
 
         papers = db(db.paper.symposium == symp).select(orderby=(db.paper.symposium,db.paper.title))
-        session['filter'] = symp.sid
-        all = False
     else:
-        symp = False
-        papers = db(db.paper.id > 0).select(orderby=(db.paper.symposium,db.paper.title))
-        session['filter'] = ""
-        all = True
+        raise HTTP(404)
 
     ret_papers = []
     for paper in papers:
         if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
             ret_papers.append(paper)
 
-    return dict(papers=ret_papers, all=all, c_show_moderation = False, symp=symp)
+    return dict(papers=ret_papers, c_show_moderation = False, symp=symp)
 
 
 @auth.requires_membership("Symposium Admin")
@@ -32,21 +28,17 @@ def admin_index():
 
         if not symp:
             raise HTTP(404)
-
+        response.active_symp = symp
         papers = db(db.paper.symposium == symp).select(orderby=(db.paper.symposium,db.paper.title))
-        session['filter'] = symp.sid
-        all = False
+
     else:
-        symp = False
-        papers = db(db.paper.id > 0).select(orderby=(db.paper.symposium,db.paper.title))
-        session['filter'] = ""
-        all = True
+       raise HTTP(404)
 
     ret_papers = []
     for paper in papers:
         ret_papers.append(paper)
 
-    return dict(papers=ret_papers, all=all, c_show_moderation=True, symp=symp)
+    return dict(papers=ret_papers,  c_show_moderation=True, symp=symp)
 
 def view():
     paper = db.paper(request.args(0))
@@ -55,6 +47,7 @@ def view():
         response.view = "papers/view_min.html"
 
     if paper:
+        response.active_symp = paper.symposium
         if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS] or can_edit_paper(paper) or can_review_paper(paper):
             return dict(paper=paper)
         else:
@@ -94,6 +87,7 @@ def submit():
         return dict(form = DIV(T("Select the symposium you wich to submit to."),UL(choices)))
 
     else:
+        response.active_symp = valid_sym.first()
         crud.messages.submit_button = T("Save and continue")
         
         db.paper.format.requires=IS_IN_DB(db(db.format.symposium == valid_sym.first().id), db.format, label=db.format._format)
@@ -116,7 +110,9 @@ def edit():
                     (db.paper_associations.person == auth.user.id) &
                     (db.paper_associations.paper == db.paper.id)).select(db.paper.ALL, orderby=~db.paper_associations.paper)
         return dict(papers = papers)
-        
+    
+    response.active_symp = paper.symposium
+    
     if can_edit_paper(paper):
         db.paper.symposium.writable = False
         
@@ -150,6 +146,7 @@ def submit_for_approval():
     if not paper:
         raise HTTP(404)
 
+    response.active_symp = paper.symposium
     if can_edit_paper(paper):
         db.paper_comment.paper.default = paper.id
         db.paper_comment.status.default = PAPER_STATUS[PEND_APPROVAL]
@@ -165,6 +162,8 @@ def attach_file():
     paper = db.paper(request.args(0))
     if not paper:
         raise HTTP(404)
+        
+    response.active_symp = paper.symposium
 
     if can_edit_paper(paper):
 
@@ -187,6 +186,8 @@ def review():
     paper = db.paper(request.args(0))
     
     if paper:
+        response.active_symp = paper.symposium
+        
         if paper.status != PAPER_STATUS[PEND_APPROVAL]:
             response.view = "papers/view_min.html"
             return dict(paper=paper)
@@ -209,6 +210,8 @@ def edit_members():
     if not paper:
         raise HTTP(404)
 
+    response.active_symp = paper.symposium
+    
     if can_edit_paper(paper):
         return dict(paper=paper)
     else:

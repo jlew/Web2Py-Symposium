@@ -9,7 +9,11 @@
         _class="button left thickbox"),
     A(SPAN(_class="icon mail"),"Email Participants",
         _href=URL("editsymp","email",args=symposium.id)+"?KeepThis=true&TB_iframe=true&height=350&width=400",
+        _class="button middle thickbox"),
+    A(SPAN(_class="icon plus"),"Add Static Page",
+        _href=URL("editsymp","add_page",args=symposium.id)+"?KeepThis=true&TB_iframe=true&height=350&width=400",
         _class="button right thickbox"),
+        
     _style="float: right;"
     )}}
 {{pass}}

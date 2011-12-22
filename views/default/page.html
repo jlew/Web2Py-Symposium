@@ -1,0 +1,11 @@
+{{extend 'layout.html'}}
+{{if auth.has_membership("Symposium Admin"):}}
+{{=DIV(
+    A(SPAN(_class="icon pen"),"Edit Page",
+        _href=(URL("default","edit_page",args=page.id) if not symp else URL("editsymp","edit_page",args=page.id))+"?KeepThis=true&TB_iframe=true&height=450&width=600",
+        _class="button thickbox"),
+    _style="float: right;"
+    )}}
+{{pass}}
+<h1>{{=page.title}}</h1>
+{{=XML(page.body)}}

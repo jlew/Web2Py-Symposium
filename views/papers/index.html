@@ -43,12 +43,7 @@ if symp:
             }).columnFilter({
                     aoColumns: [null,
                                 { type: "text" },
-                                {{if all:}}
-                                { type: "select", 
-                                  values: ['{{=XML("','".join([ db.symposium._format % x for x in db(db.symposium.id>0).select()]))}}'] },
-                                  {{else:}}
                                   null,
-                                  {{pass}}
                                 { type: "select", values: ['{{=XML("','".join(
                                     set([db.category._format % x for x in db(category_query).select()])))}}'] },
                                 { type: "select", values: ['{{=XML("','".join(
@@ -59,20 +54,10 @@ if symp:
                                 {{pass}}
                                 ]
                 });
-
-            {{if all:}}
-            oTable.rowGrouping({"iGroupingColumnIndex":2});
-            {{pass}}
-
     } );
 </script>
 
 <h1>{{=T("Papers")}}{{=": %s" % symp.name if symp else ""}}</h1>
-<div style="font-size: 70%;">
-{{if symp:}}
-    {{=T("Showing only papers from %s.", symp.name)}} {{=A(T("View All Papers"), _href=URL())}}
-{{pass}}
-</div>
 {{if auth.has_membership("Symposium Admin"):}}
     {{if not c_show_moderation:}}
         {{=A(T("Goto Admin Mode (View All Papers, including incomplete papers)"), _href=URL('admin_index', args=request.args))}}

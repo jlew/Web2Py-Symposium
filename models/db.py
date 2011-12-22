@@ -183,6 +183,14 @@ db.define_table('paper_attachment',
     format = "%(title)s"
     )
 
+db.define_table('page',
+    Field('title', required=True),
+    Field('url', required=True, requires=[IS_NOT_EMPTY(), IS_SLUG(check=True, error_message="only alphanumeric characters and non-repeated dashes")]),
+    Field('body', 'text'),
+    Hidden('symposium', db.symposium, requires=IS_EMPTY_OR(IS_IN_DB(db, db.symposium, db.symposium._format))),
+    format = "%(title)s"
+    )
+
 #########################################################################
 # Helper to create admin groups and accounts when the first user is
 # created.  Also sets session pre-populate flag to cause the wiki-plugin

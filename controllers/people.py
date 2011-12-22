@@ -5,15 +5,11 @@ def index():
         symposiums = db(db.symposium.sid == request.args(0)).select()
         if symposiums.first():
             symp = symposiums.first()
-            session['filter'] = symp.sid
-            all = False
+            response.active_symp = symp
         else:
             raise HTTP(404)
     else:
-        symp = False
-        symposiums = db(db.symposium.id > 0).select(orderby=~db.symposium.event_date)
-        all = True
-        session['filter'] = ""
+        raise HTTP(404)
     
     # Build Dict of all symposiums containing the symposium,
     # its papers, and the number of pending/non-approved papers
@@ -31,7 +27,6 @@ def index():
                         if not people.has_key(p):
                             people[p] = []
                         person.affiliation = asoc
-                        print person.first_name, asoc
                         people[p].append(person)
     
         people[T("Judges")] = [db.auth_user(x) for x in get_symposium_judges_id(symposium)]
@@ -39,7 +34,7 @@ def index():
         ret.append( {"symposium": symposium,
                    "people": people,})
 
-    return dict(ret=ret, all=all, symp=symp)
+    return dict(ret=ret, symp=symp)
 
 def profile():
     if request.vars.has_key("minview"):

@@ -46,6 +46,7 @@ def edit_format():
 @auth.requires_membership("Symposium Admin")
 def add_reviewer():
     symp = db.symposium( request.args(0) )
+    response.active_symp = symp
     
     if not symp:
         raise HTTP(404)
@@ -368,3 +369,29 @@ def email():
     elif form.errors:
         response.flash = 'form has errors'
     return dict(form=form)
+    
+@auth.requires_membership("Symposium Admin")
+def add_page():
+    response.view = "form_layout.html"
+    symp = db.symposium( request.args(0) )
+    
+    if not symp:
+        raise HTTP(404)
+    db.page.symposium.default = symp
+    db.page.url.requires.append(IS_NOT_IN_DB(
+        db((db.page.url==request.vars.url) & (db.page.symposium==symp.id)),
+        'page.url', error_message='URL is already in use'))
+    return dict(form=crud.create(db.page, next=URL("editsymp","close_parent")))
+    
+@auth.requires_membership("Symposium Admin")
+def edit_page():
+    response.view = "form_layout.html"
+    page = db.page( request.args(0) )
+    
+    if not page:
+        raise HTTP(404)
+    
+    db.page.url.requires.append(IS_NOT_IN_DB(
+        db((db.page.url==request.vars.url) & (db.page.symposium==page.symposium) & (db.page.url != page.url)),
+        'page.url', error_message='URL is already in use'))
+    return dict(form=crud.update(db.page, page, deletable=True, next=URL("editsymp","close_parent")))
