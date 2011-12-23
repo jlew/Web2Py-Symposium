@@ -67,6 +67,7 @@ def add_page():
     
 @auth.requires_membership("Symposium Admin")
 def edit_page():
+    response.view = "form_layout.html"
     page = db.page( request.args(0) )
     
     if not page or page.symposium != None:
@@ -75,7 +76,7 @@ def edit_page():
     db.page.url.requires.append(IS_NOT_IN_DB(
         db((db.page.url==request.vars.url) & (db.page.symposium==None) & (db.page.url != page.url)),
         'page.url', error_message='URL is already in use'))
-    return dict(form=crud.update(db.page, page, deletable=True))
+    return dict(form=crud.update(db.page, page, deletable=True, next=URL("editsymp","close_parent")))
     
 def user():
     """
