@@ -24,44 +24,36 @@
 <div style="border: 1px solid #000;">
 {{=LOAD("papers","abstract", args=paper.id)}}
 </div>
-{{author_ids = []}}
-{{mentor_ids = []}}
 <table width="100%">
-<tr><td>
-{{=H2(T("Authors"))}}
-{{back="fff"}}
-{{for usr in [db.auth_user(x) for x in paper.authors]:}}
-{{author_ids.append(usr.id)}}
-{{back = "fff" if back == "eee" else "eee"}}
-<div class="paper_member_ctr" style="background: #{{=back}};">
-    <div class="paper_member_img">
-        {{=IMG(_src=(URL('default','thumb',args=[75,75,usr.profile_picture]) if usr.profile_picture else URL('static','images/no-photo.png')))}}
-    </div>
-    <div>{{=usr.first_name}} {{=usr.last_name}}<br />{{=usr.affiliation}}</div>
-    {{=A(SPAN(_class="icon cross"), T("Remove as author"), _href=URL('papers','rem_by_id', args=[paper.id, "A", usr.id]), _class="button negative")}}
-</div>
-{{pass}}
-</td><td>
-{{=H2(T("Mentors"))}}
-{{back="fff"}}
-{{for usr in [db.auth_user(x) for x in paper.mentors]:}}
-{{mentor_ids.append(usr.id)}}
-{{back = "fff" if back == "eee" else "eee"}}
-<div class="paper_member_ctr" style="background: #{{=back}};">
-    <div class="paper_member_img">
-        {{=IMG(_src=(URL('default','thumb',args=[75,75,usr.profile_picture]) if usr.profile_picture else URL('static','images/no-photo.png')))}}
-    </div>
-    <div>{{=usr.first_name}} {{=usr.last_name}}<br />{{=usr.affiliation}}</div>
-    {{=A(SPAN(_class="icon cross"), T("Remove as mentor"), _href=URL('papers','rem_by_id', args=[paper.id, "M", usr.id]), _class="button negative")}}
-</div>
-{{pass}}
-</td></tr></table>
-<hr>
-<h1>{{=T("Add Authors and Mentors")}}</h1>
-<script type="text/javascript">
-var authors = {{=author_ids}};
-var mentors = {{=mentor_ids}};
+<tr>
 
+{{added_users=[]}}
+{{for a,s in zip(PAPER_ASSOCIATIONS, PAPER_ASSOCIATIONS_PL):}}
+<td>{{=H2(s)}}
+{{back="fff"}}
+
+{{for x in db( (db.paper_associations.paper == paper) & (db.paper_associations.type==a)).select():}}
+{{usr=db.auth_user(x.person)}}
+{{added_users.append(usr.id)}}
+{{back = "fff" if back == "eee" else "eee"}}
+<div class="paper_member_ctr" style="background: #{{=back}};">
+    <div class="paper_member_img">
+        {{=IMG(_src=(URL('default','thumb',args=[75,75,usr.profile_picture]) if usr.profile_picture else URL('static','images/no-photo.png')))}}
+    </div>
+    <div>
+        {{=usr.first_name}} {{=usr.last_name}}<br />
+        {{=A(x.person_association, _href=URL('edit_association',args=[paper.id,x.id])+"?KeepThis=true&TB_iframe=true&height=200&width=450", _class="thickbox")}}</div>
+    {{=A(SPAN(_class="icon cross"), T("Remove as %s" % a), _href=URL('papers','rem_by_id', args=[paper.id, a, usr.id]), _class="button negative")}}
+</div>
+{{pass}}
+</td>
+{{pass}}
+</tr></table>
+<hr>
+<h1>{{=T("Add Paper Associations")}}</h1>
+<script type="text/javascript">
+
+var added_users = [{{=",".join([str(x) for x in added_users])}}];
 pending_request = false;
 function pull_choices(){
     if( pending_request ){
@@ -83,40 +75,37 @@ function pull_choices(){
                      }
 
                     backgrd = (backgrd == "fff")?"eee":"fff";
-                    if( authors.indexOf(val['id']) == -1 ){
-                        author_link = "<a class='button' href='{{=URL('papers','add_by_id',args=[paper.id, 'A'])}}/" +
-                                    val['id'] + "?s=" + escape($("#search_name").val()) + "'>" +
-                                "<span class='icon plus'></span>{{=T("Add as Author")}}</a>";
-                    }else{
-                        author_link = "<a class='button negative active'>" +
-                                "<span class='icon user'></span>{{=T("Is Author")}}</a>";
-                    }
+                    if( added_users.indexOf(val['id']) == -1 ){
+                        author_link = "";
 
-                    if( mentors.indexOf(val['id']) == -1){
-                        mentor_link = "<a class='button' href='{{=URL('papers','add_by_id',args=[paper.id, 'M'])}}/" +
+                        {{for atype in PAPER_ASSOCIATIONS:}}
+                        author_link += "<a class='button' href='{{=URL('papers','add_by_id',args=[paper.id, atype])}}/" +
                                     val['id'] + "?s=" + escape($("#search_name").val()) + "'>" +
-                                "<span class='icon plus'></span>{{=T("Add as Mentor")}}</a>";
+                                "<span class='icon plus'></span>{{=T("Add as %s") % atype}}</a>";
+                         {{pass}}
                     }else{
-                        mentor_link = "<a class='button negative active' >" +
-                                "<span class='icon plus'></span>{{=T("Is Mentor")}}</a>";
+                        author_link = "{{=B(T("Added To Paper"))}}";
                     }
 
                     $("#search_return").append("<div class='paper_member_ctr' style='background: #" + backgrd + ";'>" +
                         "<div class='paper_member_img'><img src='"+img_url+"'></div>" +
                         "<div>" +
                             val['first_name'] + " " + val['last_name'] + "<br />" + val['affiliation'] +
-                        "</div>" + author_link + mentor_link +
-                        "</div>")
+                        "</div>" + author_link + "</div>")
                 });
 
             }else{
                 $("#search_return").html("{{=T("No users found.")}}");
             }
-            $("#search_return").append('{{=DIV( T("They do not have an account? "),
-             A(SPAN(_class="icon user"), T("Create New Author"), _class="button left thickbox",
-                  _href=URL("papers","register_user", args=[paper.id,'A'])+"?KeepThis=true&TB_iframe=true&height=200&width=450"),
-             A(SPAN(_class="icon user"), T("Create New Mentor"), _class="button left thickbox",
-                  _href=URL("papers","register_user", args=[paper.id,'M'])+"?KeepThis=true&TB_iframe=true&height=200&width=450"))}}');
+            
+             {{OutDIV = DIV(T("They do not have an account? "))}}
+             {{for atype in PAPER_ASSOCIATIONS:}}
+                 {{OutDIV.append(
+                     A(SPAN(_class="icon user"), T("Create New %s") % atype, _class="button left thickbox",
+                  _href=URL("papers","register_user", args=[paper.id,atype])+"?KeepThis=true&TB_iframe=true&height=200&width=450"))}}
+             {{pass}}
+
+            $("#search_return").append('{{=OutDIV}}');
             tb_init("#search_return a.thickbox");
         }else{
             $("#search_return").html("{{=T("Search Failed")}}");

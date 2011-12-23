@@ -6,22 +6,18 @@ def index():
 
         if not symp:
             raise HTTP(404)
+        response.active_symp = symp
 
         papers = db(db.paper.symposium == symp).select(orderby=(db.paper.symposium,db.paper.title))
-        session['filter'] = symp.sid
-        all = False
     else:
-        symp = False
-        papers = db(db.paper.id > 0).select(orderby=(db.paper.symposium,db.paper.title))
-        session['filter'] = ""
-        all = True
+        raise HTTP(404)
 
     ret_papers = []
     for paper in papers:
         if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
             ret_papers.append(paper)
 
-    return dict(papers=ret_papers, all=all, c_show_moderation = False, symp=symp)
+    return dict(papers=ret_papers, c_show_moderation = False, symp=symp)
 
 
 @auth.requires_membership("Symposium Admin")
@@ -32,21 +28,17 @@ def admin_index():
 
         if not symp:
             raise HTTP(404)
-
+        response.active_symp = symp
         papers = db(db.paper.symposium == symp).select(orderby=(db.paper.symposium,db.paper.title))
-        session['filter'] = symp.sid
-        all = False
+
     else:
-        symp = False
-        papers = db(db.paper.id > 0).select(orderby=(db.paper.symposium,db.paper.title))
-        session['filter'] = ""
-        all = True
+       raise HTTP(404)
 
     ret_papers = []
     for paper in papers:
         ret_papers.append(paper)
 
-    return dict(papers=ret_papers, all=all, c_show_moderation=True, symp=symp)
+    return dict(papers=ret_papers,  c_show_moderation=True, symp=symp)
 
 def view():
     paper = db.paper(request.args(0))
@@ -55,6 +47,7 @@ def view():
         response.view = "papers/view_min.html"
 
     if paper:
+        response.active_symp = paper.symposium
         if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS] or can_edit_paper(paper) or can_review_paper(paper):
             return dict(paper=paper)
         else:
@@ -94,6 +87,7 @@ def submit():
         return dict(form = DIV(T("Select the symposium you wich to submit to."),UL(choices)))
 
     else:
+        response.active_symp = valid_sym.first()
         crud.messages.submit_button = T("Save and continue")
         
         db.paper.format.requires=IS_IN_DB(db(db.format.symposium == valid_sym.first().id), db.format, label=db.format._format)
@@ -112,9 +106,13 @@ def edit():
     paper = db.paper(request.args(0))
     if not paper:
         response.view = "papers/managelist.html"
-        papers = db(db.paper.authors.contains(auth.user.id) | db.paper.mentors.contains(auth.user.id)).select(orderby=~db.paper.id)
+        papers = db( 
+                    (db.paper_associations.person == auth.user.id) &
+                    (db.paper_associations.paper == db.paper.id)).select(db.paper.ALL, orderby=~db.paper_associations.paper)
         return dict(papers = papers)
-        
+    
+    response.active_symp = paper.symposium
+    
     if can_edit_paper(paper):
         db.paper.symposium.writable = False
         
@@ -148,6 +146,7 @@ def submit_for_approval():
     if not paper:
         raise HTTP(404)
 
+    response.active_symp = paper.symposium
     if can_edit_paper(paper):
         db.paper_comment.paper.default = paper.id
         db.paper_comment.status.default = PAPER_STATUS[PEND_APPROVAL]
@@ -163,6 +162,8 @@ def attach_file():
     paper = db.paper(request.args(0))
     if not paper:
         raise HTTP(404)
+        
+    response.active_symp = paper.symposium
 
     if can_edit_paper(paper):
 
@@ -185,6 +186,8 @@ def review():
     paper = db.paper(request.args(0))
     
     if paper:
+        response.active_symp = paper.symposium
+        
         if paper.status != PAPER_STATUS[PEND_APPROVAL]:
             response.view = "papers/view_min.html"
             return dict(paper=paper)
@@ -207,10 +210,24 @@ def edit_members():
     if not paper:
         raise HTTP(404)
 
+    response.active_symp = paper.symposium
+    
     if can_edit_paper(paper):
         return dict(paper=paper)
     else:
         raise HTTP(401)
+
+@auth.requires_login()   
+def edit_association():
+    response.view = "form_layout.html"
+    paper = db.paper(request.args(0))
+    usr = db.paper_associations(request.args(1))
+    
+    if not paper or not usr or usr.paper != paper.id:
+        raise HTTP(404)
+
+    if can_edit_paper(paper):
+        return crud.update(db.paper_associations, usr, deletable=False, next=URL("editsymp","close_parent"))
 
 @auth.requires_login()
 def add_by_id():
@@ -221,19 +238,16 @@ def add_by_id():
         raise HTTP(404)
 
     if can_edit_paper(paper):
-
-        if request.args(1) == "A":
-            if not usr.id in paper.authors:
-                paper.authors.append(usr.id)
-                paper.update_record(authors=paper.authors)
-            session.s_val = request.vars.s
-            session.flash=T("Author Added")
-        elif request.args(1) == "M":
-            if not usr.id in paper.mentors:
-                paper.mentors.append(usr.id)
-                paper.update_record(mentors=paper.mentors)
-            session.s_val = request.vars.s
-            session.flash=T("Mentor Added")
+        if request.args(1) in PAPER_ASSOCIATIONS:
+            if db((usr.id==db.paper_associations.person) & (db.paper_associations.paper==paper.id)).count() == 0:
+                db.paper_associations.insert(paper=paper, person=usr,
+                    person_association=usr.affiliation, type=request.args(1))
+                
+                session.s_val = request.vars.s
+                session.flash=T("%s Added" % request.args(1))
+            else:
+                session.flash=T("Error, person is already attached to this submission")
+        
         else:
             raise HTTP(400)
 
@@ -252,19 +266,14 @@ def rem_by_id():
 
     if can_edit_paper(paper):
 
-        if request.args(1) == "A":
-            if usr.id in paper.authors:
-                paper.authors.remove(usr.id)
-                if len(paper.authors) == 0:
-                    session.flash = T("You can not remove the only author.")
-                else:
-                    paper.update_record(authors=paper.authors)
-                    session.flash=T("Author Removed")
-        elif request.args(1) == "M":
-            if usr.id in paper.mentors:
-                paper.mentors.remove(usr.id)
-                paper.update_record(mentors=paper.mentors)
-            session.flash=T("Mentor Removed")
+        if request.args(1) in PAPER_ASSOCIATIONS:
+            if usr.id != auth.user_id:
+                db((db.paper_associations.person==usr.id) & (db.paper_associations.paper==paper.id)).delete()
+
+                session.s_val = request.vars.s
+                session.flash=T("%s Removed" % request.args(1))
+            else:
+                session.flash=T("Can not remove yourself, please ask a co-author/mentor to remove you.")
         else:
             raise HTTP(400)
 
@@ -283,7 +292,7 @@ def register_user():
     if not paper:
         raise HTTP(404, T("Paper not found"))
         
-    if request.args(1) not in ["A","M"]:
+    if request.args(1) not in PAPER_ASSOCIATIONS:
         raise HTTP(404, T("Author/Mentor Not Defined"))
 
     # Generate a password for the new user
@@ -304,13 +313,9 @@ def register_user():
     # Lets handle the new user
     def user_callback(form):
         user = db.auth_user(form.vars.id)
-
-        if request.args(1) == "A":
-            paper.authors.append( user.id )
-            paper.update_record(authors=paper.authors)
-        else:
-            paper.mentors.append( user.id )
-            paper.update_record(mentors=paper.mentors)
+        
+        db.paper_associations.insert(paper=paper, person=user,
+                    person_association=user.affiliation, type=request.args(1))
 
         mail.send(to=user.email, subject=T("Symposium Registration System: You have been registered"),
             message = response.render('email_templates/registration_for_paper.txt', {
@@ -321,34 +326,10 @@ def register_user():
                 "password": the_pass,
                 "url":"http://%s%s" % (request.env.http_host, URL("default","user",args="profile")),
                 "manage_paper_url":"http://%s%s" % (request.env.http_host, URL("papers","edit")),
-                "type": T("Author") if request.args(1) == "A" else T("Mentor"),
+                "type": request.args(1),
                 "title": paper.title,
         }))
     
     crud.settings.create_onaccept.auth_user.insert(0, user_callback)
     return dict(title=T("Author") if request.args(1) == "A" else T("Mentor"),
                 form=crud.create(db.auth_user, message=T("Account created and linked to paper"), next=URL("editsymp","close_parent")))
-                
-@auth.requires_membership("Symposium Admin")
-def batch():
-    papers = db(db.paper.id>0).select()
-    return dict(papers=papers)
-
-@auth.requires_membership("Symposium Admin")
-def edit_cell():
-    paper = db.paper[request.args(1)]
-    if not paper:
-        raise HTTP(404)
-        
-    if request.vars.has_key("return"):
-        return dict(msg=batch_cell_view(request.args(0), paper))
-        
-    form = SQLFORM(db.paper, paper, fields=[request.args(0)], showid=False, ignore_rw=True,
-                   labels={request.args(0):""}, formstyle="divs", comments=False)
-    if form.accepts(request.vars, session):
-        return dict(msg=batch_cell_view(request.args(0), db.paper[request.args(1)]))
-    return dict(form=DIV(form,A(
-                            T("Cancel"),
-                            _href=URL(args=request.args, vars={"return":True}), cid="pid_%s_%d" % (request.args(0), paper.id),
-                            _style="position: absolute; bottom: 3px; left: 80px;"
-                            ), _style="position: relative;"))

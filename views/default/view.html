@@ -9,7 +9,11 @@
         _class="button left thickbox"),
     A(SPAN(_class="icon mail"),"Email Participants",
         _href=URL("editsymp","email",args=symposium.id)+"?KeepThis=true&TB_iframe=true&height=350&width=400",
+        _class="button middle thickbox"),
+    A(SPAN(_class="icon plus"),"Add Static Page",
+        _href=URL("editsymp","add_page",args=symposium.id)+"?KeepThis=true&TB_iframe=true&height=525&width=700",
         _class="button right thickbox"),
+        
     _style="float: right;"
     )}}
 {{pass}}
@@ -19,20 +23,6 @@
     {{=B(T("Accepting Submissions"), _style="color: #080;")}}
     {{=B(A(T("Submit to this symposium"), _href=URL("papers","submit", vars={"symp":symposium.sid})))}}
 {{pass}}
-    
-    {{
-    authors = set()
-    mentors = set()
-    paper_count = public_paper_count = 0
-    for papers in symposium.paper.select():
-        paper_count+=1
-        if papers.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
-            public_paper_count+=1
-            pass
-        authors = authors.union(papers.authors)
-        mentors = mentors.union(papers.mentors)
-    pass
-    }}
     
     {{=MARKMIN(symposium.extra_info)}}
     </div>
@@ -191,19 +181,11 @@ tr:nth-child(even)    { background-color:#fff; }
     <table>
         <tr>
             <td>{{=T("Published Papers")}}</td>
-            <td>{{=public_paper_count}}</td>
+            <td>{{=db((db.paper.symposium==symposium) & get_public_filter()).count()}}</td>
         </tr>
         <tr>
             <td>{{=T("Submitted Papers")}}</td>
-            <td>{{=paper_count}}</td>
-        </tr>
-        <tr>
-            <td>{{=T("Authors")}}</td>
-            <td>{{=len(authors)}}</td>
-        </tr>
-        <tr>
-            <td>{{=T("Mentors")}}</td>
-            <td>{{=len(mentors)}}</td>
+            <td>{{=symposium.paper.count()}}</td>
         </tr>
     </table>
 

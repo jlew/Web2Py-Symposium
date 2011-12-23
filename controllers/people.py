@@ -5,25 +5,36 @@ def index():
         symposiums = db(db.symposium.sid == request.args(0)).select()
         if symposiums.first():
             symp = symposiums.first()
-            session['filter'] = symp.sid
-            all = False
+            response.active_symp = symp
         else:
             raise HTTP(404)
     else:
-        symp = False
-        symposiums = db(db.symposium.id > 0).select(orderby=~db.symposium.event_date)
-        all = True
-        session['filter'] = ""
+        raise HTTP(404)
     
     # Build Dict of all symposiums containing the symposium,
     # its papers, and the number of pending/non-approved papers
     ret = []
     for symposium in symposiums:
+        symp_papers = symposium.paper.select()
+        people = {}
+        for paper in symp_papers:
+            if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:
+                for t,p in zip(PAPER_ASSOCIATIONS,PAPER_ASSOCIATIONS_PL):
+                    for person,asoc in [(x.person,x.person_association) for x in db(
+                            (db.paper_associations.paper == paper) &
+                            (db.paper_associations.type==t)
+                        ).select(db.paper_associations.person,db.paper_associations.person_association)]:
+                        if not people.has_key(p):
+                            people[p] = []
+                        person.affiliation = asoc
+                        people[p].append(person)
+    
+        people[T("Judges")] = [db.auth_user(x) for x in get_symposium_judges_id(symposium)]
+        people[T("Reviewers")] = [db.auth_user(x) for x in get_symposium_reviewers_id(symposium)]
         ret.append( {"symposium": symposium,
-                   "mentors": [db.auth_user(x) for x in get_symposium_mentors_id(symposium)],
-                   "authors": [db.auth_user(x) for x in get_symposium_authors_id(symposium)]})
+                   "people": people,})
 
-    return dict(ret=ret, all=all, symp=symp)
+    return dict(ret=ret, symp=symp)
 
 def profile():
     if request.vars.has_key("minview"):

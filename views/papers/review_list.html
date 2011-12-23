@@ -41,7 +41,6 @@ font-size:70%;
                                 { type: "select", values: ['{{=XML("','".join(
                                     set([db.format._format % x for x in db(db.format.id > 0).select()])))}}'] },
                                 null,
-                                null,
                                 ]
                 });;
     } );
@@ -59,8 +58,7 @@ font-size:70%;
             <th>{{=db.paper.symposium.label}}</th>
             <th>{{=db.paper.category.label}}</th>
             <th>{{=db.paper.format.label}}</th>
-            <th>{{=db.paper.authors.label}}</th>
-            <th>{{=db.paper.mentors.label}}</th>
+            <th>{{=T("People")}}</th>
         </tr>
     </thead>
     <tbody>
@@ -84,18 +82,16 @@ font-size:70%;
                 {{=db.format._format % db.format[paper.format]}}
             </td>
             <td>
+                {{for t,s in zip(PAPER_ASSOCIATIONS, PAPER_ASSOCIATIONS_PL):}}
+                {{=B(s)}}
                 <ul>
-                {{for x in [db.auth_user(y) for y in paper.authors]:}}
+                {{for y in db((db.paper_associations.type==t) & (db.paper_associations.paper == paper)).select():}}
+                    {{x = db.auth_user(y.person)}}
+                    {{x.affiliation = y.person_association}}
                     <li>{{=A( db.auth_user._format % x, _href=URL("people","profile",args=x.id), _title=x.search_name)}}</li>
                {{pass}}
                </ul>
-           </td>
-           <td>
-                <ul>
-                {{for x in [db.auth_user(y) for y in paper.mentors]:}}
-                    <li>{{=A( db.auth_user._format % x, _href=URL("people","profile",args=x.id), _title=x.search_name)}}</li>
                {{pass}}
-               </ul>
            </td>
         </tr>
         {{pass}}
@@ -107,8 +103,7 @@ font-size:70%;
             <th>{{=db.paper.symposium.label}}</th>
             <th>{{=db.paper.category.label}}</th>
             <th>{{=db.paper.format.label}}</th>
-            <th>{{=db.paper.authors.label}}</th>
-            <th>{{=db.paper.mentors.label}}</th>
+            <th>{{=T("People")}}</th>
         </tr>
     </tfoot>
 </table>

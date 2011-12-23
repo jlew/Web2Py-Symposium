@@ -88,11 +88,6 @@ db.define_table('paper',
               At anytime (even after approval) You may to add additional presentation
               materials from the manage my papers screen.
               """))),
-          
-    Hidden('authors', 'list:reference auth_user', label=T("Paper Authors"),
-          default=[auth.user.id if auth.user else None]),
-          
-    Hidden('mentors', 'list:reference auth_user', label=T("Paper Mentors"), default=[]),
                      
     Field('status', 'string', requires=IS_IN_SET(PAPER_STATUS), default=PAPER_STATUS[0],
           label=T("Paper Status"), writable=False),
@@ -125,6 +120,17 @@ def paper_update(form):
 crud.settings.update_onvalidation.paper.append(paper_update)
 
 
+db.define_table('paper_associations',
+    Hidden('paper', db.paper),
+    Field('person', db.auth_user, writable=False, label=T("Person/Official Affiliation")),
+    Hidden('type', requires=IS_IN_SET(PAPER_ASSOCIATIONS)),
+    Field('person_association', label=T("Paper Specific Affiliation")),
+    Hidden('created', 'datetime', default=request.now),
+    Hidden('created_by', db.auth_user, default=auth.user_id),
+    Hidden('modified', 'datetime', default=request.now, update=request.now),
+    Hidden('modified_by', db.auth_user, default=auth.user_id, update=auth.user_id)
+)
+
 #########################################################################
 # Paper_comment Table, used to keep track of the review process
 #########################################################################
@@ -147,10 +153,12 @@ def paper_comment(form):
     paper = db.paper(comment.paper)
     paper.update_record(status=comment.status)
 
-    # Email authors
-    author_list = [db.auth_user(author).email for author in paper.authors]
-    mentor_list = [db.auth_user(mentor).email for mentor in paper.mentors]
-    mail.send(to=author_list, cc=mentor_list, subject=T("Symposium Paper Status Update"),
+    # Email All associated users
+    people = db(db.paper_associations.paper==paper).select(db.paper_associations.person)
+        
+    author_list = [db.auth_user(person.person).email for person in people]
+
+    mail.send(to=author_list, subject=T("Symposium Paper Status Update"),
     message=response.render('email_templates/paper_updated.txt', {
         "title":paper.title,
         "author":db.auth_user._format % db.auth_user(comment.author),
@@ -172,6 +180,14 @@ db.define_table('paper_attachment',
     Field('file', 'upload', required=True, notnull=True),
     Field('created', 'datetime', default=request.now, writable=False),
     Field('comment', 'string', label=T("Short Comment/Description")),
+    format = "%(title)s"
+    )
+
+db.define_table('page',
+    Field('title', required=True),
+    Field('url', required=True, requires=[IS_NOT_EMPTY(), IS_SLUG(check=True, error_message="only alphanumeric characters and non-repeated dashes")]),
+    Field('body', 'text'),
+    Hidden('symposium', db.symposium, requires=IS_EMPTY_OR(IS_IN_DB(db, db.symposium, db.symposium._format))),
     format = "%(title)s"
     )
 

@@ -3,21 +3,20 @@
 <body>
 <center>
 <h1>{{=paper.title}}</h1>
-<p>
-{{for author in paper.authors:}}
-    {{db_person=db.auth_user[author]}}
-    {{=db_person.first_name}} {{=db_person.last_name}}. <i>{{=db_person.affiliation}}</i>, {{=db_person.email}}.<br />
-{{pass}}
-</p>
 
-{{if paper.mentors:}}
-<b>Mentors</b>
-<p>
-{{for mentor in paper.mentors:}}
-    {{db_person=db.auth_user[mentor]}}
-    {{=db_person.first_name}} {{=db_person.last_name}}. <i>{{=db_person.affiliation}}</i>, {{=db_person.email}}.<br />
-{{pass}}
+{{for a,s in zip(PAPER_ASSOCIATIONS, PAPER_ASSOCIATIONS_PL):}}
+    {{people = db( (db.paper_associations.paper == paper) & (db.paper_associations.type==a)).select()}}
+    {{if people:}}
+    {{=B(s)}}
+    <p>
+        {{for x in people:}}
+        {{usr = db.auth_user(x.person)}}
+        {{=usr.first_name}} {{=usr.last_name}}. <i>{{=x.person_association}}</i>, {{=usr.email}}.<br />
+        {{pass}}
+    </p>
+    {{pass}}
 {{pass}}
 </center>
 {{=MARKMIN(paper.description)}}
 </body>
+</html>

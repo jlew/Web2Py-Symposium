@@ -7,14 +7,10 @@ def index():
 
         if not symp:
             raise HTTP(404)
-        session['filter'] = symp.sid
+        response.active_symp = symp
 
     else:
-        session.flash = "Please select a symposium to view the agenda"
-        redirect( URL("default", "index") )
-        symposiums = db(db.symposium.sid>0).select()
-        symp = False
-        session['filter'] = ""
+        raise HTTP(404)
 
     timeblocks = symp.timeblock.select(orderby=db.timeblock.start_time)
     return dict(timeblocks=timeblocks,symp=symp)
@@ -23,12 +19,12 @@ def index():
 def edit():
     symp = db.symposium(request.args(0))
     if symp:
-        
+        response.active_symp = symp
         papers = db(
                     (db.paper.symposium == symp.id) &
                     (db.paper.session == None)
                    ).select(
-                       db.paper.id, db.paper.title, db.paper.description, db.paper.format, db.paper.category, db.paper.authors, db.paper.mentors
+                       db.paper.id, db.paper.title, db.paper.description, db.paper.format, db.paper.category
                    )
         
         return dict(symposium=symp, unscheduled_papers=papers)
@@ -85,7 +81,7 @@ def del_from_session():
 
 def view_session():
     sess = db.session(request.args(0))
-    
+    response.active_symp = sess.timeblock.symposium
     if not sess:
         raise HTTP(404)
         

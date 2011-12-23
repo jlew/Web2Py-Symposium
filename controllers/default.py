@@ -24,6 +24,7 @@ def index():
     
 def view():
     symp = db(db.symposium.sid == request.args(0)).select().first()
+    response.active_symp = symp
     
     if symp:
         session['filter'] = symp.sid
@@ -33,6 +34,61 @@ def view():
     else:
         redirect( URL('default','index') )
 
+def page():
+    if len(request.args) == 2:
+        symp = db(db.symposium.sid == request.args(0)).select().first()
+        response.active_symp = symp
+        if not symp:
+            raise HTTP(404)
+        
+        page = db( (db.page.url==request.args(1)) & (db.page.symposium==symp.id)).select(db.page.ALL).first()
+        
+        if not page:
+            raise HTTP(404)
+            
+        return dict(page=page, symp=True)
+    elif len(request.args) == 1:
+        page = db( (db.page.url==request.args(0)) & (db.page.symposium==None) ).select().first()
+        
+        if not page:
+            raise HTTP(404)
+            
+        return dict(page=page, symp=False)
+    else:
+        raise HTTP(404)
+        
+@auth.requires_membership("Symposium Admin")
+def add_page():
+    db.page.symposium.default = None
+    db.page.url.requires.append(IS_NOT_IN_DB(
+        db((db.page.url==request.vars.url) & (db.page.symposium==None)),
+        'page.url', error_message='URL is already in use'))
+    return dict(form=crud.create(db.page))
+    
+@auth.requires_membership("Symposium Admin")
+def edit_page():
+    response.view = "form_layout.html"
+    page = db.page( request.args(0) )
+    
+    if not page or page.symposium != None:
+        raise HTTP(404)
+    
+    
+    db.page.url.requires.append(IS_NOT_IN_DB(
+        db((db.page.url==request.vars.url) & (db.page.symposium==None) & (db.page.url != page.url)),
+        'page.url', error_message='URL is already in use'))
+    
+    if request.vars.delete_this_record:
+        next_url = URL("editsymp","redirect_parent") + "?url=%s" % URL("default","index")
+        
+    elif request.vars.url != page.url:
+        next_url =URL("editsymp","redirect_parent") + "?url=%s" % URL("default","page", args=request.vars.url)
+
+    else:
+        next_url = URL("editsymp","close_parent")
+
+    return dict(form=crud.update(db.page, page, deletable=True, next=next_url))
+    
 def user():
     """
     exposes:

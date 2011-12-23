@@ -9,22 +9,24 @@
 
 {{=MARKMIN(short_profile)}}
 
-{{papers = db(db.paper.authors.contains(id)).select()}}
-{{if papers:}}
-    <h2 style="clear: both;">{{=T("My Papers")}}</h2>
-    {{for paper in papers:}}
-       {{if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:}}
-           {{paper_block()}}
-        {{pass}}
-    {{pass}}
-{{pass}}
 
-{{mentors = db(db.paper.mentors.contains(id)).select()}}
-{{if mentors:}}
-    <h2 style="clear: both;">{{=T("Papers I mentored")}}</h2>
-    {{for paper in mentors:}}
-       {{if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:}}
-           {{paper_block()}}
+
+
+{{for t,p in zip(PAPER_ASSOCIATIONS, PAPER_ASSOCIATIONS_PT):}}
+    {{papers = db( (db.paper_associations.person==id) & (db.paper_associations.type==t) ).select()}}
+    {{if papers:}}
+        <h2 style="clear: both;">{{=T("Papers I %s")%p}}</h2>
+        {{for paper in [x.paper for x in papers]:}}
+           {{if paper.status in [PAPER_STATUS[x] for x in VISIBLE_STATUS]:}}
+               {{paper_block()}}
+           {{else:}}
+               <div style="border: 1px dashed #000000; background: #EAEAEA; padding: 5px; margin: 10px;">
+               {{=T("Paper not yet public")}}
+               {{show_action_buttons=True}}
+               {{if can_edit_paper(paper):}}{{paper_block()}}{{pass}}
+               {{show_action_buttons=False}}
+               </div>
+           {{pass}}
         {{pass}}
     {{pass}}
 {{pass}}

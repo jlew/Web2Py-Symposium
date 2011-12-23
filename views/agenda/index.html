@@ -22,7 +22,7 @@ tr:nth-child(even)    { background-color:#fff; }
 {{rooms = symp.room.select(db.room.name, db.room.id, orderby=db.room.name)}}
 {{timeblocks = symp.timeblock.select(orderby=db.timeblock.start_time)}}
 
-<table border=1>
+<table border=1 width="100%">
     <tr>
         <th width="10%">Time</th>
         {{for room in rooms:}}
@@ -34,15 +34,17 @@ tr:nth-child(even)    { background-color:#fff; }
     <tr>
         <td>{{=timeblock.start_time.strftime(TIME_FORMAT)}}<br><span style="font-size: 80%">{{=timeblock.desc}}</span></td>
     {{for room in rooms:}}
+
         {{sess_block = db(
             (db.session.room == room.id) & (db.session.timeblock == timeblock.id) 
             ).select(db.session.id,db.session.name, db.session.judges).first()}}
+
         {{if sess_block:}}
             <td>
                 <div style="font-weight: bold; text-decoration: underline; text-align: center;">{{=A(sess_block.name, _href=URL('agenda','view_session', args=sess_block.id))}}</div>
                 <ul style="font-size: 80%">
                 {{the_time = timeblock.start_time}}
-                 {{for paper in db(db.paper.session == sess_block.id).select():}}
+                {{for paper in db(db.paper.session == sess_block.id).select():}}
                      {{=LI(
                          B(the_time.strftime(TIME_FORMAT), _style="font-size: 90%;"),
                          A(paper.title, _href=URL("papers","view",args=paper.id)))}}

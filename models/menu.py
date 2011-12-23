@@ -14,32 +14,37 @@ response.meta.keywords = 'Symposium, Conference'
 response.meta.generator = 'Web2py Enterprise Framework'
 response.meta.copyright = 'Copyright 2011'
 
-paper_menu=[]
-# If logged in, show submit and manage options
-if auth.user:
-    paper_menu.append( (T('Submit Paper'), False, URL('papers', 'submit'), []) )
-    paper_menu.append( (T('Manage My Papers'), False, URL('papers', 'edit'), []) )
+response.active_symp = False
 
-class filter_link:
-    def __init__(self, control, func):
-        self.control = control
-        self.func = func
-    def __str__(self):
-        return str(URL(self.control, self.func, args=session.get('filter', "")))
+def getMenu():
+    menu = [(T('Symposium List'), False, URL('default','index'), [])]
+    for m_item in db(db.page.symposium==None).select():
+        menu.append( (m_item.title, False, URL('default','page', args=m_item.url)))
 
-response.menu = [
-    (T('Home'), False, URL('default','index'), []),
-    (T('Papers'), False, filter_link('papers','index'), paper_menu),
-    (T('People'), False, filter_link('people','index'), []),
-    (T('Agenda'), False, filter_link('agenda','index'), []),
-]
-
-# Add an admin menu if in admin group
-if auth.has_membership("Symposium Admin"):
-    response.menu += [
-        (T('Admin Actions'), False, "#", [
-            (T('Symposium Management'), False, URL('editsymp','index'), []),
-            (T('Manage System Users'), False, URL(request.application,'plugin_useradmin','index'), []),
-            (T('Edit Pages'),False,URL('plugin_wiki','index'), []),
-        ])
+    # If logged in, show submit and manage options
+    if auth.user:
+        menu.append( (T('Submit Paper'), False, URL('papers', 'submit'), []) )
+        menu.append( (T('Manage My Papers'), False, URL('papers', 'edit'), []) )
+    
+    # Add an admin menu if in admin group
+    if auth.has_membership("Symposium Admin"):
+        menu += [
+            (T('Admin Actions'), False, "#", [
+                (T('Manage System Users'), False, URL(request.application,'plugin_useradmin','index'), []),
+                (T('Edit Page Inserts'),False,URL('plugin_wiki','index'), []),
+                (T('Add Global Page'), False, URL('default','add_page'), [])
+            ])
         ]
+    return menu
+
+def getSympMenu():
+    menu = []
+
+    if response.active_symp:
+        menu.append((response.active_symp.name, False, URL('default','view',args=response.active_symp.sid), []))
+        menu.append((T('Papers'), False, URL('papers','index', args=response.active_symp.sid), []))
+        menu.append((T('People'), False, URL('people','index', args=response.active_symp.sid), []))
+        menu.append((T('Agenda'), False, URL('agenda','index', args=response.active_symp.sid), []))
+        for m_item in db(db.page.symposium==response.active_symp.id).select():
+            menu.append( (m_item.title, False, URL('default','page', args=[m_item.symposium.sid, m_item.url])))
+    return menu
