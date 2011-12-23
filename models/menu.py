@@ -30,7 +30,6 @@ def getMenu():
     if auth.has_membership("Symposium Admin"):
         menu += [
             (T('Admin Actions'), False, "#", [
-                (T('Symposium Management'), False, URL('editsymp','index'), []),
                 (T('Manage System Users'), False, URL(request.application,'plugin_useradmin','index'), []),
                 (T('Edit Page Inserts'),False,URL('plugin_wiki','index'), []),
                 (T('Add Global Page'), False, URL('default','add_page'), [])
@@ -42,7 +41,7 @@ def getSympMenu():
     menu = []
 
     if response.active_symp:
-        menu.append((T('Symposium Details'), False, URL('default','view',args=response.active_symp.sid), []))
+        menu.append((response.active_symp.name, False, URL('default','view',args=response.active_symp.sid), []))
         menu.append((T('Papers'), False, URL('papers','index', args=response.active_symp.sid), []))
         menu.append((T('People'), False, URL('people','index', args=response.active_symp.sid), []))
         menu.append((T('Agenda'), False, URL('agenda','index', args=response.active_symp.sid), []))
