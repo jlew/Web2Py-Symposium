@@ -225,6 +225,9 @@ def create_session():
 def close_parent():
     return dict()
 
+def redirect_parent():
+    return dict(url=request.vars.url)
+
 @auth.requires_membership("Symposium Admin")
 def edit_session_judges():
     sess = db.session(request.args(0))
@@ -394,4 +397,14 @@ def edit_page():
     db.page.url.requires.append(IS_NOT_IN_DB(
         db((db.page.url==request.vars.url) & (db.page.symposium==page.symposium) & (db.page.url != page.url)),
         'page.url', error_message='URL is already in use'))
-    return dict(form=crud.update(db.page, page, deletable=True, next=URL("editsymp","close_parent")))
+    
+    if request.vars.delete_this_record:
+        next_url = URL("editsymp","redirect_parent") + "?url=%s" % URL("default","view", args=page.symposium.sid)
+        
+    elif request.vars.url != page.url:
+        next_url =URL("editsymp","redirect_parent") + "?url=%s" % URL("default","page", args=[page.symposium.sid, request.vars.url])
+
+    else:
+        next_url = URL("editsymp","close_parent")
+    
+    return dict(form=crud.update(db.page, page, deletable=True, next=next_url))
