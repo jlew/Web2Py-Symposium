@@ -185,7 +185,7 @@ db.define_table('paper_attachment',
 
 db.define_table('page',
     Field('title', required=True),
-    Field('url', required=True, requires=[IS_NOT_EMPTY(), IS_SLUG(check=True, error_message="only alphanumeric characters and non-repeated dashes")]),
+    Field('url', required=True, requires=[IS_NOT_EMPTY(), IS_SLUG(check=True, error_message="only lowercase alphanumeric characters and non-repeated dashes")]),
     Field('body', 'text'),
     Hidden('symposium', db.symposium, requires=IS_EMPTY_OR(IS_IN_DB(db, db.symposium, db.symposium._format))),
     format = "%(title)s"
