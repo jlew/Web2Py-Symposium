@@ -41,7 +41,7 @@ def getSympMenu():
     menu = []
 
     if response.active_symp:
-        menu.append((response.active_symp.name, False, URL('default','view',args=response.active_symp.sid), []))
+        menu.append((T('Symposium Details'), False, URL('default','view',args=response.active_symp.sid), []))
         menu.append((T('Papers'), False, URL('papers','index', args=response.active_symp.sid), []))
         menu.append((T('People'), False, URL('people','index', args=response.active_symp.sid), []))
         menu.append((T('Agenda'), False, URL('agenda','index', args=response.active_symp.sid), []))
