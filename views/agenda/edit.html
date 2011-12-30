@@ -13,6 +13,7 @@ var typewatch = (function(){
 
 $(function() {
         $(".connectedSortable").sortable({
+                opacity: 0.4,
                 connectWith: ['.connectedSortable'],
                 placeholder: "ui-state-highlight",
                 update: function(event, ui){
