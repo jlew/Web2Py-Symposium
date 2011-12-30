@@ -2,6 +2,15 @@
 {{extend 'layout.html'}}
 {{=A("Back To Agenda", _href=URL("agenda","index", args=symposium.sid))}}
 <script>
+// http://stackoverflow.com/a/2219966/163759
+var typewatch = (function(){
+  var timer = 0;
+  return function(callback, ms){
+    clearTimeout (timer);
+    timer = setTimeout(callback, ms);
+  }  
+})();
+
 $(function() {
         $(".connectedSortable").sortable({
                 connectWith: ['.connectedSortable'],
@@ -292,7 +301,9 @@ $(function() {
         return false;
       })
     .keyup( function () {
-        $(this).change();
+        typewatch( function() {
+            $(input).change();
+        }, 500);
     });
   }
 
