@@ -113,7 +113,7 @@
     
 <hr style="clear: both;">
 
-<div style="background: #eee;">
+<div style="border: 1px solid #eee;">
 {{if auth.has_membership("Symposium Admin"):}}
     {{=DIV(A(SPAN(_class="icon clock"),"Manage Agenda",
         _href=URL("agenda","edit",args=symposium.id),
