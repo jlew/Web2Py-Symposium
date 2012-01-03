@@ -90,4 +90,8 @@ def get_reviewer_filter(reviewer=False):
                     (db.paper.symposium == reviewer_rule.symposium) & (db.paper.category.belongs(reviewer_rule.categories)))
             else:
                 reviewer_filter = ((db.paper.symposium == reviewer_rule.symposium) & (db.paper.category.belongs(reviewer_rule.categories)))
-    return (db.paper.status==PAPER_STATUS[PEND_APPROVAL]) & reviewer_filter
+
+    if reviewer_filter:
+        return (db.paper.status==PAPER_STATUS[PEND_APPROVAL]) & reviewer_filter
+    else:
+        return False

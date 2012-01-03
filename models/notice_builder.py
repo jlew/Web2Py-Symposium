@@ -33,10 +33,10 @@ if auth.user:
     if rfilter:
         review_count = db(rfilter).count()
     
-    if review_count:
-        msg = B(T("There are %d papers waiting review.") % review_count, " ", 
-                A(T("Click Here To Review"), _href=URL('papers','review')))
-        if not response.has_key("notice_msg"):
-            response.notice_msg = msg
-        else:
-             response.notice_msg = DIV(response.notice_msg, msg)
+        if review_count:
+            msg = B(T("There are %d papers waiting review.") % review_count, " ", 
+                    A(T("Click Here To Review"), _href=URL('papers','review')))
+            if not response.has_key("notice_msg"):
+                response.notice_msg = msg
+            else:
+                 response.notice_msg = DIV(response.notice_msg, msg)
