@@ -1,7 +1,7 @@
-{{show_action_buttons = show_moderation = show_discription = True}}
+{{show_action_buttons = show_moderation = show_discription = show_download = showSymp = True}}
 {{show_moderate_button = False}}
 {{def paper_block():}}
-<div style="border: 1px solid #000000; background: #EAEAEA; padding: 5px; margin: 10px;">
+<div style="border: 1px solid #000000; background: #EAEAEA; padding: 5px; margin: 10px; page-break-before:auto;">
    <div style="width: 100%; background: #DADADA;">
        <div style="float: right; font-weight: bold;">
            {{=paper.status if show_moderation else ""}} {{=db.format._format%db.format[paper.format] if paper.format else ""}}
@@ -16,13 +16,15 @@
            {{pass}}
        </div>
        <div style="float: right; clear: both;">{{=db.category._format%db.category[paper.category]}}</div>
+       {{if showSymp:}}
        <div>
            {{=paper.symposium.name}}
        </div>
+       {{pass}}
        {{if paper.session:}}
        <div>
            <b>
-               {{=T("Scheduled Session:")}} {{=A(paper.session.name, _href=URL("agenda","view_session",args=paper.session.id))}}
+               {{=A(paper.session.name, _href=URL("agenda","view_session",args=paper.session.id))}}
                {{if 'scheduled_time' in globals():}}
                    ({{=B(scheduled_time)}})
                {{else:}}
@@ -50,10 +52,12 @@
            {{if show_moderate_button:}}
                {{=A(SPAN(_class="icon clock"), T("Review"), _href=URL("review",args=paper.id), _class="button")}}
            {{pass}}
-           {{if paper.paper:}}
-           {{=A(SPAN(_class="icon downarrow"), T("Download Paper"), _href=URL('default','download', args=paper.paper), _class="button")}}
-           {{else:}}
-           {{=A(SPAN(_class="icon downarrow"), T("Download Not Avaliable"), _href="#", _class="button negative active")}}
+           {{if show_download:}}
+               {{if paper.paper:}}
+               {{=A(SPAN(_class="icon downarrow"), T("Download Paper"), _href=URL('default','download', args=paper.paper), _class="button")}}
+               {{else:}}
+               {{=A(SPAN(_class="icon downarrow"), T("Download Not Avaliable"), _href="#", _class="button negative active")}}
+               {{pass}}
            {{pass}}
        </div>
        {{if show_discription:}}
@@ -63,19 +67,22 @@
        
        
        {{for t,s in zip(PAPER_ASSOCIATIONS, PAPER_ASSOCIATIONS_PL):}}
-           <div>
-                {{=B(s)}}
-                <ul>
-                {{for y in db((db.paper_associations.type==t) & (db.paper_associations.paper == paper)).select():}}
-                    {{x = db.auth_user(y.person)}}
-                    {{x.affiliation = y.person_association}}
-                    <li>{{=A( db.auth_user._format % x, _href=URL("people","profile",args=x.id))}}</li>
+           {{query = db((db.paper_associations.type==t) & (db.paper_associations.paper == paper))}}
+           {{if query.count():}}
+               <div>
+               {{=B(s)}}
+               <ul>
+               {{for y in query.select():}}
+                   {{x = db.auth_user(y.person)}}
+                   {{x.affiliation = y.person_association}}
+                   <li>{{=A( db.auth_user._format % x, _href=URL("people","profile",args=x.id))}}</li>
                {{pass}}
                </ul>
                </div>
            {{pass}}
+       {{pass}}
        
-        {{if paper.paper_attachment.count() > 0:}}
+       {{if paper.paper_attachment.count() > 0:}}
        <div>
            {{=T("Additional Files:")}}<ul>
            {{for file in paper.paper_attachment.select():}}

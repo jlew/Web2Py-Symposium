@@ -1,0 +1,104 @@
+{{include 'blocks/paper_block.html'}}
+{{show_action_buttons = show_moderation = show_discription = show_download = showSymp = False}}
+{{from datetime import date, datetime, time, timedelta}}
+<html>
+<head>
+
+</head>
+<style type="text/css">
+@media screen
+{
+  .page-break  { width: 100%; border-top: 1px dashed grey; }
+}
+
+@media print
+{
+  .page-break  { display:block; page-break-before:always; }
+}
+
+ul {
+    margin: 0px;
+}
+
+a{
+    text-decoration: none;
+    color: grey;
+}
+
+.columns {
+    -moz-column-count: 2;
+    -moz-column-gap: 1.5em;
+    -moz-column-rule: none;
+    -webkit-column-count: 2;
+    -webkit-column-gap: 1.5em;
+    -webkit-column-rule: none;
+    }
+
+</style>
+<body>
+<div style="text-align: center;">
+<h1>{{=symp.name}}</h1>
+<b>{{=symp.event_date}}</b>
+<p>{{=MARKMIN(symp.extra_info)}}</p>
+</div>
+
+<h1 class="page-break">Session Overview</h1>
+
+{{room_count = symp.room.count()}}
+{{rooms = symp.room.select(db.room.name, db.room.id, orderby=db.room.name)}}
+{{timeblocks = symp.timeblock.select(orderby=db.timeblock.start_time)}}
+{{session_info = []}}
+<table border=1 width="100%">
+    <tr>
+        <th width="10%">Time</th>
+        {{for room in rooms:}}
+            <th width="{{=90/len(rooms)}}%">{{=room.name}}</th> 
+        {{pass}}
+    </tr>
+
+    {{for timeblock in timeblocks:}}
+    <tr>
+        <td>{{=timeblock.start_time.strftime(TIME_FORMAT)}}<br><span style="font-size: 80%">{{=timeblock.desc}}</span></td>
+    {{for room in rooms:}}
+        {{sess_block = db(
+            (db.session.room == room.id) & (db.session.timeblock == timeblock.id) 
+            ).select().first()}}
+
+        {{if sess_block:}}
+            {{session_info.append(sess_block)}}
+            <td style="text-align: center;">
+                <div style="font-weight: bold;">{{=sess_block.name}}</div>
+                <div>{{=sess_block.theme}}</div>
+            </td>
+        {{else:}}
+            <td>&nbsp;</td>
+        {{pass}}
+    {{pass}}
+    </tr>
+{{pass}}
+</table>
+
+<h1 class="page-break">Session Details</h1>
+<div class="columns" style="font-size: 70%;">
+    {{for sBlock in session_info:}}
+        <div style="display: inline-block; width: 100%">
+            <h2 style="margin:0px;">{{=sBlock.name}}</h2>
+            <div>{{=sBlock.room.name}} ({{=sBlock.room.location}})</div>
+            <div>{{=sBlock.timeblock.start_time.strftime(TIME_FORMAT)}}</div>
+            <div><b>Theme:</b> {{=sBlock.theme}}</div>
+            <div><b>Judges:</b> {{=",".join([db.auth_user._format % usr for usr in [db.auth_user(x) for x in sBlock.judges]])}}</div>
+            
+            {{the_time = sBlock.timeblock.start_time}}
+            {{for paper in db(
+                    (db.paper.session==sBlock.id) &
+                    get_public_filter()
+                    ).select(db.paper.ALL, orderby=db.paper.session_pos):}}
+                    {{scheduled_time=the_time.strftime(TIME_FORMAT)}}
+                {{paper_block()}}
+                {{the_time = (datetime.combine(date.today(), the_time) + timedelta(minutes=paper.format.duration)).time()}}
+            {{pass}}
+        </div><br/>
+    {{pass}}
+</div>
+</body>
+</html>

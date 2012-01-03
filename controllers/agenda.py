@@ -86,3 +86,12 @@ def view_session():
         raise HTTP(404)
         
     return dict(sess=sess)
+    
+def program():
+    symp = db(db.symposium.sid==request.args(0)).select().first()
+    response.active_symp = symp
+    
+    if not symp:
+        raise HTTP(404)
+    
+    return dict(symp=symp)
