@@ -37,9 +37,10 @@
 
    <div>
        <div style="float: right;">
-           {{if auth.has_membership("Symposium Admin"):}}
-           {{=A(SPAN(_class="icon cog"), T("Admin Edit"), _href=URL("edit",args=paper.id), _class="button")}}
+           {{if auth.has_membership("Symposium Admin") and showSymp:}}
+               {{=A(SPAN(_class="icon cog"), T("Admin Edit"), _href=URL("edit",args=paper.id), _class="button")}}
            {{pass}}
+           
            {{if show_action_buttons:}}
                {{if paper.status in [PAPER_STATUS[x] for x in NEED_SUBMIT]:}}
                    {{=A(SPAN(_class="icon check"), T("Submit for approval"), _href=URL("submit_for_approval",args=paper.id), _class="button")}}
