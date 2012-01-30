@@ -3,12 +3,18 @@ def can_edit_paper(paper):
     """
     Returns true if has edit abilities on the paper
     """
+    if not auth.user:
+        return False
+    
     if auth.has_membership("Symposium Admin"):
         return True
     
     return auth.user.id in [x.person for x in db(db.paper_associations.paper==paper).select()]
             
 def can_review_paper(paper):
+    if not auth.user:
+        return False
+
     if auth.has_membership("Symposium Admin"):
         return True
         
