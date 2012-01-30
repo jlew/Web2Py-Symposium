@@ -3,17 +3,39 @@
 {{from datetime import date, datetime, time, timedelta}}
 <html>
 <head>
-
+<script src="{{=URL('static','js/jquery.js')}}" type="text/javascript"></script>
 </head>
 <style type="text/css">
 @media screen
 {
-  .page-break  { width: 100%; border-top: 1px dashed grey; }
+  .page-break  { width: 100%; border-top: 1px dashed grey; margin-top: 15px; }
+  .noprint-header{width: 100%; postion: absolute; top: 0px; right: 0px; background: black; color: white;  padding: 5px;}
+  .noprint-header a{color: white; text-decoration: underline;}
 }
+  
 
 @media print
 {
-  .page-break  { display:block; page-break-before:always; }
+  .page-break  { display:block; page-break-before:always;}
+  .noprint-header{display: none;}
+}
+
+
+
+div.first-page{
+    text-align: center;
+    background: red;
+}
+
+h1.first-page{}
+.first-page-date{font-weight: bold;}
+
+div.session-block{
+    display: inline-block; width: 100%
+}
+
+h2.session-name{
+    margin:0px;
 }
 
 ul {
@@ -22,7 +44,8 @@ ul {
 
 a{
     text-decoration: none;
-    color: grey;
+    color: black;
+    font-weight: bold;
 }
 
 .columns {
@@ -36,14 +59,23 @@ a{
 
 </style>
 <body>
-<div style="text-align: center;">
-<h1>{{=symp.name}}</h1>
-<b>{{=symp.event_date}}</b>
-<p>{{=MARKMIN(symp.extra_info)}}</p>
+<div class="noprint-header">
+    {{=A("Back To Agenda", _href=URL("agenda","index",args=symp.sid), _style="float: right;")}}
+    Toggle:
+    <a href="#" onclick="$('.first-page, .first-page + .page-break').toggle(); return false;">First Page</a>
+    <a href="#" onclick="$('.session-overview').toggle(); return false;">Session Overview</a>
 </div>
 
-<h1 class="page-break">Session Overview</h1>
+<div class="first-page">
+    <h1 class="first-page-name">{{=symp.name}}</h1>
+    <div class="first-page-date">{{=symp.event_date}}</div>
+    <div class="first-page-info">{{=MARKMIN(symp.extra_info)}}</div>
+</div>
 
+<div class="page-break">&nbsp;</div>
+
+<div class="session-overview">
+<h1>Session Overview</h1>
 {{room_count = symp.room.count()}}
 {{rooms = symp.room.select(db.room.name, db.room.id, orderby=db.room.name)}}
 {{timeblocks = symp.timeblock.select(orderby=db.timeblock.start_time)}}
@@ -77,16 +109,22 @@ a{
     </tr>
 {{pass}}
 </table>
+<div class="page-break">&nbsp;</div>
+</div>
 
-<h1 class="page-break">Session Details</h1>
+<div class="session-details">
+<h1>Session Details</h1>
 <div class="columns" style="font-size: 70%;">
     {{for sBlock in session_info:}}
-        <div style="display: inline-block; width: 100%">
-            <h2 style="margin:0px;">{{=sBlock.name}}</h2>
-            <div>{{=sBlock.room.name}} ({{=sBlock.room.location}})</div>
-            <div>{{=sBlock.timeblock.start_time.strftime(TIME_FORMAT)}}</div>
-            <div><b>Theme:</b> {{=sBlock.theme}}</div>
-            <div><b>Judges:</b> {{=",".join([db.auth_user._format % usr for usr in [db.auth_user(x) for x in sBlock.judges]])}}</div>
+        <div class="session-block">
+            <h2 class="session-name">{{=sBlock.name}}</h2>
+            <div class="session-room">{{=sBlock.room.name}} ({{=sBlock.room.location}})</div>
+            <div class="session-time">{{=sBlock.timeblock.start_time.strftime(TIME_FORMAT)}}</div>
+            <div class="session-theme"><b>Theme:</b> {{=sBlock.theme}}</div>
+            <div class="session-judges">
+                <b>Judges:</b>
+                {{=",".join([db.auth_user._format % usr for usr in [db.auth_user(x) for x in sBlock.judges]])}}
+            </div>
             
             {{the_time = sBlock.timeblock.start_time}}
             {{for paper in db(
@@ -99,6 +137,7 @@ a{
             {{pass}}
         </div><br/>
     {{pass}}
+</div>
 </div>
 </body>
 </html>
