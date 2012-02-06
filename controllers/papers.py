@@ -93,8 +93,13 @@ def submit():
         db.paper.format.requires=IS_IN_DB(db(db.format.symposium == valid_sym.first().id), db.format, label=db.format._format)
         db.paper.category.requires=IS_IN_DB(db(db.category.symposium == valid_sym.first().id), db.category, label=db.category._format)
         db.paper.symposium.default = valid_sym.first().id
+        
         def user_callback(form):
             session.supress_paper_warning = form.vars.id
+            
+            db.paper_associations.insert(paper=form.vars.id, person=auth.user_id,
+                    person_association=db.auth_user(auth.user_id).affiliation, type=PAPER_ASSOCIATIONS[0])
+            
             redirect( URL('papers','edit_members', args=form.vars.id) )
 
         crud.settings.create_onaccept.paper.append(user_callback)
@@ -148,10 +153,18 @@ def submit_for_approval():
 
     response.active_symp = paper.symposium
     if can_edit_paper(paper):
+    
+        if db(
+                (db.paper_associations.paper == paper) &
+                (db.paper_associations.type==PAPER_ASSOCIATIONS[0])).count() == 0:
+            session.flash = T("You must add an author before you may submit")
+            redirect( URL("edit_members",args=paper.id))
+    
+    
         db.paper_comment.paper.default = paper.id
         db.paper_comment.status.default = PAPER_STATUS[PEND_APPROVAL]
-        db.paper_comment.status.writable = db.paper_comment.status.readable = False
-        db.paper_comment.status.requires = IS_IN_SET( (PAPER_STATUS[PEND_APPROVAL],) )
+        #db.paper_comment.status.writable = db.paper_comment.status.readable = False
+        db.paper_comment.status.requires = IS_IN_SET( [PAPER_STATUS[x] for x in SUBMIT_OPTIONS] )
         return dict(paper=paper, form=crud.create(db.paper_comment, next=URL('edit'),
                         message=T("Seccessfully Submitted for Review")))
     else:

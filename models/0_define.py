@@ -18,6 +18,7 @@ EDIT_STATUS =     [0, 1, 4]    # When the uesr is allowed to edit
 NEED_SUBMIT =     [0, 4]       # When the user can to sumbit paper
 VISIBLE_STATUS =  [2]          # When the paper is visible to public
 PEND_APPROVAL =   1            # The waiting for approval state
+SUBMIT_OPTIONS =  [1,3]
 
 DEFAULT_PAPER_CATEGORIES = (
             T('Biological and Environmental Sciences'),
