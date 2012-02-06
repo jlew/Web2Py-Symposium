@@ -24,14 +24,16 @@
 
 div.first-page{
     text-align: center;
-    background: red;
 }
 
 h1.first-page{}
 .first-page-date{font-weight: bold;}
 
 div.session-block{
-    display: inline-block; width: 100%
+    width: 98%;
+    border: 2px inset grey;
+    display: block;
+    padding: 2px;
 }
 
 h2.session-name{
@@ -47,16 +49,6 @@ a{
     color: black;
     font-weight: bold;
 }
-
-.columns {
-    -moz-column-count: 2;
-    -moz-column-gap: 1.5em;
-    -moz-column-rule: none;
-    -webkit-column-count: 2;
-    -webkit-column-gap: 1.5em;
-    -webkit-column-rule: none;
-    }
-
 </style>
 <body>
 <div class="noprint-header">
@@ -64,15 +56,15 @@ a{
     Toggle:
     <a href="#" onclick="$('.first-page, .first-page + .page-break').toggle(); return false;">First Page</a>
     <a href="#" onclick="$('.session-overview').toggle(); return false;">Session Overview</a>
+    <a href="#" onclick="$('.session-details').toggle(); return false;">Session Details</a>
 </div>
 
 <div class="first-page">
     <h1 class="first-page-name">{{=symp.name}}</h1>
     <div class="first-page-date">{{=symp.event_date}}</div>
     <div class="first-page-info">{{=MARKMIN(symp.extra_info)}}</div>
+    <div class="page-break">&nbsp;</div>
 </div>
-
-<div class="page-break">&nbsp;</div>
 
 <div class="session-overview">
 <h1>Session Overview</h1>
