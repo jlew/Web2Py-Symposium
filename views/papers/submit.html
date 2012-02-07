@@ -1,7 +1,45 @@
 {{extend 'layout.html'}}
-{{extend 'layout.html'}}
 {{=XML(T("Steps:  <b>Create Paper</b> --> Manage Authors & Mentors --> Submit for Approval --> Wait for approval"))}}
-<h1>Create Paper</h1>
+
 {{=plugin_wiki.embed_page('submit_paper') or ""}}
-{{=form}}
-{{extend 'layout.html'}}
+<style>
+    div.step, div.inactivestep{
+        -moz-border-radius: 15px;
+        border-radius: 15px;
+        border: 1px solid black;
+       margin: 10px;
+        background: #eee;
+    }
+    
+    input[type="submit"]{
+        color: #900;
+        border: 1px solid #900;
+        font-weight: bold;
+        padding: 4px;
+    }
+    
+    div.step h1{
+        -moz-border-radius: 15px 0px 15px 0px;
+        border-radius: 15px 15px 0px 0px;
+        border-bottom: 1px solid black;
+        background: #ccc;
+        padding: 0px;
+        margin: 0px;
+    }
+    
+    div.inactivestep{
+        opacity: .5;
+    }
+</style>
+<div class="step">
+    <h1>Step 1: Create Paper</h1>
+    {{=form}}
+</div>
+
+<div class="inactivestep">
+    <h2>Step 2: Manage Authors &amp; Mentors</h2>
+</div>
+
+<div class="inactivestep">
+<h2>Step 3: Submit for Approval</h2>
+</div>
