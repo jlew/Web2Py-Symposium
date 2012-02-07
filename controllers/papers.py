@@ -166,7 +166,7 @@ def submit_for_approval():
         #db.paper_comment.status.writable = db.paper_comment.status.readable = False
         db.paper_comment.status.requires = IS_IN_SET( [PAPER_STATUS[x] for x in SUBMIT_OPTIONS] )
         return dict(paper=paper, form=crud.create(db.paper_comment, next=URL('edit'),
-                        message=T("Seccessfully Submitted for Review")))
+                        message=T("Successfully Submitted for Review")))
     else:
         raise HTTP(401)
 
