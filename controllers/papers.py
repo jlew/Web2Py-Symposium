@@ -226,7 +226,21 @@ def edit_members():
     response.active_symp = paper.symposium
     
     if can_edit_paper(paper):
-        return dict(paper=paper)
+    
+        if db(
+                (db.paper_associations.paper == paper) &
+                (db.paper_associations.type==PAPER_ASSOCIATIONS[0])).count() == 0:
+            session.flash = T("You must add an author before you may submit")
+            redirect( URL("edit_members",args=paper.id))
+    
+    
+        db.paper_comment.paper.default = paper.id
+        db.paper_comment.status.default = PAPER_STATUS[PEND_APPROVAL]
+        #db.paper_comment.status.writable = db.paper_comment.status.readable = False
+        db.paper_comment.status.requires = IS_IN_SET( [PAPER_STATUS[x] for x in SUBMIT_OPTIONS] )
+        crud.messages.submit_button = T("Done, Submit for approval")
+        return dict(paper=paper, form=crud.create(db.paper_comment, next=URL('edit'),
+                        message=T("Successfully Submitted for Review"), ))
     else:
         raise HTTP(401)
 

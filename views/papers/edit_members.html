@@ -42,8 +42,8 @@
     A(T("Create/Edit Paper"), _href=URL('papers','edit', args=paper.id)),
     T(" --> "),
     B(T("Manage Authors & Mentors")),
-    T(" --> "),
-    A(T("Submit for Approval"), _href=URL('papers','submit_for_approval', args=paper.id)),
+    T(" & "),
+    B(T("Submit for Approval")),
     T(" --> "),
     A(T("Back to Manage Papers"), _href=URL('papers','edit')),
 )}}
@@ -83,7 +83,15 @@
 {{pass}}
 </tr></table>
 <hr>
-<h2>{{=T("Add Paper Associations")}}</h2>
+<h2>{{=T("Add")}}{{if len(PAPER_ASSOCIATIONS_PL) > 2:}}
+        {{
+        nameheading = ", ".join([str(x) for x in PAPER_ASSOCIATIONS_PL])
+        
+        }}
+        {{=nameheading[:nameheading.rindex(",")+1] + (" %s " % T("and")) + nameheading[nameheading.rindex(",")+1:]}}
+    {{else:}}
+        {{=" and ".join([str(x) for x in PAPER_ASSOCIATIONS_PL])}}
+    {{pass}}</h2>
 <script type="text/javascript">
 
 var added_users = [{{=",".join([str(x) for x in added_users])}}];
@@ -156,21 +164,19 @@ Search: <input type="text" id="search_name" onkeyup="javascript:pull_choices();"
 <script type="text/javascript">$("#search_name").val(unescape("{{=session.s_val}}")); pull_choices();</script>
 {{del session.s_val}}
 {{pass}}
-<br/>
-{{=INPUT(_type="button", _value=T("Save and Continue"), _onClick="javascript:document.location = '" + URL('papers','submit_for_approval', args=paper.id) + "';")}}
-
 </div>
 
-<div class="inactivestep">
-<h2>{{=A(T("Step 3: Submit for Approval"), _href=URL('papers','submit_for_approval', args=paper.id))}}</h2>
+<div class="step">
+<h1>{{=T("Step 3: Submit for Approval")}}</h1>
+<div>{{=form}}</div>
 </div>
 
 {{=DIV(T("Steps: "),
     A(T("Create/Edit Paper"), _href=URL('papers','edit', args=paper.id)),
     T(" --> "),
     B(T("Manage Authors & Mentors")),
-    T(" --> "),
-    A(T("Submit for Approval"), _href=URL('papers','submit_for_approval', args=paper.id)),
+    T(" & "),
+    B(T("Submit for Approval")),
     T(" --> "),
     A(T("Back to Manage Papers"), _href=URL('papers','edit')),
 )}}
