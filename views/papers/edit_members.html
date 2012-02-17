@@ -93,6 +93,15 @@
         {{=" and ".join([str(x) for x in PAPER_ASSOCIATIONS_PL])}}
     {{pass}}</h2>
 <script type="text/javascript">
+//FIX IE http://stackoverflow.com/q/1744310
+if (!Array.prototype.indexOf) { 
+    Array.prototype.indexOf = function(obj, start) { 
+         for (var i = (start || 0), j = this.length; i < j; i++) { 
+             if (this[i] === obj) { return i; } 
+         } 
+         return -1; 
+    } 
+} 
 
 var added_users = [{{=",".join([str(x) for x in added_users])}}];
 pending_request = false;
