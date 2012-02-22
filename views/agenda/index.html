@@ -44,7 +44,7 @@ tr:nth-child(even)    { background-color:#fff; }
                 <div style="font-weight: bold; text-decoration: underline; text-align: center;">{{=A(sess_block.name, _href=URL('agenda','view_session', args=sess_block.id))}}</div>
                 <ul style="font-size: 80%">
                 {{the_time = timeblock.start_time}}
-                {{for paper in db(db.paper.session == sess_block.id).select():}}
+                {{for paper in db(db.paper.session == sess_block.id).select(orderby=db.paper.session_pos):}}
                      {{=LI(
                          B(the_time.strftime(TIME_FORMAT), _style="font-size: 90%;"),
                          A(paper.title, _href=URL("papers","view",args=paper.id)))}}
