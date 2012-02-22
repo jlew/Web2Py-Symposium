@@ -22,7 +22,8 @@ def edit():
         response.active_symp = symp
         papers = db(
                     (db.paper.symposium == symp.id) &
-                    (db.paper.session == None)
+                    (db.paper.session == None) &
+                    get_public_filter()
                    ).select(
                        db.paper.id, db.paper.title, db.paper.description, db.paper.format, db.paper.category
                    )
