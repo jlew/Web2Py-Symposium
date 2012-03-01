@@ -110,13 +110,15 @@ a{
     {{for sBlock in session_info:}}
         <div class="session-block">
             <h2 class="session-name">{{=sBlock.name}}</h2>
-            <div class="session-room">{{=sBlock.room.name}} ({{=sBlock.room.location}})</div>
+            <div class="session-room">{{=sBlock.room.name}} {{if sBlock.room.location:}}({{=sBlock.room.location}}){{pass}}</div>
             <div class="session-time">{{=sBlock.timeblock.start_time.strftime(TIME_FORMAT)}}</div>
-            <div class="session-theme"><b>Theme:</b> {{=sBlock.theme}}</div>
+            {{if sBlock.theme:}}<div class="session-theme"><b>Theme:</b> {{=sBlock.theme}}</div>{{pass}}
+            {{if sBlock.judges:}}
             <div class="session-judges">
                 <b>Judges:</b>
-                {{=",".join([db.auth_user._format % usr for usr in [db.auth_user(x) for x in sBlock.judges]])}}
+                {{=", ".join([db.auth_user._format % usr for usr in [db.auth_user(x) for x in sBlock.judges]])}}
             </div>
+            {{pass}}
             
             {{the_time = sBlock.timeblock.start_time}}
             {{for paper in db(
