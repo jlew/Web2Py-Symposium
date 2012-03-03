@@ -1,7 +1,7 @@
 {{show_action_buttons = show_moderation = show_discription = show_download = showSymp = True}}
 {{show_moderate_button = False}}
 {{def paper_block():}}
-<div style="border: 1px solid #000000; background: #EAEAEA; padding: 5px; margin: 10px; page-break-before:auto;">
+<div style="border: 1px solid #000000; background: #EAEAEA; padding: 5px; margin: 10px; page-break-inside: avoid;">
    <div style="width: 100%; background: #DADADA;">
        <div style="float: right; font-weight: bold;">
            {{=paper.status if show_moderation else ""}} {{=db.format._format%db.format[paper.format] if paper.format else ""}}
@@ -62,7 +62,7 @@
            {{pass}}
        </div>
        {{if show_discription:}}
-           {{=MARKMIN(paper.description)}}
+           <div class="paper-description">{{=MARKMIN(paper.description)}}</div>
        {{pass}}
        
        

@@ -1,5 +1,6 @@
 {{include 'blocks/paper_block.html'}}
-{{show_action_buttons = show_moderation = show_discription = show_download = showSymp = False}}
+{{show_action_buttons = show_moderation = show_download = showSymp = False}}
+{{show_discription = True}}
 {{from datetime import date, datetime, time, timedelta}}
 <html>
 <head>
@@ -8,15 +9,18 @@
 <style type="text/css">
 @media screen
 {
-  .page-break  { width: 100%; border-top: 1px dashed grey; margin-top: 15px; }
-  .noprint-header{width: 100%; postion: absolute; top: 0px; right: 0px; background: black; color: white;  padding: 5px;}
+  .page-break  { width: 100%; border-top: 1px dashed grey; border-bottom: 1px dashed grey; margin-top: 15px; text-align: center; margin: 5px;}
+  .noprint-header{width: 100%; position: fixed; top: 0px; right: 0px; background: black; color: white; }
   .noprint-header a{color: white; text-decoration: underline;}
+  .noprint-header-links{padding-left: 15px; padding-right: 15px;}
+  body{padding-top: 20px;}
 }
   
 
 @media print
 {
   .page-break  { display:block; page-break-before:always;}
+  .page-break span{display:none;}
   .noprint-header{display: none;}
 }
 
@@ -52,18 +56,20 @@ a{
 </style>
 <body>
 <div class="noprint-header">
-    {{=A("Back To Agenda", _href=URL("agenda","index",args=symp.sid), _style="float: right;")}}
-    Toggle:
-    <a href="#" onclick="$('.first-page, .first-page + .page-break').toggle(); return false;">First Page</a>
-    <a href="#" onclick="$('.session-overview').toggle(); return false;">Session Overview</a>
-    <a href="#" onclick="$('.session-details').toggle(); return false;">Session Details</a>
+    <div class="noprint-header-links">
+        {{=A("Back To Agenda", _href=URL("agenda","index",args=symp.sid), _style="float: right;")}}
+        Toggle:
+        <a href="#" onclick="$('.first-page, .first-page + .page-break').toggle(); return false;">First Page</a>
+        <a href="#" onclick="$('.session-overview').toggle(); return false;">Session Overview</a>
+        <a href="#" onclick="$('.session-details').toggle(); return false;">Session Details</a>
+        <a href="#" onclick="$('.paper-description').toggle(); return false;">Abstract Body</a>
+    </div>
 </div>
-
 <div class="first-page">
     <h1 class="first-page-name">{{=symp.name}}</h1>
     <div class="first-page-date">{{=symp.event_date}}</div>
     <div class="first-page-info">{{=MARKMIN(symp.extra_info)}}</div>
-    <div class="page-break">&nbsp;</div>
+    <div class="page-break">&nbsp;<span>&sect; &sect; &sect;</span></div>
 </div>
 
 <div class="session-overview">
@@ -101,7 +107,7 @@ a{
     </tr>
 {{pass}}
 </table>
-<div class="page-break">&nbsp;</div>
+<div class="page-break">&nbsp;<span>&sect; &sect; &sect;</span></div>
 </div>
 
 <div class="session-details">
@@ -126,10 +132,11 @@ a{
                     get_public_filter()
                     ).select(db.paper.ALL, orderby=db.paper.session_pos):}}
                     {{scheduled_time=the_time.strftime(TIME_FORMAT)}}
-                {{paper_block()}}
+                    {{paper_block()}}
                 {{the_time = (datetime.combine(date.today(), the_time) + timedelta(minutes=paper.format.duration)).time()}}
             {{pass}}
-        </div><br/>
+        </div>
+        <div class="page-break">&nbsp;<span>&sect; &sect; &sect;</span></div>
     {{pass}}
 </div>
 </div>
