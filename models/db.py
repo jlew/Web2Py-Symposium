@@ -135,10 +135,10 @@ db.define_table('paper_associations',
 # Paper_comment Table, used to keep track of the review process
 #########################################################################
 db.define_table('paper_comment',
-    Field('paper', db.paper, writable=False),
-    Field('author', db.auth_user, default=auth.user.id if auth.user else None, writable=False),
+    Hidden('paper', db.paper, writable=False),
+    Hidden('author', db.auth_user, default=auth.user.id if auth.user else None),
     Field('status', 'string', requires=IS_IN_SET(PAPER_STATUS)),
-    Field('created', 'datetime', default=request.now, writable=False),
+    Hidden('created', 'datetime', default=request.now),
     Field('comment', 'text')
     )
 

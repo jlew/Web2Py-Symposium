@@ -70,6 +70,6 @@ auth.settings.registration_requires_approval =  config.getboolean('auth','approv
 auth.messages.verify_email = 'Click on the link http://'+request.env.http_host+URL('default','user',args=['verify_email'])+'/%(key)s to verify your email'
 auth.settings.reset_password_requires_verification = True
 auth.messages.reset_password = 'Click on the link http://'+request.env.http_host+URL('default','user',args=['reset_password'])+'/%(key)s to reset your password'
-auth.messages.email_sent = T("Verificaion Email Sent, please verify your email before you login")
+auth.messages.email_sent = T("Verification Email Sent, please verify your email before you login")
 
 crud.settings.auth = None        # =auth to enforce authorization on crud
