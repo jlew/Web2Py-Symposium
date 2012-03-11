@@ -1,0 +1,144 @@
+{{include 'blocks/paper_block.html'}}
+{{show_action_buttons = show_moderation = show_download = showSymp = False}}
+{{show_discription = True}}
+{{from datetime import date, datetime, time, timedelta}}
+<html>
+<head>
+<script src="{{=URL('static','js/jquery.js')}}" type="text/javascript"></script>
+</head>
+<style type="text/css">
+@media screen
+{
+  .page-break  { width: 100%; border-top: 1px dashed grey; border-bottom: 1px dashed grey; margin-top: 15px; text-align: center; margin: 5px;}
+  .noprint-header{width: 100%; position: fixed; top: 0px; right: 0px; background: black; color: white; }
+  .noprint-header a{color: white; text-decoration: underline;}
+  .noprint-header-links{padding-left: 15px; padding-right: 15px;}
+  body{padding-top: 20px;}
+}
+  
+
+@media print
+{
+  .page-break  { display:block; page-break-before:always;}
+  .page-break span{display:none;}
+  .noprint-header{display: none;}
+}
+
+
+
+div.first-page{
+    text-align: center;
+}
+
+h1.first-page{}
+.first-page-date{font-weight: bold;}
+
+div.session-block{
+    width: 98%;
+    border: 2px inset grey;
+    display: block;
+    padding: 2px;
+}
+
+h2.session-name{
+    margin:0px;
+}
+
+ul {
+    margin: 0px;
+}
+
+a{
+    text-decoration: none;
+    color: black;
+    font-weight: bold;
+}
+</style>
+<body>
+<div class="noprint-header">
+    <div class="noprint-header-links">
+        {{=A("Back To Agenda", _href=URL("agenda","index",args=symp.sid), _style="float: right;")}}
+        Toggle:
+        <a href="#" onclick="$('.first-page, .first-page + .page-break').toggle(); return false;">First Page</a>
+        <a href="#" onclick="$('.session-overview').toggle(); return false;">Session Overview</a>
+        <a href="#" onclick="$('.session-details').toggle(); return false;">Session Details</a>
+        <a href="#" onclick="$('.paper-description').toggle(); return false;">Abstract Body</a>
+    </div>
+</div>
+<div class="first-page">
+    <h1 class="first-page-name">{{=symp.name}}</h1>
+    <div class="first-page-date">{{=symp.event_date}}</div>
+    <div class="first-page-info">{{=MARKMIN(symp.extra_info)}}</div>
+    <div class="page-break">&nbsp;<span>&sect; &sect; &sect;</span></div>
+</div>
+
+<div class="session-overview">
+<h1>Session Overview</h1>
+{{room_count = symp.room.count()}}
+{{rooms = symp.room.select(db.room.name, db.room.id, orderby=db.room.name)}}
+{{timeblocks = symp.timeblock.select(orderby=db.timeblock.start_time)}}
+{{session_info = []}}
+<table border=1 width="100%">
+    <tr>
+        <th width="10%">Time</th>
+        {{for room in rooms:}}
+            <th width="{{=90/len(rooms)}}%">{{=room.name}}</th> 
+        {{pass}}
+    </tr>
+
+    {{for timeblock in timeblocks:}}
+    <tr>
+        <td>{{=timeblock.start_time.strftime(TIME_FORMAT)}}<br><span style="font-size: 80%">{{=timeblock.desc}}</span></td>
+    {{for room in rooms:}}
+        {{sess_block = db(
+            (db.session.room == room.id) & (db.session.timeblock == timeblock.id) 
+            ).select().first()}}
+
+        {{if sess_block:}}
+            {{session_info.append(sess_block)}}
+            <td style="text-align: center;">
+                <div style="font-weight: bold;">{{=sess_block.name}}</div>
+                <div>{{=sess_block.theme}}</div>
+            </td>
+        {{else:}}
+            <td>&nbsp;</td>
+        {{pass}}
+    {{pass}}
+    </tr>
+{{pass}}
+</table>
+<div class="page-break">&nbsp;<span>&sect; &sect; &sect;</span></div>
+</div>
+
+<div class="session-details">
+<h1>Session Details</h1>
+<div class="columns" style="font-size: 70%;">
+    {{for sBlock in session_info:}}
+        <div class="session-block">
+            <h2 class="session-name">{{=sBlock.name}}</h2>
+            <div class="session-room">{{=sBlock.room.name}} {{if sBlock.room.location:}}({{=sBlock.room.location}}){{pass}}</div>
+            <div class="session-time">{{=sBlock.timeblock.start_time.strftime(TIME_FORMAT)}}</div>
+            {{if sBlock.theme:}}<div class="session-theme"><b>Theme:</b> {{=sBlock.theme}}</div>{{pass}}
+            {{if sBlock.judges:}}
+            <div class="session-judges">
+                <b>Judges:</b>
+                {{=", ".join([db.auth_user._format % usr for usr in [db.auth_user(x) for x in sBlock.judges]])}}
+            </div>
+            {{pass}}
+            
+            {{the_time = sBlock.timeblock.start_time}}
+            {{for paper in db(
+                    (db.paper.session==sBlock.id) &
+                    get_public_filter()
+                    ).select(db.paper.ALL, orderby=db.paper.session_pos):}}
+                    {{scheduled_time=the_time.strftime(TIME_FORMAT)}}
+                    {{paper_block()}}
+                {{the_time = (datetime.combine(date.today(), the_time) + timedelta(minutes=paper.format.duration)).time()}}
+            {{pass}}
+        </div>
+        <div class="page-break">&nbsp;<span>&sect; &sect; &sect;</span></div>
+    {{pass}}
+</div>
+</div>
+</body>
+</html>

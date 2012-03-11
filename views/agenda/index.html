@@ -10,6 +10,7 @@
 {{pass}}
 {{room_count = symp.room.count()}}
 <h1>Agenda: {{=symp.name}}</h1>
+{{=A(T("Printable Program"), _href=URL("program",args=symp.sid), _style="float: right;")}}
 <style>
 table, tr, td, th{
     border: 1px solid black;
